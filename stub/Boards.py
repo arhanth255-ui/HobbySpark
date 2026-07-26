@@ -1,8 +1,10 @@
 import json as BoardDataManager
 from pathlib import Path
 from .Errors import InvalidArgumentError,MicroControllerError
-path=Path.home()/"AppData"/"Roaming"/"HobbySpark transpiler"/"BoardsData.json"
-folder=Path.home()/"AppData"/"Roaming"/"HobbySpark transpiler"
+from platformdirs import user_config_dir
+
+path=Path(user_config_dir("HobbySpark transpiler", "HobbySpark transpiler"))/"BoardsData.json"
+folder=Path(user_config_dir("HobbySpark transpiler", "HobbySpark transpiler"))
 folder.mkdir(parents=True, exist_ok=True)
 if not path.exists() or path.stat().st_size == 0:
     with open(path, "w") as file:

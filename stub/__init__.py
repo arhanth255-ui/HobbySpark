@@ -47,7 +47,7 @@ print("Hello, this is auto generated text from the HobbySpark transpiler.  ",
       sep="\n"
 )
 
-folder=Path.home()/"AppData"/"Roaming"/"HobbySpark transpiler"
+folder=Path(user_config_dir("HobbySpark transpiler", "HobbySpark transpiler"))
 file=folder/"ClassData.json"
 
 if not folder.exists():

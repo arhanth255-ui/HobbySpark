@@ -14,9 +14,10 @@ from tkinter import colorchooser
 from tkinter.colorchooser import askcolor
 
 from nodes.General import ProgramNode
-from znode import Lexer
+from lexer import Lexer
 from parser import *
-from transpiler_new import Transpiler
+from transpiler import Transpiler
+from platformdirs import user_config_dir
 
 
 
@@ -26,7 +27,7 @@ import subprocess
 import json as data_handle
 from pathlib import Path
 
-project_path =Path.home()/"AppData"/"Roaming"/"HobbySpark transpiler"/"GUI"
+project_path =Path(user_config_dir("HobbySpark transpiler", "HobbySpark transpiler"))/"GUI"
 
 ALL_BOARDS = {}
 
