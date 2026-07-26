@@ -1,0 +1,86 @@
+name: Build HobbySpark
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build
+        run: |
+          pyinstaller tks.py ^
+            --windowed ^
+            --onedir ^
+            --name HobbySpark
+        shell: cmd
+        if: runner.os == 'Windows'
+
+      - name: Build
+        run: |
+          pyinstaller tks.py \
+            --windowed \
+            --onedir \
+            --name HobbySpark
+        shell: bash
+        if: runner.os != 'Windows'
+
+      - name: Zip Windows
+        if: runner.os == 'Windows'
+        run: |
+          powershell Compress-Archive dist/HobbySpark HobbySpark-Windows-x64.zip
+
+      - name: Archive Linux
+        if: runner.os == 'Linux'
+        run: |
+          tar -czf HobbySpark-Linux-x64.tar.gz dist/HobbySpark
+
+      - name: Zip macOS
+        if: runner.os == 'macOS'
+        run: |
+          zip -r HobbySpark-macOS.zip dist/HobbySpark.app
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: HobbySpark-${{ runner.os }}
+          path: |
+            *.zip
+            *.tar.gz
+
+      - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.zip
+            *.tar.gz
