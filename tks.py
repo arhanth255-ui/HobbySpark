@@ -27,7 +27,8 @@ import subprocess
 import json as data_handle
 from pathlib import Path
 
-project_path =Path(user_config_dir("HobbySpark transpiler", "HobbySpark transpiler"))/"GUI"
+project_path = Path(user_config_dir("HobbySpark transpiler",appauthor=False, roaming=True))/"GUI"
+print(project_path)
 
 ALL_BOARDS = {}
 

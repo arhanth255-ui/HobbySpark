@@ -3,8 +3,8 @@ from pathlib import Path
 from .Errors import InvalidArgumentError,MicroControllerError
 from platformdirs import user_config_dir
 
-path=Path(user_config_dir("HobbySpark transpiler", "HobbySpark transpiler"))/"BoardsData.json"
-folder=Path(user_config_dir("HobbySpark transpiler", "HobbySpark transpiler"))
+path=Path(user_config_dir("HobbySpark transpiler", appauthor=False, roaming=True))/"BoardsData.json"
+folder=Path(user_config_dir("HobbySpark transpiler", appauthor=False, roaming=True))
 folder.mkdir(parents=True, exist_ok=True)
 if not path.exists() or path.stat().st_size == 0:
     with open(path, "w") as file:
