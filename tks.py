@@ -2,9 +2,10 @@ import shutil
 from shutil import rmtree
 import datetime as dt
 from pygame import mixer
+import serial
 
 
-from tkinter.simpledialog import askstring
+from tkinter.simpledialog import askinteger, askstring
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog as fd
@@ -404,6 +405,7 @@ class GUI:
 		self.run_ = Button(self.run, text="Run", command=self.run__)
 		self.transpile_check_ = Button(self.run, text="Transpile check", command=self.transpile_check)
 		self.clear = Button(self.run, text="Clear console", command=lambda:self.console.clear())
+		self.serial_ = Button(self.run, text="Serial monitor", command=self.serial)
 
 		self.extra = LabelFrame(root, text="Extra options", width=300)
 		self.lex_ = Button(self.extra, text="Lex", command=self.lex)
@@ -440,6 +442,7 @@ class GUI:
 		self.test_.pack(pady=5, fill=BOTH)
 		self.transpile_check_.pack(pady=5, fill=BOTH)
 		self.run_.pack(pady=5, fill=BOTH)
+		self.serial_.pack(pady=5, fill=BOTH)
 		self.clear.pack(pady=5, fill=BOTH)
 
 		self.lex_.pack(pady=5, fill=BOTH)
@@ -467,12 +470,53 @@ class GUI:
 		file.add_command(label="New project", command=self.new)
 		main.add_cascade(label="File", menu=file)
 
-		preferences = Menu(main, tearoff=False)
+		preferences = Menu(main, tearoff=True)
 		preferences.add_command(label="Change user data", command=self.change_pr)
 
 		main.add_cascade(label="Preferences", menu=preferences)
 
 		root.config(menu=main)
+
+
+	def serial(self):
+		com = askcom(self.root,askprompt(self.root)[1], self.console)
+		baud = int(askinteger("Baudrate ", "Baud (must be int): "))
+		ser = serial.Serial(com, baud)
+		new = Toplevel(self.root)
+		mon = Console(new, "Serial monitor")
+		errr = False
+
+		def see():
+			nonlocal errr
+			while ser.in_waiting:
+				line = ser.readline().decode().strip()
+				if line=="[@@@HOBBYSPARK ERROR 123@@@]":
+					errr = True
+					mon.write_error("ERROR!!!")
+					break
+				if errr:
+					mon.write_error(line)
+				else:
+					mon.write(line)
+
+			new.after(50, see)
+
+		def finish(self):
+			if ser.is_open:
+				ser.close()
+			new.destroy()
+
+		new.protocol("WM_DELETE_WINDOW", finish)
+
+		mon.str.pack(expand=True, fill=BOTH)
+		mon.frame.pack(expand=True, fill=BOTH)
+
+
+
+
+
+		
+
 
 
 	def change_pr(self):

@@ -131,7 +131,21 @@ const float NOTE_AS7 = 3729.31;
 const float NOTE_BF7 = NOTE_AS7;
 const float NOTE_B7 = 3951.07;
 const float NOTE_C8 = 4186.01;
-
+class SerialMoniter{
+public:
+    SerialMoniter(int baud = 9600){
+        Serial.begin(baud);
+    }
+    void print(String string){
+        Serial.println(string);
+    }
+    String read(){
+        return (Serial.readStringUntil('\n'));
+    }
+    bool available(){
+        return Serial.available();
+    }
+};
 class RGB{
 public:
     int r,g,b;
@@ -155,6 +169,8 @@ public:
         return ("#"+to_hash(r)+to_hash(g)+to_hash(b));
     }
 };
+
+void interrupt(int t, int u){delay(t*u);}
 
 //Classes
 
@@ -270,11 +286,10 @@ public:
         pinMode(this->pin, INPUT);
     }
 
-   bool read(){
-        bool reading = digitalRead(pin)==LOW;
-        delay(1000);
+    bool read(){
+        bool reading = digitalRead(pin)==HIGH;
         
-        if (reading){
+        if (reading&&!last){
             last = reading;
             return (true);
         }
@@ -286,8 +301,6 @@ public:
         
     }
     bool update(){return(read());}
-
-            
 };
 
 class RGBLed{
@@ -532,6 +545,26 @@ public:
     }
 };
 
+class UltrasonicSensor{
+    byte trig;
+    byte echo;
+    UltrasonicSensor(byte tri, byte ech):trig(tri), echo(ech){
+        pinMode(tri, OUTPUT);
+        pinMode(ech, INPUT);
+    }
+    long distance(){
+        digitalWrite(trig, LOW);
+        delayMicroseconds(2);
+        digitalWrite(trig,HIGH);
+        delayMicroseconds(10);
+        digitalWrite(trig,LOW);
+        long duration = pulseIn(echo, HIGH);
+        return (duration * 0.0343f / 2.0f);
+    }
+    long update(){distance();}
+};
+
+
 struct Message{
     String str;
     bool importance;
@@ -594,7 +627,14 @@ public:
 
     void add(String str, int importance=0){
         if (message_count>=80){
-            return;
+            SerialMoniter s(9600);
+            s.print("[@@@HOBBYSPARK ERROR 123@@@]");
+            s.print("scroll_with_millis has overflowed. ");
+            while (true){
+                s.print("This is a loop that runs to notify you about the error. ");
+                s.print("scroll_with_millis has overflowed. ");
+                interrupt(1, SEC);
+            }
         }
         
         if (importance==0){
@@ -674,3 +714,5 @@ public:
 
 
 };
+
+
