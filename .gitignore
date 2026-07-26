@@ -1,0 +1,14 @@
+# Py
+*.pyo
+*.pyc
+.venv/
+venv/
+__pycache__/
+
+*.exe
+*.c
+
+counter.py
+about_me.txt
+random experiments(for fun obiously)/
+zxyxparser.py
