@@ -202,8 +202,6 @@ class ArduinoUnoR3(Board):
         self.sda="A4"
         self.scl="A5"
         self.onboard_led="13"
-b=ArduinoUnoR3()
-b.export()
 class ArduinoNano(Board):
     def setup(self):
         self.pins=MCUpin.generate_pin_array(8,14)
@@ -212,11 +210,8 @@ class ArduinoNano(Board):
         self.onboard_led="14"
         self.non_PWM_pins=["A0","A1","A2","A3","A4","A5","A6","A7"]
         self.has_EEPROM=True
-b=ArduinoNano()
-b.export()
 
 class HobbySparkBoard(Board):
     def setup(self):
         self.set_variables(MCUpin.generate_pin_array(12, 500), 34, 56, 11, ["A0","A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11"],1, 0, {"QWERTY pin":122}, has_EEPROM=True)
-ArduinoNano.export(ArduinoNano())
 CURRENTBOARD:Board=None
