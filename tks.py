@@ -50,6 +50,7 @@ for board in data["boards"]:
 class Welcome:
 	def __init__(self, root:Tk) -> None:
 		self.root = Toplevel(root)
+		self.root.title("HobbySpark Welcome")
 		self.first = Frame(self.root)
 		Label(self.first, text="------WELCOME TO HOBBYSPARK------").pack()
 		Label(self.first, text="Enter your name please: ", anchor="w").pack()
@@ -124,6 +125,7 @@ def askcom(root, out = None, console:Console = None):
 	print("OUT", out)
 	com = ""
 	new = Toplevel(root)
+	new.title("Select COM port")
 	result = subprocess.run(["arduino-cli", "board", "list", "--format", "json"], capture_output=True, text=True)
 	print(result.stdout)
 	data:dict = (data_handle.loads(result.stdout))["detected_ports"]
@@ -179,6 +181,7 @@ def askprompt(root):
 	board = ""
 	fqbn = ""
 	new = Toplevel(root)
+	new.title("Select board")
 	box = ttk.Combobox(new, values=list(ALL_BOARDS.keys()), width=50)
 	def use():
 		nonlocal board
@@ -200,6 +203,7 @@ def askprompt(root):
 class AST_visualizer:
 	def __init__(self, r, console:Console, parsed:ProgramNode) -> None:
 		root = Toplevel(r)
+		root.title("AST visualizer")
 		frame = ttk.Frame(root)
 		frame.pack(fill="both", expand=True)
 
@@ -372,6 +376,7 @@ class TabManager:
 class GUI:
 	def __init__(self, root:Tk) -> None:
 		mixer.init()
+		root.title("HobbySpark")
 		self.config_file = project_path/"user_data.json"
 		if not os.path.exists(str(self.config_file)):
 			new = Welcome(root)
@@ -379,7 +384,8 @@ class GUI:
 			a = {
 				"name":new.name,
 				"birth":new.birthday.strftime("%d|%m"),
-				"age":new.age
+				"age":new.age,
+				"fin":None
 
 			}
 			with open(self.config_file,"w") as f:
@@ -390,6 +396,7 @@ class GUI:
 			self.name = data["name"]
 			self.birthday = data["birth"]
 			self.age = data["age"]
+			self.fin = data["fin"]
 
 		root.after(100, self.open_project)
 		self.root = root
@@ -456,9 +463,10 @@ class GUI:
 		self.had_last = None
 		print("HELLO:", dt.date.today().strftime("%d|%m"))
 
-		if dt.date.today().strftime("%d|%m") == self.birthday:
+		if dt.date.today().strftime("%d|%m") == self.birthday and dt.date.today().year!=self.fin:
 			mb.showinfo("Happy birthday!!!!!", f"HAPPY BIRTHDAY, {self.name}. Our best wishes from the HobbySpark team. You're finally {self.age+1} years old!")
 			self.age+=1
+			self.fin = dt.date.today().year
 			mixer.music.load(os.path.join("assets", "h.mp3"))
 			mixer.music.play()
 
