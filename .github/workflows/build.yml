@@ -549,3 +549,15 @@ jobs:
         generate_release_notes: true
         files: |
           artifacts/**
+
+    - name: Upload Installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: HobbySpark-Setup
+        path: installers/Output/HobbySparkSetup.exe
+
+    - name: Upload Portable
+      uses: actions/upload-artifact@v4
+      with:
+        name: HobbySpark-Portable
+        path: dist/HobbySpark
