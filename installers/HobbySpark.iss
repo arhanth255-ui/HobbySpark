@@ -1,26 +1,29 @@
-;##############################################################################
+;###############################################################################
+;
 ; HobbySpark Installer
-; Part 1 / 3
-;##############################################################################
+; Version 1.0
+;
+; Part 1/?
+;
+;###############################################################################
 
-#define MyAppName "HobbySpark"
-#define MyAppVersion GetStringFileInfo(AddBackslash(SourcePath) + "..\dist\HobbySpark\HobbySpark.exe", "ProductVersion")
-#if MyAppVersion == ""
-    #define MyAppVersion "1.0.0"
+#ifndef AppVersion
+#define AppVersion "DEV"
 #endif
 
-#define MyAppPublisher "HobbySpark Industries"
-#define MyAppURL ""
-#define MyAppExeName "HobbySpark.exe"
+#define MyAppName        "HobbySpark"
+#define MyAppVersion     AppVersion
+#define MyAppPublisher   "HobbySpark Industries"
+#define MyAppExeName     "HobbySpark.exe"
 
 [Setup]
-AppId={{A36D7F42-1C76-4C77-BB77-56E8B55C3F01}
+
+AppId={{A1D35F0A-9E7D-45D0-97AF-91C34E2D1B61}
+
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
+
 AppPublisher={#MyAppPublisher}
-AppPublisherURL={#MyAppURL}
-AppSupportURL={#MyAppURL}
-AppUpdatesURL={#MyAppURL}
 
 DefaultDirName={autopf}\HobbySpark
 DefaultGroupName=HobbySpark
@@ -30,50 +33,62 @@ OutputBaseFilename=HobbySparkSetup
 
 Compression=lzma2
 SolidCompression=yes
+
 WizardStyle=modern
 
 PrivilegesRequired=admin
+
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
+DisableDirPage=no
 DisableProgramGroupPage=yes
-ChangesAssociations=no
+
 AllowNoIcons=yes
+
+SetupIconFile=icon.ico
+
+UninstallDisplayIcon={app}\{#MyAppExeName}
+
+VersionInfoCompany=HobbySpark Industries
+VersionInfoProductName=HobbySpark
+VersionInfoProductVersion=1.0.0.0
+VersionInfoDescription=HobbySpark Installer
+VersionInfoCopyright=© 2026 HobbySpark
+
 CloseApplications=yes
 RestartApplications=yes
 
-SetupIconFile=icon.ico
-UninstallDisplayIcon={app}\HobbySpark.exe
-
-VersionInfoCompany=HobbySpark Industries
-VersionInfoCopyright=© 2026 HobbySpark
-VersionInfoDescription=HobbySpark Installer
-VersionInfoProductName=HobbySpark
-VersionInfoProductVersion={#MyAppVersion}
-
-LicenseFile=license.txt
-
 WizardResizable=yes
 
+UsePreviousAppDir=no
+UsePreviousLanguage=yes
+
 [Languages]
+
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: desktopicon; Description: "Create a Desktop Shortcut"; GroupDescription: "Additional Icons:"
+
+Name: desktopicon; Description: "Create Desktop Shortcut"; GroupDescription: "Additional Icons:"
+
+[Dirs]
+
+Name: "{app}"
 
 [Files]
 
-;---------------------------------------------------------------------------
-; HobbySpark Application
-;---------------------------------------------------------------------------
+;==============================================================================
+; HobbySpark
+;==============================================================================
 
 Source: "..\dist\HobbySpark\*"; \
     DestDir: "{app}"; \
     Flags: ignoreversion recursesubdirs createallsubdirs
 
-;---------------------------------------------------------------------------
-; Bundled Installers
-;---------------------------------------------------------------------------
+;==============================================================================
+; Dependencies
+;==============================================================================
 
 Source: "python.exe"; \
     DestDir: "{tmp}"; \
@@ -95,180 +110,256 @@ Name: "{autodesktop}\HobbySpark"; \
     Filename: "{app}\HobbySpark.exe"; \
     Tasks: desktopicon
 
-;##############################################################################
-; Pascal Code
-; Part 2 / 3
-;##############################################################################
+;###############################################################################
+; Code
+;###############################################################################
 
 [Code]
 
-var
-  PythonInstalled: Boolean;
-  ArduinoCLIInstalled: Boolean;
+const
+  PythonInstaller = '{tmp}\python.exe';
+  ArduinoInstaller = '{tmp}\arduino-cli.msi';
 
-function IsPythonInstalled(): Boolean;
 var
-  ResultCode: Integer;
-begin
-  Result :=
-    Exec('cmd.exe',
-      '/C python --version',
-      '',
-      SW_HIDE,
-      ewWaitUntilTerminated,
-      ResultCode) and (ResultCode = 0);
-end;
+  InstallLabel: TNewStaticText;
 
-function IsArduinoCLIInstalled(): Boolean;
+function RunAndWait(FileName, Params: String): Integer;
 var
   ResultCode: Integer;
 begin
-  Result :=
-    Exec('cmd.exe',
-      '/C arduino-cli version',
-      '',
-      SW_HIDE,
-      ewWaitUntilTerminated,
-      ResultCode) and (ResultCode = 0);
-end;
-
-procedure InstallPython();
-var
-  ResultCode: Integer;
-begin
-  if IsPythonInstalled() then
-    Exit;
-
-  WizardForm.StatusLabel.Caption :=
-    'Installing Python...';
+  Log('Running: ' + FileName + ' ' + Params);
 
   if not Exec(
-      ExpandConstant('{tmp}\python.exe'),
-      '/quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1',
+      FileName,
+      Params,
       '',
       SW_SHOW,
       ewWaitUntilTerminated,
-      ResultCode) then
+      ResultCode)
+  then
   begin
-    MsgBox(
-      'Unable to launch the Python installer.',
-      mbError,
-      MB_OK);
+      MsgBox(
+        'Unable to execute:'#13#10 + FileName,
+        mbCriticalError,
+        MB_OK);
 
-    RaiseException('Python installation failed.');
+      WizardForm.Close;
   end;
 
-  if ResultCode <> 0 then
-  begin
-    MsgBox(
-      'Python installation failed.'#13#10 +
-      'Exit Code: ' + IntToStr(ResultCode),
-      mbError,
-      MB_OK);
-
-    RaiseException('Python installation failed.');
-  end;
+  Result := ResultCode;
 end;
 
-procedure InstallArduinoCLI();
-var
-  ResultCode: Integer;
+procedure Status(const S: String);
 begin
-  if IsArduinoCLIInstalled() then
-    Exit;
+  Log(S);
 
-  WizardForm.StatusLabel.Caption :=
-    'Installing Arduino CLI...';
+  if Assigned(InstallLabel) then
+      InstallLabel.Caption := S;
 
-  if not Exec(
-      'msiexec.exe',
-      '/i "' +
-      ExpandConstant('{tmp}\arduino-cli.msi') +
-      '" /qn',
-      '',
-      SW_SHOW,
-      ewWaitUntilTerminated,
-      ResultCode) then
-  begin
-    MsgBox(
-      'Unable to launch the Arduino CLI installer.',
-      mbError,
-      MB_OK);
-
-    RaiseException('Arduino CLI installation failed.');
-  end;
-
-  if ResultCode <> 0 then
-  begin
-    MsgBox(
-      'Arduino CLI installation failed.'#13#10 +
-      'Exit Code: ' + IntToStr(ResultCode),
-      mbError,
-      MB_OK);
-
-    RaiseException('Arduino CLI installation failed.');
-  end;
+  WizardForm.StatusLabel.Caption := S;
 end;
 
-procedure ConfigureArduinoCLI();
+function PythonInstalled(): Boolean;
 var
-  ResultCode: Integer;
+  Code: Integer;
+begin
+  Result :=
+      Exec(
+          'cmd.exe',
+          '/C python --version',
+          '',
+          SW_HIDE,
+          ewWaitUntilTerminated,
+          Code)
+      and
+      (Code = 0);
+end;
+
+function ArduinoCLIInstalled(): Boolean;
+var
+  Code: Integer;
+begin
+  Result :=
+      Exec(
+          'cmd.exe',
+          '/C arduino-cli version',
+          '',
+          SW_HIDE,
+          ewWaitUntilTerminated,
+          Code)
+      and
+      (Code = 0);
+end;
+
+procedure InstallPython;
+var
+  ExitCode: Integer;
 begin
 
-  WizardForm.StatusLabel.Caption :=
-    'Configuring Arduino CLI...';
+  if PythonInstalled() then
+  begin
+      Log('Python already installed.');
+      Exit;
+  end;
 
-  if not Exec(
-      'cmd.exe',
-      '/C arduino-cli config init',
-      '',
-      SW_HIDE,
-      ewWaitUntilTerminated,
-      ResultCode) then
-    RaiseException('Unable to initialize Arduino CLI.');
+  Status('Installing Python...');
 
-  if ResultCode <> 0 then
-    RaiseException('Arduino CLI configuration failed.');
+  ExitCode :=
+      RunAndWait(
+          ExpandConstant(PythonInstaller),
+          '/quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1');
 
-  if not Exec(
-      'cmd.exe',
-      '/C arduino-cli core update-index',
-      '',
-      SW_HIDE,
-      ewWaitUntilTerminated,
-      ResultCode) then
-    RaiseException('Unable to update Arduino index.');
+  if ExitCode <> 0 then
+  begin
+      MsgBox(
+          'Python installation failed.'#13#10 +
+          'Exit code: ' + IntToStr(ExitCode),
+          mbCriticalError,
+          MB_OK);
 
-  if ResultCode <> 0 then
-    RaiseException('Arduino CLI update-index failed.');
+      WizardForm.Close;
+  end;
 
-  if not Exec(
-      'cmd.exe',
-      '/C arduino-cli core install arduino:avr',
-      '',
-      SW_HIDE,
-      ewWaitUntilTerminated,
-      ResultCode) then
-    RaiseException('Unable to install Arduino AVR core.');
+end;
 
-  if ResultCode <> 0 then
-    RaiseException('Arduino AVR core installation failed.');
+procedure InstallArduinoCLI;
+var
+  ExitCode: Integer;
+begin
+
+  if ArduinoCLIInstalled() then
+  begin
+      Log('Arduino CLI already installed.');
+      Exit;
+  end;
+
+  Status('Installing Arduino CLI...');
+
+  ExitCode :=
+      RunAndWait(
+          'msiexec.exe',
+          '/i "' +
+          ExpandConstant(ArduinoInstaller) +
+          '" /qn');
+
+  if ExitCode <> 0 then
+  begin
+
+      MsgBox(
+          'Arduino CLI installation failed.'#13#10 +
+          'Exit code: ' + IntToStr(ExitCode),
+          mbCriticalError,
+          MB_OK);
+
+      WizardForm.Close;
+
+  end;
+
+end;
+
+procedure ConfigureArduinoCLI;
+var
+  ExitCode: Integer;
+begin
+
+  Status('Initializing Arduino CLI...');
+
+  ExitCode :=
+      RunAndWait(
+          'cmd.exe',
+          '/C arduino-cli config init');
+
+  if ExitCode <> 0 then
+  begin
+      MsgBox(
+          'Unable to initialize Arduino CLI.',
+          mbCriticalError,
+          MB_OK);
+
+      WizardForm.Close;
+      Exit;
+  end;
+
+  Status('Updating board index...');
+
+  ExitCode :=
+      RunAndWait(
+          'cmd.exe',
+          '/C arduino-cli core update-index');
+
+  if ExitCode <> 0 then
+  begin
+      MsgBox(
+          'Unable to update the Arduino board index.',
+          mbCriticalError,
+          MB_OK);
+
+      WizardForm.Close;
+      Exit;
+  end;
+
+  Status('Installing Arduino AVR Core...');
+
+  ExitCode :=
+      RunAndWait(
+          'cmd.exe',
+          '/C arduino-cli core install arduino:avr');
+
+  if ExitCode <> 0 then
+  begin
+      MsgBox(
+          'Failed to install the Arduino AVR Core.',
+          mbCriticalError,
+          MB_OK);
+
+      WizardForm.Close;
+      Exit;
+  end;
+
+  Log('Arduino AVR Core installed successfully.');
+
+end;
+
+procedure InitializeWizard;
+begin
+
+  InstallLabel :=
+      TNewStaticText.Create(WizardForm);
+
+  InstallLabel.Parent :=
+      WizardForm;
+
+  InstallLabel.Left := ScaleX(0);
+  InstallLabel.Top := ScaleY(180);
+  InstallLabel.Width := ScaleX(430);
+
+  InstallLabel.Caption :=
+      'Preparing installation...';
+
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if CurStep <> ssInstall then
-    Exit;
 
+  if CurStep <> ssPostInstall then
+      Exit;
+
+  Status('Checking Python...');
   InstallPython;
+
+  Status('Checking Arduino CLI...');
   InstallArduinoCLI;
+
+  Status('Configuring Arduino CLI...');
   ConfigureArduinoCLI;
+
+  Status('Installation complete.');
+
 end;
 
-;##############################################################################
-; Final Sections
-; Part 3 / 3
-;##############################################################################
+;###############################################################################
+; Registry
+;###############################################################################
 
 [Registry]
 
@@ -279,16 +370,26 @@ Root: HKLM; \
     ValueData: "{app}"; \
     Flags: uninsdeletekey
 
+Root: HKLM; \
+    Subkey: "Software\HobbySpark"; \
+    ValueType: string; \
+    ValueName: "Version"; \
+    ValueData: "{#MyAppVersion}"; \
+    Flags: uninsdeletevalue
+
+;###############################################################################
+; Run
+;###############################################################################
+
 [Run]
 
 Filename: "{app}\HobbySpark.exe"; \
     Description: "Launch HobbySpark"; \
     Flags: nowait postinstall skipifsilent
 
-[UninstallDelete]
-
-Type: filesandordirs; \
-    Name: "{app}"
+;###############################################################################
+; Uninstall
+;###############################################################################
 
 [UninstallRun]
 
@@ -296,35 +397,21 @@ Filename: "cmd.exe"; \
     Parameters: "/C arduino-cli cache clean"; \
     Flags: runhidden skipifdoesntexist
 
-[Messages]
+[UninstallDelete]
 
-BeveledLabel=HobbySpark Installer
-ButtonNext=Next >
-ButtonBack=< Back
-ButtonInstall=&Install
-ButtonFinish=&Finish
+Type: filesandordirs; \
+    Name: "{app}"
 
-WelcomeLabel1=Welcome to the HobbySpark Setup Wizard
-WelcomeLabel2=This wizard will install HobbySpark on your computer.
-
-FinishedHeadingLabel=Installation Complete
-FinishedLabel=HobbySpark has been successfully installed.
-
-ExitSetupMessage=Are you sure you want to exit the HobbySpark installer?
-
-PreparingLabel=Preparing to install HobbySpark...
-
-[CustomMessages]
-
-InstallingPython=Installing Python...
-InstallingArduinoCLI=Installing Arduino CLI...
-InstallingAVR=Installing Arduino AVR Core...
+;###############################################################################
+; Install Delete
+;###############################################################################
 
 [InstallDelete]
 
-Type: files; \
-    Name: "{tmp}\python.exe"
+Type: files; Name: "{tmp}\python.exe"
+Type: files; Name: "{tmp}\arduino-cli.msi"
 
-Type: files; \
-    Name: "{tmp}\arduino-cli.msi"
+;###############################################################################
+; Finished
+;###############################################################################
 
