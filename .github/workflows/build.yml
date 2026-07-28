@@ -1,75 +1,551 @@
-name: Release HobbySpark
+name: Build & Release HobbySpark
 
 on:
   push:
+    branches:
+      - main
+      - master
+
     tags:
       - "v*"
+
+  pull_request:
+    branches:
+      - main
+      - master
+
+  workflow_dispatch:
 
 permissions:
   contents: write
 
-jobs:
-  build:
-    name: Build (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+env:
+  APP_NAME: HobbySpark
+  EXECUTABLE: HobbySpark.exe
+  PYTHON_VERSION: "3.13"
 
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - windows-latest
-          - ubuntu-latest
-          - macos-latest
+jobs:
+
+###############################################################################
+# Windows
+###############################################################################
+
+  windows:
+
+    name: Windows
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: cmd
 
     steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
+###############################################################################
+# Checkout
+###############################################################################
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          pyinstaller tks.py ^
-            --windowed ^
-            --onedir ^
-            --name HobbySpark
-          powershell Compress-Archive dist/HobbySpark HobbySpark-Windows-x64.zip
+###############################################################################
+# Python
+###############################################################################
 
-      - name: Build (Linux)
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          pyinstaller tks.py \
-            --windowed \
-            --onedir \
-            --name HobbySpark
-          tar -czf HobbySpark-Linux-x64.tar.gz dist/HobbySpark
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Build (macOS)
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          pyinstaller tks.py \
-            --windowed \
-            --onedir \
-            --name HobbySpark
-          cd dist
-          zip -r ../HobbySpark-macOS.zip HobbySpark.app
+###############################################################################
+# Cache Pip
+###############################################################################
 
-      - name: Upload Release Asset
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            HobbySpark-Windows-x64.zip
-            HobbySpark-Linux-x64.tar.gz
-            HobbySpark-macOS.zip
-          generate_release_notes: true
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~\AppData\Local\pip\Cache
+        key: windows-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          windows-pip-
+
+###############################################################################
+# Upgrade pip
+###############################################################################
+
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip
+
+###############################################################################
+# Install Requirements
+###############################################################################
+
+    - name: Install Requirements
+      run: |
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+###############################################################################
+# Determine Version
+###############################################################################
+
+    - name: Determine Version
+      id: version
+      shell: powershell
+      run: |
+        if ("${{ github.ref }}".StartsWith("refs/tags/"))
+        {
+            $v="${{ github.ref_name }}"
+            $v=$v.TrimStart("v")
+        }
+        else
+        {
+            $v="DEV-${{ github.run_number }}"
+        }
+
+        "version=$v" >> $env:GITHUB_OUTPUT
+
+###############################################################################
+# Build executable
+###############################################################################
+
+    - name: Build HobbySpark
+      run: |
+        pyinstaller tks.py ^
+          --windowed ^
+          --onedir ^
+          --name HobbySpark
+
+###############################################################################
+# Verify executable
+###############################################################################
+
+    - name: Verify executable
+      run: |
+        if not exist dist\HobbySpark\HobbySpark.exe (
+            echo.
+            echo ERROR:
+            echo HobbySpark.exe was not produced.
+            exit /b 1
+        )
+
+###############################################################################
+# Install Inno Setup
+###############################################################################
+
+    - name: Install Inno Setup
+      shell: powershell
+      run: |
+        choco install innosetup -y
+
+###############################################################################
+# Locate ISCC.exe
+#######
+    - name: Locate ISCC
+      id: iscc
+      shell: powershell
+      run: |
+        $paths = @(
+          "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+          "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
+        )
+
+        foreach ($path in $paths) {
+          if (Test-Path $path) {
+            "path=$path" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+        }
+
+        throw "Unable to locate ISCC.exe"
+
+###############################################################################
+# Verify installer resources
+###############################################################################
+
+    - name: Verify installer files
+      run: |
+        if not exist installers\python.exe (
+            echo Missing python.exe
+            exit /b 1
+        )
+
+        if not exist installers\arduino-cli.msi (
+            echo Missing arduino-cli.msi
+            exit /b 1
+        )
+
+        if not exist installers\icon.ico (
+            echo Missing icon.ico
+            exit /b 1
+        )
+
+        if not exist installers\HobbySpark.iss (
+            echo Missing HobbySpark.iss
+            exit /b 1
+        )
+
+###############################################################################
+# Compile installer
+###############################################################################
+
+    - name: Build Installer
+      run: |
+        "${{ steps.iscc.outputs.path }}" ^
+        installers\HobbySpark.iss ^
+        /DAppVersion=${{ steps.version.outputs.version }}
+
+###############################################################################
+# Verify installer
+###############################################################################
+
+    - name: Verify installer
+      run: |
+        if not exist installers\Output\HobbySparkSetup.exe (
+            echo Installer was not generated.
+            exit /b 1
+        )
+
+###############################################################################
+# Create portable ZIP
+###############################################################################
+
+    - name: Portable ZIP
+      shell: powershell
+      run: |
+        Compress-Archive `
+          -Path dist/HobbySpark/* `
+          -DestinationPath `
+          HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable.zip
+
+###############################################################################
+# Rename installer
+###############################################################################
+
+    - name: Rename installer
+      shell: powershell
+      run: |
+        Rename-Item `
+          installers/Output/HobbySparkSetup.exe `
+          HobbySpark-${{ steps.version.outputs.version }}-Setup.exe
+
+###############################################################################
+# Upload Windows artifacts
+###############################################################################
+
+    - name: Upload Windows Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Windows
+        path: |
+          HobbySpark-${{ steps.version.outputs.version }}-Setup.exe
+          HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable.zip
+
+
+###############################################################################
+# Linux
+###############################################################################
+
+  linux:
+
+    name: Linux
+
+    runs-on: ubuntu-latest
+
+    needs: windows
+
+    steps:
+
+###############################################################################
+# Checkout
+###############################################################################
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+###############################################################################
+# Python
+###############################################################################
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+###############################################################################
+# Cache pip
+###############################################################################
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: linux-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          linux-pip-
+
+###############################################################################
+# Upgrade pip
+###############################################################################
+
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip
+
+###############################################################################
+# Install dependencies
+###############################################################################
+
+    - name: Install Requirements
+      run: |
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+###############################################################################
+# Determine Version
+###############################################################################
+
+    - name: Determine Version
+      id: version
+      run: |
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF_NAME#v}"
+        else
+          VERSION="DEV-${GITHUB_RUN_NUMBER}"
+        fi
+
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+###############################################################################
+# Build
+###############################################################################
+
+    - name: Build HobbySpark
+      run: |
+        pyinstaller tks.py \
+          --windowed \
+          --onedir \
+          --name HobbySpark
+
+###############################################################################
+# Verify
+###############################################################################
+
+    - name: Verify executable
+      run: |
+        if [ ! -f dist/HobbySpark/HobbySpark ]; then
+          echo "Linux executable missing."
+          exit 1
+        fi
+
+###############################################################################
+# Create tar.gz
+###############################################################################
+
+    - name: Create Archive
+      run: |
+        tar -czf \
+          HobbySpark-${{ steps.version.outputs.version }}-Linux.tar.gz \
+          dist/HobbySpark
+
+###############################################################################
+# Upload Artifact
+###############################################################################
+
+    - name: Upload Linux Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Linux
+        path: |
+          HobbySpark-${{ steps.version.outputs.version }}-Linux.tar.gz
+
+###############################################################################
+# macOS
+###############################################################################
+
+  macos:
+
+    name: macOS
+
+    runs-on: macos-latest
+
+    steps:
+
+###############################################################################
+# Checkout
+###############################################################################
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+###############################################################################
+# Setup Python
+###############################################################################
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+###############################################################################
+# Cache pip
+###############################################################################
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/Library/Caches/pip
+        key: macos-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          macos-pip-
+
+###############################################################################
+# Upgrade pip
+###############################################################################
+
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip
+
+###############################################################################
+# Install dependencies
+###############################################################################
+
+    - name: Install Requirements
+      run: |
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+###############################################################################
+# Determine Version
+###############################################################################
+
+    - name: Determine Version
+      id: version
+      run: |
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF_NAME#v}"
+        else
+          VERSION="DEV-${GITHUB_RUN_NUMBER}"
+        fi
+
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+###############################################################################
+# Build HobbySpark
+###############################################################################
+
+    - name: Build HobbySpark
+      run: |
+        pyinstaller tks.py \
+          --windowed \
+          --onedir \
+          --name HobbySpark
+
+###############################################################################
+# Verify Build
+###############################################################################
+
+    - name: Verify Application
+      run: |
+        if [ ! -d dist/HobbySpark.app ]; then
+          echo "HobbySpark.app not found."
+          exit 1
+        fi
+
+###############################################################################
+# Create ZIP
+###############################################################################
+
+    - name: Create Archive
+      run: |
+        cd dist
+        zip -r \
+          ../HobbySpark-${{ steps.version.outputs.version }}-macOS.zip \
+          HobbySpark.app
+
+###############################################################################
+# Upload Artifact
+###############################################################################
+
+    - name: Upload macOS Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: macOS
+        path: |
+          HobbySpark-${{ steps.version.outputs.version }}-macOS.zip
+
+###############################################################################
+# Release
+###############################################################################
+
+  release:
+
+    name: Publish GitHub Release
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - windows
+      - linux
+      - macos
+
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+
+###############################################################################
+# Download Windows Artifacts
+###############################################################################
+
+    - name: Download Windows
+      uses: actions/download-artifact@v4
+      with:
+        name: Windows
+        path: artifacts
+
+###############################################################################
+# Download Linux Artifact
+###############################################################################
+
+    - name: Download Linux
+      uses: actions/download-artifact@v4
+      with:
+        name: Linux
+        path: artifacts
+
+###############################################################################
+# Download macOS Artifact
+###############################################################################
+
+    - name: Download macOS
+      uses: actions/download-artifact@v4
+      with:
+        name: macOS
+        path: artifacts
+
+###############################################################################
+# Verify Artifacts
+###############################################################################
+
+    - name: Verify Release Files
+      run: |
+        ls -R artifacts
+
+        if [ -z "$(find artifacts -type f)" ]; then
+          echo "No release artifacts found."
+          exit 1
+        fi
+
+###############################################################################
+# Publish Release
+###############################################################################
+
+    - name: Publish GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        generate_release_notes: true
+        files: |
+          artifacts/**
