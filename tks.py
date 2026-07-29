@@ -376,6 +376,7 @@ class TabManager:
 class GUI:
 	def __init__(self, root:Tk) -> None:
 		mixer.init()
+		root.iconbitmap("installers\\icon.ico")
 		root.title("HobbySpark")
 		self.config_file = project_path/"user_data.json"
 		if not os.path.exists(str(self.config_file)):
