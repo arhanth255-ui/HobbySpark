@@ -112,10 +112,11 @@ jobs:
 
       - name: Build HobbySpark
         run: |
-          pyinstaller tks.py ^
+          pyinstaller --clean tks.py ^
             --windowed ^
             --onedir ^
-            --name HobbySpark
+            --name HobbySpark ^
+            --icon installers\icon.ico
 
 ###############################################################################
 # Verify executable
