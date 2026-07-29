@@ -227,7 +227,7 @@ jobs:
       - name: Rename installer
         shell: powershell
         run: |
-          Rename-Item `
+          Move-Item `
             installers/Output/HobbySparkSetup.exe `
             HobbySpark-${{ steps.version.outputs.version }}-Setup.exe
 
@@ -565,8 +565,8 @@ jobs:
 ###############################################################################
 
       - name: Finished
-      run: |
-        echo
-        echo "=========================================="
-        echo "HobbySpark build completed successfully."
-        echo "==========================================" 
+        run: |
+          echo
+          echo "=========================================="
+          echo "HobbySpark build completed successfully."
+          echo "==========================================" 

@@ -480,7 +480,7 @@ class GUI:
 		file.add_command(label="New project", command=self.new)
 		main.add_cascade(label="File", menu=file)
 
-		preferences = Menu(main, tearoff=True)
+		preferences = Menu(main, tearoff=False)
 		preferences.add_command(label="Change user data", command=self.change_pr)
 
 		main.add_cascade(label="Preferences", menu=preferences)
