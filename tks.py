@@ -3,6 +3,13 @@ from shutil import rmtree
 import datetime as dt
 from pygame import mixer
 import serial
+import os
+import sys
+
+def resource_path(relative):
+	if hasattr(sys, "_MEIPASS"):
+		return os.path.join(sys._MEIPASS, relative)
+	return os.path.join(os.path.abspath("."), relative)
 
 
 from tkinter.simpledialog import askinteger, askstring
@@ -376,7 +383,7 @@ class TabManager:
 class GUI:
 	def __init__(self, root:Tk) -> None:
 		mixer.init()
-		root.iconbitmap("installers\\icon.ico")
+		root.iconbitmap(resource_path("installers\\icon.ico"))
 		root.title("HobbySpark")
 		self.config_file = project_path/"user_data.json"
 		if not os.path.exists(str(self.config_file)):
