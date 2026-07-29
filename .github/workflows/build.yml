@@ -113,7 +113,7 @@ jobs:
       - name: Build HobbySpark
         run: |
           pyinstaller --clean tks.py ^
-            --add-data "installers/icon.ico;"
+            --add-data "installers/icon.ico;" ^
             --windowed ^
             --onedir ^
             --name HobbySpark ^
@@ -326,7 +326,7 @@ jobs:
             --icon installers/icon.ico
             --windowed \
             --onedir \
-            --name HobbySpark
+            --name HobbySpark \ 
             --add-data "installers/icon.ico;"
 
 ###############################################################################
@@ -440,7 +440,7 @@ jobs:
       - name: Build HobbySpark
         run: |
           pyinstaller --clean tks.py \
-            --icon installers/icon.ico
+            --icon installers/icon.ico \
             --windowed \
             --onedir \
             --name HobbySpark
