@@ -109,7 +109,7 @@ class   Pin():
                 raise PinNotApplicableError(raw_pin,mode,needed)
         for name, reserved_pin in Boards.CURRENTBOARD.reservedpins.items():
             if str(reserved_pin) == raw_pin:
-                reserved_pin_warn(raw_pin,name)
+                print(f"Note that pin {raw_pin} is a reserved pin on the {Boards.CURRENTBOARD.boardname}. This may cause errors in the future. ")
                 break
         used_pins.append(raw_pin)
         self.pinname=pin

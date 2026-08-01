@@ -389,6 +389,8 @@ class GUI:
 		if self.python is None:
 			mb.showerror("Python was not found on your system. ")
 			root.destroy()
+		print(self.python)
+
 
 		mixer.init()
 		root.iconbitmap(resource_path("installers\\icon.ico"))
@@ -681,8 +683,6 @@ set_board("board_name", True)
 
 
 	def build_tree(self, parent, root):
-		for tab in self.editor.tabs:
-			self.editor.delete(tab)
 		if parent == "":
 			parent = self.dir.insert(
 	    		"",
@@ -796,11 +796,11 @@ set_board("board_name", True)
 
 		self.check_if_open()
 
-		os.makedirs(os.path.join(self.path, "COMPILATION"), exist_ok=True)
-		with open(os.path.join(self.path, "COMPILATION", "COMPILATION.ino"), "w") as f:
+		os.makedirs(os.path.join(self.path, "COMPILATION", self.editor.current.name), exist_ok=True)
+		with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, f"{self.editor.current.name}.ino"), "w") as f:
 			f.write("\n".join(transpiled))
 
-		with open(os.path.join(self.path, "COMPILATION", "package.h"), "w") as f:
+		with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, "package.h"), "w") as f:
 			with open("package.h", "r") as f2:
 				f.write(f2.read())
 
@@ -820,7 +820,7 @@ set_board("board_name", True)
 		        "compile",
 		        "--fqbn",
 		        fqbn[0],
-		        os.path.join(self.path, "COMPILATION")
+		        os.path.join(self.path, "COMPILATION", self.editor.current.name)
 		    ],
 		    capture_output=True,
 		    text=True
@@ -847,7 +847,7 @@ set_board("board_name", True)
 		        board,
 		        "--fqbn",
 		        fqbn[0],
-		        os.path.join(self.path, "COMPILATION")
+		        os.path.join(self.path, "COMPILATION", self.editor.current.name)
 		    ],
 		    capture_output=True,
 		    text=True
@@ -887,15 +887,16 @@ set_board("board_name", True)
 			return
 
 		os.makedirs(os.path.join(self.path, "COMPILATION", self.editor.current.name), exist_ok=True)
-		with open(os.path.join(self.path, "COMPILATION",self.editor.current.name, "COMPILATION.ino"), "w") as f:
+		with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, self.editor.current.name+".ino"), "w") as f:
 			f.write("\n".join(transpiled))
 
-		with open(os.path.join(self.path, "COMPILATION", "package.h"), "w") as f:
+		with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, "package.h"), "w") as f:
 			with open("package.h", "r") as f2:
 				f.write(f2.read())
 		self.check_if_open()
 		self.dir.delete(*self.dir.get_children())
 		self.build_tree("", self.path)
+
 		if os.path.exists(os.path.join(self.path, "settings.json")):
 			with open(os.path.join(self.path, "settings.json")) as f:
 				loaded = data_handle.load(f)["def_board"]
@@ -910,7 +911,7 @@ set_board("board_name", True)
 		        "compile",
 		        "--fqbn",
 		        fqbn,
-		        os.path.join(self.path, "COMPILATION")
+		        os.path.join(self.path, "COMPILATION", self.editor.current.name)
 		    ],
 		    capture_output=True,
 		    text=True
