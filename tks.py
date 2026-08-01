@@ -42,7 +42,8 @@ ALL_BOARDS = {}
 result = subprocess.run(
 	["arduino-cli", "board", "listall", "--format", "json"],
 	capture_output=True,
-	text=True
+	text=True,
+    creationflags=subprocess.CREATE_NO_WINDOW
 )
 
 
@@ -133,7 +134,7 @@ def askcom(root, out = None, console:Console = None):
 	com = ""
 	new = Toplevel(root)
 	new.title("Select COM port")
-	result = subprocess.run(["arduino-cli", "board", "list", "--format", "json"], capture_output=True, text=True)
+	result = subprocess.run(["arduino-cli", "board", "list", "--format", "json"], capture_output=True, text=True,creationflags=subprocess.CREATE_NO_WINDOW)
 	print(result.stdout)
 	data:dict = (data_handle.loads(result.stdout))["detected_ports"]
 	real_data = []
@@ -381,12 +382,10 @@ class TabManager:
 
 
 class GUI:
-	def __init__(self, root:Tk) -> None:	
-		self.python = shutil.which("python")
-		if self.python is None:
-			
-			self.python = shutil.which("python3")
-		if self.python is None:
+	def __init__(self, root:Tk) -> None:
+		if shutil.which("python") is not None: self.python="python"	
+		elif shutil.which("python3") is not None: self.python="python3"
+		else:
 			mb.showerror("Python was not found on your system. ")
 			root.destroy()
 		print(self.python)
@@ -823,7 +822,7 @@ set_board("board_name", True)
 		        os.path.join(self.path, "COMPILATION", self.editor.current.name)
 		    ],
 		    capture_output=True,
-		    text=True
+		    text=True,creationflags=subprocess.CREATE_NO_WINDOW
 		)
 		if result.stderr:
 			self.console.write_error(f"Failed to compile, {result.stderr}")
@@ -850,7 +849,7 @@ set_board("board_name", True)
 		        os.path.join(self.path, "COMPILATION", self.editor.current.name)
 		    ],
 		    capture_output=True,
-		    text=True
+		    text=True,creationflags=subprocess.CREATE_NO_WINDOW
 		)
 		if result.stderr:
 			self.console.write_error(f"Could not upload, {result.stderr}")
@@ -859,67 +858,71 @@ set_board("board_name", True)
 
 
 	def test(self):
-		if self.run__():
-			return
-		text = self.editor.current.editor.text.get("1.0",END)
-		self.console.write("Lexing")
-		try: 
-			lexed = Lexer(text).evaluate()
-			self.console.write("Lexed")
+		try:
+			if self.run__():
+				return
+			text = self.editor.current.editor.text.get("1.0",END)
+			self.console.write("Lexing")
+			try: 
+				lexed = Lexer(text).evaluate()
+				self.console.write("Lexed")
+			except Exception as e:
+				self.console.write_error(f"Failed to lex code, {e}")
+				return
+
+			self.console.write("Parsing")
+			try: 
+				parsed = Parser(lexed).parse()
+				self.console.write("Parsed")
+			except Exception as e:
+				self.console.write_error(f"Failed to parse code, {e}")
+				return
+
+			self.console.write("Transpiling")
+			try: 
+				transpiled = Transpiler(parsed).translate()
+				self.console.write("Transpiled")
+			except Exception as e:
+				self.console.write_error(f"Failed to transpile code, {e}")
+				return
+
+			os.makedirs(os.path.join(self.path, "COMPILATION", self.editor.current.name), exist_ok=True)
+			with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, self.editor.current.name+".ino"), "w") as f:
+				f.write("\n".join(transpiled))
+
+			with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, "package.h"), "w") as f:
+				with open("package.h", "r") as f2:
+					f.write(f2.read())
+			self.check_if_open()
+			self.dir.delete(*self.dir.get_children())
+			self.build_tree("", self.path)
+
+			if os.path.exists(os.path.join(self.path, "settings.json")):
+				with open(os.path.join(self.path, "settings.json")) as f:
+					loaded = data_handle.load(f)["def_board"]
+					if loaded is not None: fqbn = ALL_BOARDS[loaded]
+					else: fqbn = askprompt(self.root)[0]
+			else: fqbn = askprompt(self.root)[0]
+			print("FQBN", fqbn)
+
+			result = subprocess.run(
+			    [
+			        "arduino-cli",
+			        "compile",
+			        "--fqbn",
+			        fqbn,
+			        os.path.join(self.path, "COMPILATION", self.editor.current.name)
+			    ],
+			    capture_output=True,
+			    text=True
+			)
+			if result.stderr:
+				self.console.write_error(f"Failed to compile, {result.stderr}")
+				return
+			self.console.write("Compiled sucessfully")
+
 		except Exception as e:
-			self.console.write_error(f"Failed to lex code, {e}")
-			return
-
-		self.console.write("Parsing")
-		try: 
-			parsed = Parser(lexed).parse()
-			self.console.write("Parsed")
-		except Exception as e:
-			self.console.write_error(f"Failed to parse code, {e}")
-			return
-
-		self.console.write("Transpiling")
-		try: 
-			transpiled = Transpiler(parsed).translate()
-			self.console.write("Transpiled")
-		except Exception as e:
-			self.console.write_error(f"Failed to transpile code, {e}")
-			return
-
-		os.makedirs(os.path.join(self.path, "COMPILATION", self.editor.current.name), exist_ok=True)
-		with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, self.editor.current.name+".ino"), "w") as f:
-			f.write("\n".join(transpiled))
-
-		with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, "package.h"), "w") as f:
-			with open("package.h", "r") as f2:
-				f.write(f2.read())
-		self.check_if_open()
-		self.dir.delete(*self.dir.get_children())
-		self.build_tree("", self.path)
-
-		if os.path.exists(os.path.join(self.path, "settings.json")):
-			with open(os.path.join(self.path, "settings.json")) as f:
-				loaded = data_handle.load(f)["def_board"]
-				if loaded is not None: fqbn = ALL_BOARDS[loaded]
-				else: fqbn = askprompt(self.root)[0]
-		else: fqbn = askprompt(self.root)[0]
-		print("FQBN", fqbn)
-
-		result = subprocess.run(
-		    [
-		        "arduino-cli",
-		        "compile",
-		        "--fqbn",
-		        fqbn,
-		        os.path.join(self.path, "COMPILATION", self.editor.current.name)
-		    ],
-		    capture_output=True,
-		    text=True
-		)
-		if result.stderr:
-			self.console.write_error(f"Failed to compile, {result.stderr}")
-			return
-		self.console.write("Compiled sucessfully")
+			self.console.write("ERROR!!!", e)
 
 
 		
@@ -955,7 +958,7 @@ set_board("board_name", True)
 	def run__(self):
 		self.save()
 		self.console.write("Running")
-		result = subprocess.run([self.python, self.editor.current.path], capture_output=True, text=True)
+		result = subprocess.run([self.python, self.editor.current.path], capture_output=True, text=True,creationflags=subprocess.CREATE_NO_WINDOW)
 		if result.stderr:
 			self.console.write_error(f"Could not run: {result.stderr}")
 			return True
