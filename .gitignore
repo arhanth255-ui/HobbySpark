@@ -4,6 +4,10 @@
 .venv/
 venv/
 __pycache__/
+build/
+dist/
+
+tks.spec
 
 *.exe
 *.c

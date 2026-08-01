@@ -381,7 +381,15 @@ class TabManager:
 
 
 class GUI:
-	def __init__(self, root:Tk) -> None:
+	def __init__(self, root:Tk) -> None:	
+		self.python = shutil.which("python")
+		if self.python is None:
+			
+			self.python = shutil.which("python3")
+		if self.python is None:
+			mb.showerror("Python was not found on your system. ")
+			root.destroy()
+
 		mixer.init()
 		root.iconbitmap(resource_path("installers\\icon.ico"))
 		root.title("HobbySpark")
@@ -946,7 +954,7 @@ set_board("board_name", True)
 	def run__(self):
 		self.save()
 		self.console.write("Running")
-		result = subprocess.run([sys.executable, self.editor.current.path], capture_output=True, text=True)
+		result = subprocess.run([self.python, self.editor.current.path], capture_output=True, text=True)
 		if result.stderr:
 			self.console.write_error(f"Could not run: {result.stderr}")
 			return True
