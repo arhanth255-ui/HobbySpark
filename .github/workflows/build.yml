@@ -151,8 +151,9 @@ jobs:
       - name: Build Debian package
         shell: bash
         run: |
-          chmod +x linux/build-deb.sh
-          ./linux/build-deb.sh "${{ steps.version.outputs.version }}"
+          chmod +x linux/deb.sh
+          ./linux/deb.sh "${{ steps.version.outputs.version }}"
+          mv deb.deb HobbySpark-${VERSION}-Linux-amd64.deb
 
       - name: Compress
         run: tar -czf HobbySpark-${VERSION}-Linux-Portable.tar.gz dist/HobbySpark
