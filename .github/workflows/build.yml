@@ -72,7 +72,7 @@ jobs:
           )
       - name: Build
         run: |
-          ${{ steps.iscc.outputs.path}} ^
+          "${{ steps.iscc.outputs.path}}" ^
           installers\HobbySpark.iss ^
           /DAppVersion=${{ steps.version.outputs.version }}
 
