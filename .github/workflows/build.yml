@@ -76,12 +76,14 @@ jobs:
           installers\HobbySpark.iss ^
           /DAppVersion=${{ steps.version.outputs.version }}
 
-      - name: Verify installer
+      - name: Verify executable exists
+        shell: bash
         run: |
-          if not exist installers\Output\HobbySparkSetup.exe (
-              echo Installer was not generated.
-              exit /b 1
-          )
+          if [ ! -f "dist/HobbySpark/HobbySpark" ]; then
+            echo "ERROR:"
+            echo "PyInstaller failed"
+            exit 1
+          fi
 
       - name: Create portable ZIP
         shell: powershell
