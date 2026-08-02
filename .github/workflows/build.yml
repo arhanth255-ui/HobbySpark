@@ -96,14 +96,14 @@ jobs:
         run: |
           Move-Item `
             installers/Output/HobbySparkSetup.exe `
-            HobbySpark-${{ steps.version.outputs.version }}WindowsSetup.exe
+            HobbySpark-${{ steps.version.outputs.version }}-WindowsSetup.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Windows
           path: |
-            HobbySpark-${{ steps.version.outputs.version }}WindowsSetup.exe
+            HobbySpark-${{ steps.version.outputs.version }}-WindowsSetup.exe
             HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable-No-Save.zip
             
             
