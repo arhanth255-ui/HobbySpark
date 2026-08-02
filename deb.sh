@@ -15,10 +15,10 @@ mkdir -p deb/usr/share/applications
 mkdir -p deb/usr/share/icons/hicolor/256x256/apps
 mkdir -p deb/usr/share/hobbyspark
 
-cp linux/control deb/DEBIAN/control
-cp linux/hobbyspark.desktop deb/usr/share/applications/
+cp control deb/DEBIAN/control
+cp hobbyspark.desktop deb/usr/share/applications/
+cp hobbyspark deb/usr/bin/
 cp assets/icon.png deb/usr/share/icons/hicolor/256x256/apps/hobbyspark.png
-cp linux/hobbyspark deb/usr/bin/
 chmod +x deb/usr/bin/hobbyspark
 
 cp -r dist/HobbySpark/* deb/usr/share/hobbyspark/
