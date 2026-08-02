@@ -148,6 +148,12 @@ jobs:
             exit 1
           fi
 
+      - name: Build Debian package
+        shell: bash
+        run: |
+          chmod +x linux/build-deb.sh
+          ./linux/build-deb.sh "${{ steps.version.outputs.version }}"
+
       - name: Compress
         run: tar -czf HobbySpark-${VERSION}-Linux-Portable.tar.gz dist/HobbySpark
 
