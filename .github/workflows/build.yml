@@ -157,7 +157,6 @@ jobs:
         run: |
           chmod +x deb.sh
           ./deb.sh "${{ steps.version.outputs.version }}"
-          mv deb.deb HobbySpark-${{steps.version.outputs.version}}-Linux-amd64.deb
 
       - name: Compress
         run: tar -czf HobbySpark-${{steps.version.outputs.version}}-Linux-Portable.tar.gz dist/HobbySpark
