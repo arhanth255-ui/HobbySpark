@@ -1,113 +1,113 @@
 name: HobbySpark
 on: push
 jobs:
-  # build:
-  #   runs-on: windows-latest
-  #   defaults:
-  #     run:
-  #       shell: cmd
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
         
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Adding python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: 3.13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Adding python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
 
-  #     - name: Installing packages
-  #       run: | 
-  #         python -m pip install --upgrade pip
-  #         python -m pip install -r requirements.txt
-  #         python -m pip install pyinstaller
+      - name: Installing packages
+        run: | 
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
 
-  #     - name: Determine Version
-  #       id: version
-  #       shell: pwsh
-  #       run: |
-  #           $v = "${{ github.ref_name }}"
-  #           $v = $v.TrimStart("v")
-  #           "version=$v" >> $env:GITHUB_OUTPUT
+      - name: Determine Version
+        id: version
+        shell: pwsh
+        run: |
+            $v = "${{ github.ref_name }}"
+            $v = $v.TrimStart("v")
+            "version=$v" >> $env:GITHUB_OUTPUT
 
-  #     - name: Compile excecutable
-  #       run: pyinstaller tks.spec
+      - name: Compile excecutable
+        run: pyinstaller tks.spec
 
-  #     - name: Verify executable exists
-  #       shell: bash
-  #       run: |
-  #         if [ ! -f "dist/HobbySpark/HobbySpark" ]; then
-  #           echo "ERROR:"
-  #           echo "PyInstaller failed"
-  #           exit 1
-  #         fi
-  #     - name: Install InnoSetup
-  #       shell: powershell
-  #       run: choco install innosetup -y
+      - name: Verify executable exists
+        shell: bash
+        run: |
+          if [ ! -f "dist/HobbySpark/HobbySpark" ]; then
+            echo "ERROR:"
+            echo "PyInstaller failed"
+            exit 1
+          fi
+      - name: Install InnoSetup
+        shell: powershell
+        run: choco install innosetup -y
 
-  #     - name: Locate ISCC
-  #       id: iscc
-  #       shell: powershell
-  #       run: |
-  #         $paths = @(
-  #           "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
-  #           "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
-  #         )
+      - name: Locate ISCC
+        id: iscc
+        shell: powershell
+        run: |
+          $paths = @(
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
+          )
 
-  #         foreach ($path in $paths) {
-  #           if (Test-Path $path) {
-  #             "path=$path" >> $env:GITHUB_OUTPUT
-  #             exit 0
-  #           }
-  #         }
+          foreach ($path in $paths) {
+            if (Test-Path $path) {
+              "path=$path" >> $env:GITHUB_OUTPUT
+              exit 0
+            }
+          }
 
-  #         throw "Unable to locate ISCC.exe"
-  #     - name: Verify installer files
-  #       run: |
-  #         if not exist installers\icon.ico (
-  #             echo Missing icon.ico
-  #             exit /b 1
-  #         )
+          throw "Unable to locate ISCC.exe"
+      - name: Verify installer files
+        run: |
+          if not exist installers\icon.ico (
+              echo Missing icon.ico
+              exit /b 1
+          )
 
-  #         if not exist installers\HobbySpark.iss (
-  #             echo Missing HobbySpark.iss
-  #             exit /b 1
-  #         )
-  #     - name: Build
-  #       run: |
-  #         "${{ steps.iscc.outputs.path}}" ^
-  #         installers\HobbySpark.iss ^
-  #         /DAppVersion=${{ steps.version.outputs.version }}
+          if not exist installers\HobbySpark.iss (
+              echo Missing HobbySpark.iss
+              exit /b 1
+          )
+      - name: Build
+        run: |
+          "${{ steps.iscc.outputs.path}}" ^
+          installers\HobbySpark.iss ^
+          /DAppVersion=${{ steps.version.outputs.version }}
 
-  #     - name: Verify executable exists
-  #       shell: bash
-  #       run: |
-  #         if [ ! -f "dist/HobbySpark/HobbySpark" ]; then
-  #           echo "ERROR:"
-  #           echo "PyInstaller failed"
-  #           exit 1
-  #         fi
+      - name: Verify executable exists
+        shell: bash
+        run: |
+          if [ ! -f "dist/HobbySpark/HobbySpark" ]; then
+            echo "ERROR:"
+            echo "PyInstaller failed"
+            exit 1
+          fi
 
-  #     - name: Create portable ZIP
-  #       shell: powershell
-  #       run: |
-  #         Compress-Archive `
-  #           -Path dist/HobbySpark/* `
-  #           -DestinationPath `
-  #           HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable-No-Save.zip
+      - name: Create portable ZIP
+        shell: powershell
+        run: |
+          Compress-Archive `
+            -Path dist/HobbySpark/* `
+            -DestinationPath `
+            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable-No-Save.zip
 
-  #     - name: Rename installer
-  #       shell: powershell
-  #       run: |
-  #         Move-Item `
-  #           installers/Output/HobbySparkSetup.exe `
-  #           HobbySpark-${{ steps.version.outputs.version }}-WindowsSetup.exe
+      - name: Rename installer
+        shell: powershell
+        run: |
+          Move-Item `
+            installers/Output/HobbySparkSetup.exe `
+            HobbySpark-${{ steps.version.outputs.version }}-WindowsSetup.exe
 
-  #     - name: Upload artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: Windows
-  #         path: |
-  #           HobbySpark-${{ steps.version.outputs.version }}-WindowsSetup.exe
-  #           HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable-No-Save.zip
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows
+          path: |
+            HobbySpark-${{ steps.version.outputs.version }}-WindowsSetup.exe
+            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable-No-Save.zip
             
   ubuntu-build:
     runs-on: ubuntu-latest
