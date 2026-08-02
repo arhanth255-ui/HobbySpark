@@ -3,6 +3,8 @@ set -e
 
 VERSION="$1"
 
+cd "$(dirname "$0")/.."
+
 echo "Building Debian package..."
 
 rm -rf deb
