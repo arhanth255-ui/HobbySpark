@@ -123,7 +123,7 @@ jobs:
           python-version: 3.13
 
       - name: Installing packages
-        run: | 
+        run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install pyinstaller
@@ -152,16 +152,16 @@ jobs:
         shell: bash
         run: |
           chmod +x deb.sh
-          .deb.sh "${{ steps.version.outputs.version }}"
-          mv deb.deb HobbySpark-${VERSION}-Linux-amd64.deb
+          ./deb.sh "${{ steps.version.outputs.version }}"
+          mv deb.deb HobbySpark-${{steps.version.outputs.version}}-Linux-amd64.deb
 
       - name: Compress
-        run: tar -czf HobbySpark-${VERSION}-Linux-Portable.tar.gz dist/HobbySpark
+        run: tar -czf HobbySpark-${{steps.version.outputs.version}}-Linux-Portable.tar.gz dist/HobbySpark
 
       - name: Verify Debian package
         shell: bash
         run: |
-          if [ ! -f HobbySpark-${{ steps.version.outputs.version }}-amd64.deb ]; then
+          if [ ! -f HobbySpark-${{ steps.version.outputs.version }}-Linux-amd64.deb ]; then
             echo "Debian package was not generated."
             exit 1
           fi
