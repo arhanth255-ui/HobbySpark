@@ -20,6 +20,14 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install pyinstaller
 
+      - name: Determine Version
+        id: version
+        shell: pwsh
+        run: |
+            $v = "${{ github.ref_name }}"
+            $v = $v.TrimStart("v")
+            "version=$v" >> $env:GITHUB_OUTPUT
+
       - name: Compile excecutable
         run: pyinstaller tks.spec
 
@@ -30,6 +38,78 @@ jobs:
               echo "Pyinstaller failed"
               exit /b 1
           )
+      - name: Install InnoSetup
+        shell: powershell
+        run: choco install innosetup -y
+
+      - name: Locate ISCC
+        id: iscc
+        shell: powershell
+        run: |
+          $paths = @(
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
+          )
+
+          foreach ($path in $paths) {
+            if (Test-Path $path) {
+              "path=$path" >> $env:GITHUB_OUTPUT
+              exit 0
+            }
+          }
+
+          throw "Unable to locate ISCC.exe"
+      - name: Verify installer files
+        run: |
+          if not exist installers\icon.ico (
+              echo Missing icon.ico
+              exit /b 1
+          )
+
+          if not exist installers\HobbySpark.iss (
+              echo Missing HobbySpark.iss
+              exit /b 1
+          )
+      - name: Build
+        run: |
+          ${{ steps.iscc.outputs.path}} ^
+          installers\HobbySpark.iss ^
+          /DAppVersion=${{ steps.version.outputs.version }}
+
+      - name: Verify installer
+        run: |
+          if not exist installers\Output\HobbySparkSetup.exe (
+              echo Installer was not generated.
+              exit /b 1
+          )
+
+      - name: Create portable ZIP
+        shell: powershell
+        run: |
+          Compress-Archive `
+            -Path dist/HobbySpark/* `
+            -DestinationPath `
+            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable-No-Save.zip
+
+      - name: Rename installer
+        shell: powershell
+        run: |
+          Move-Item `
+            installers/Output/HobbySparkSetup.exe `
+            HobbySpark-${{ steps.version.outputs.version }}WindowsSetup.exe
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows
+          path: |
+            HobbySpark-${{ steps.version.outputs.version }}WindowsSetup.exe
+            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable-No-Save.zip
+            
+            
+
+          
+        
       
         
         
