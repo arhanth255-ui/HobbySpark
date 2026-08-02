@@ -510,7 +510,18 @@ class GUI:
 			mb.showinfo("Happy birthday!!!!!", f"HAPPY BIRTHDAY, {self.name}. Our best wishes from the HobbySpark team. You're finally {self.age+1} years old!")
 			self.age+=1
 			self.fin = dt.date.today().year
-			mixer.music.load(os.path.join("assets", "h.mp3"))
+			a = {
+				"name":self.name,
+				"birth":self.birthday,
+				"age":self.age,
+				"fin":self.fin
+
+			}
+
+			with open(self.config_file,"w") as f:
+				data_handle.dump(a, f)
+
+			mixer.music.load(resource_path(os.path.join("assets", "h.mp3")))
 			mixer.music.play()
 
 		########################################################
