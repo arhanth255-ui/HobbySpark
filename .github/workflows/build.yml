@@ -1,0 +1,19 @@
+name: HobbySpark
+on: push
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: startoff
+        run: echo "hello world!"
+  second-one:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: startoff
+        run: echo "SECOND JOB"
+        
+        
+      
+        
