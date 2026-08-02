@@ -29,6 +29,7 @@ jobs:
               echo "ERROR:"
               echo "Pyinstaller failed"
               exit /b 1
+          )
       
         
         
