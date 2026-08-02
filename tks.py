@@ -385,9 +385,36 @@ class GUI:
 		if shutil.which("python") is not None: self.python=shutil.which("python")	
 		elif shutil.which("python3") is not None: self.python=shutil.which("python3")
 		else:
-			mb.showerror("Python was not found on your system. ")
-			root.destroy()
-		print(self.python)
+			mb.showerror("Python not found on PATH","Python was not found on your system. ")
+			a = mb.askokcancel("Install","Install python 3.13 automatically? ")
+			if a:
+				subprocess.run([
+				    resource_path("installers/python313.exe"),
+				    "/quiet",
+				    "InstallAllUsers=1",
+				    "PrependPath=1",
+				    "Include_pip=1",
+				])
+				mb.showinfo("Installed ","Python 3.13 was installed. HobbySpark will now restart. ")
+				os.execv(sys.executable, [sys.executable] + sys.argv)
+			else:
+				root.destroy()
+
+		if shutil.which("arduino-cli") is None:
+			mb.showwarning("arduino-cli not found on PATH", "arduino-cli was not found on your system. ")
+			a = mb.askokcancel("Install", "Install arduino-cli automatically? ")
+			if a:
+				subprocess.run([
+				    "msiexec",
+				    "/i",
+				    resource_path("installers/arduino-cli.msi"),
+				    "/qn"
+				])
+				mb.showinfo("Installed ","arduino-cli was installed. HobbySpark will now restart. ")
+				os.execv(sys.executable, [sys.executable] + sys.argv)
+			else:
+				root.destroy()
+		
 
 
 		mixer.init()
