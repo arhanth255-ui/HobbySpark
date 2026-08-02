@@ -9,10 +9,15 @@ dist/
 
 run.bat
 tks.spec
+try.iss
+soundshelper.py
+chatGPT_made_GUI.py
+
+
 
 *.exe
 *.c
-!python.exe
+!python313.exe
 
 counter.py
 about_me.txt

@@ -82,7 +82,6 @@ class Welcome:
 		self.age = 0
 		self.birthday = None
 		self.start_animation()
-		print("HEHQBHWHBQN", self.birthday, self.age, self.name)
 
 	def start_animation(self):
 		self.first.pack()
@@ -383,8 +382,8 @@ class TabManager:
 
 class GUI:
 	def __init__(self, root:Tk) -> None:
-		if shutil.which("python") is not None: self.python="python"	
-		elif shutil.which("python3") is not None: self.python="python3"
+		if shutil.which("python") is not None: self.python=shutil.which("python")	
+		elif shutil.which("python3") is not None: self.python=shutil.which("python3")
 		else:
 			mb.showerror("Python was not found on your system. ")
 			root.destroy()
@@ -394,7 +393,7 @@ class GUI:
 		mixer.init()
 		root.iconbitmap(resource_path("installers\\icon.ico"))
 		root.title("HobbySpark")
-		self.config_file = project_path/"user_data.json"
+		self.config_file = resource_path(project_path/"user_data.json")
 		if not os.path.exists(str(self.config_file)):
 			new = Welcome(root)
 			root.wait_window(new.root)
@@ -800,7 +799,7 @@ set_board("board_name", True)
 			f.write("\n".join(transpiled))
 
 		with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, "package.h"), "w") as f:
-			with open("package.h", "r") as f2:
+			with open(resource_path("package.h"), "r") as f2:
 				f.write(f2.read())
 
 		
@@ -891,7 +890,7 @@ set_board("board_name", True)
 				f.write("\n".join(transpiled))
 
 			with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, "package.h"), "w") as f:
-				with open("package.h", "r") as f2:
+				with open(resource_path("package.h"), "r") as f2:
 					f.write(f2.read())
 			self.check_if_open()
 			self.dir.delete(*self.dir.get_children())
@@ -911,10 +910,11 @@ set_board("board_name", True)
 			        "compile",
 			        "--fqbn",
 			        fqbn,
-			        os.path.join(self.path, "COMPILATION", self.editor.current.name)
+			        os.path.join(self.path, "COMPILATION", self.editor.current.name),
 			    ],
 			    capture_output=True,
-			    text=True
+			    text=True,
+			    creationflags=subprocess.CREATE_NO_WINDOW
 			)
 			if result.stderr:
 				self.console.write_error(f"Failed to compile, {result.stderr}")
@@ -922,7 +922,7 @@ set_board("board_name", True)
 			self.console.write("Compiled sucessfully")
 
 		except Exception as e:
-			self.console.write("ERROR!!!", e)
+			self.console.write_error(f"ERRORR!!!!!: {e}")
 
 
 		
