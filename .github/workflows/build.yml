@@ -140,13 +140,14 @@ jobs:
       - name: Compile excecutable
         run: pyinstaller tks.spec
 
-      - name: Verify that excecutable exists
+      - name: Verify executable exists
+        shell: bash
         run: |
-          if not exist dist\HobbySpark\HobbySpark.exe (
-              echo "ERROR:"
-              echo "Pyinstaller failed"
-              exit /b 1
-          )
+          if [ ! -f "dist/HobbySpark/HobbySpark" ]; then
+            echo "ERROR:"
+            echo "PyInstaller failed"
+            exit 1
+          fi
 
       - name: Compress
         run: tar -czf HobbySpark-${VERSION}-Linux-Portable.tar.gz dist/HobbySpark
