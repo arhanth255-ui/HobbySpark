@@ -25,7 +25,7 @@ jobs:
 
       - name: Verify that excecutable exists
         run: |
-          if not exist dist\HobbySpark\HobbySpark.exe(
+          if not exist dist\HobbySpark\HobbySpark.exe (
               echo "ERROR:"
               echo "Pyinstaller failed"
               exit /b 1
