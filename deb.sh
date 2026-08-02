@@ -3,39 +3,80 @@ set -e
 
 VERSION="$1"
 
+if [ -z "$VERSION" ]; then
+    VERSION="DEV"
+fi
+
 echo "Building Debian package..."
 
-# Clean previous build
 rm -rf deb
 
-# Create package structure
 mkdir -p deb/DEBIAN
 mkdir -p deb/usr/bin
 mkdir -p deb/usr/share/applications
 mkdir -p deb/usr/share/icons/hicolor/256x256/apps
 mkdir -p deb/usr/share/hobbyspark
 
-# Package metadata
-cp control deb/DEBIAN/control
+###############################################################################
+# control
+###############################################################################
 
-# Desktop launcher
-cp hobbyspark.desktop deb/usr/share/applications/
+cat > deb/DEBIAN/control <<EOF
+Package: hobbyspark
+Version: $VERSION
+Section: development
+Priority: optional
+Architecture: amd64
+Maintainer: HobbySpark Industries
+Description: HobbySpark Programming Language and IDE
+EOF
 
-# Launcher script
-cp hobbyspark deb/usr/bin/
+###############################################################################
+# launcher
+###############################################################################
+
+cat > deb/usr/bin/hobbyspark <<'EOF'
+#!/bin/bash
+exec /usr/share/hobbyspark/HobbySpark "$@"
+EOF
+
 chmod +x deb/usr/bin/hobbyspark
 
-# Icon
+###############################################################################
+# desktop entry
+###############################################################################
+
+cat > deb/usr/share/applications/hobbyspark.desktop <<EOF
+[Desktop Entry]
+Name=HobbySpark
+Comment=HobbySpark IDE
+Exec=hobbyspark
+Icon=hobbyspark
+Terminal=false
+Type=Application
+Categories=Development;IDE;
+EOF
+
+###############################################################################
+# icon
+###############################################################################
+
 cp assets/icon.png \
    deb/usr/share/icons/hicolor/256x256/apps/hobbyspark.png
 
-# Application files
+###############################################################################
+# application
+###############################################################################
+
 cp -r dist/HobbySpark/* deb/usr/share/hobbyspark/
 
-# Replace version placeholder
-sed -i "s/@VERSION@/$VERSION/g" deb/DEBIAN/control
+###############################################################################
+# build package
+###############################################################################
 
-# Build package
-dpkg-deb --build deb "HobbySpark-${VERSION}-Linux-amd64.deb"
+dpkg-deb --build deb \
+    "HobbySpark-${VERSION}-Linux-amd64.deb"
 
-echo "Done!"
+echo
+echo "Successfully built:"
+echo "HobbySpark-${VERSION}-Linux-amd64.deb"
