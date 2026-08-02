@@ -3,10 +3,36 @@ on: push
 jobs:
   build:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
+        
     steps:
       - uses: actions/checkout@v4
-      - name: startoff
-        run: echo "hello world!"
+      - name: Adding python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+
+      - name: Installing packages
+        run: | 
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
+
+      - name: Compile excecutable
+        run: pyinstaller tks.spec
+
+      - name: Verify that excecutable exists
+        run: |
+          if not exist dist\HobbySpark\HobbySpark.exe(
+              echo "ERROR:"
+              echo "Pyinstaller failed"
+              exit /b 1
+      
+        
+        
+        
   second-one:
     runs-on: ubuntu-latest
     steps:
