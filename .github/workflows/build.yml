@@ -130,11 +130,15 @@ jobs:
 
       - name: Determine Version
         id: version
-        shell: pwsh
+        shell: bash
         run: |
-            $v = "${{ github.ref_name }}"
-            $v = $v.TrimStart("v")
-            "version=$v" >> $env:GITHUB_OUTPUT
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="0.0.${GITHUB_RUN_NUMBER}"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT" 
 
       - name: Compile excecutable
         run: pyinstaller tks.spec
