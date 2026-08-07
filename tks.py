@@ -299,7 +299,7 @@ class WritingArea:
 		self.text.edit_modified(False)
 
 class Tab:
-	def __init__(self, tab_parent, editor_parent,manager,path=None) -> None:
+	def __init__(self, tab_parent, editor_parent,manager,tk:Tk,path=None) -> None:
 
 		print("NEW TAB CREATED")
 		self.path=path
@@ -307,6 +307,8 @@ class Tab:
 			self.name= os.path.basename(path)
 		else:
 			self.name = "Untitled"
+
+		self.modified = False
 		self.header = Frame(tab_parent, relief=RAISED, bd=1)
 		self.label1=Label(self.header,text=self.name)
 		self.label2=Label(self.header, text="X")
@@ -316,15 +318,25 @@ class Tab:
 
 		self.label1.bind("<Button-1>", lambda e:manager.change(self))
 		self.label2.bind("<Button-1>", lambda e:manager.delete(self))
+		tk.bind("<Control-s>", self.check2, add="+")
+
 
 		self.frame= Frame(editor_parent)
 		self.editor = WritingArea(self.frame)
 		self.editor.f.pack(expand=True, fill="both")
+		self.editor.text.bind("<<Modified>>", self.check)
+
+	def check(self, a):
+		self.modified=True
+	def check2(self, a):
+		self.modified=False
+
 	def __repr__(self) -> str:
 		return f"Tab at {self.name}"
 
 class TabManager:
 	def __init__(self, parent) -> None:
+		self.root=parent
 		self.mainframe = Frame(parent)
 		self.tabframe = Frame(self.mainframe)
 		self.tabframe.pack(side=TOP, anchor=W, fill=BOTH)
@@ -337,7 +349,7 @@ class TabManager:
 	def add_tab(self, path=None):
 		if self.current: 
 			self.current.frame.pack_forget()
-		current = Tab(self.tabframe, self.current_frame ,self,path)
+		current = Tab(self.tabframe, self.current_frame, self, self.root, path)
 		self.tabs.append(current)
 		self.change(current)
 		self.current = current
@@ -382,6 +394,7 @@ class TabManager:
 
 class GUI:
 	def __init__(self, root:Tk) -> None:
+		self.path=""
 		if shutil.which("python") is not None: self.python=shutil.which("python")	
 		elif shutil.which("python3") is not None: self.python=shutil.which("python3")
 		else:
@@ -540,6 +553,38 @@ class GUI:
 		main.add_cascade(label="Preferences", menu=preferences)
 
 		root.config(menu=main)
+		root.bind("<FocusIn>", self.refresh)
+		root.protocol("WM_DELETE_WINDOW", self.finish)
+
+	def finish(self):
+		any_modified = False
+		modified=[]
+		for tab in self.editor.tabs:
+			if tab.modified:
+				any_modified=True
+				modified.append((tab.name, tab.path, tab))
+		if any_modified:
+			ans=mb.askyesnocancel("Modified", f"The follwoing file(s) are modified: \n{'\n'.join([a[0] for a in modified])}\n You may lose all your changes if you choose to exit without saving. Save all these file(s) automatically?",icon="warning")
+			if ans:
+				for path in [(a[1], a[2]) for a in modified]:
+					self.console.write(f"Saving... {os.path.basename(path[0])}")
+
+					read = self.editor.tabs[self.editor.tabs.index(path[1])].editor.text.get("1.0", END)
+
+					try:
+						with open(path[0], 'w') as f:
+							f.write(read)
+							self.console.write(f"Saved {os.path.basename(path[0])}")
+					except Exception as f:
+						self.console.write_error(f"Failed to save: {f}")
+				self.console.write("Goodbye!")
+				self.root.destroy()
+			elif ans is None:
+				pass
+
+			else:
+				self.console.write("Goodbye!")
+				self.root.destroy()
 
 
 	def serial(self):
@@ -575,13 +620,10 @@ class GUI:
 		mon.str.pack(expand=True, fill=BOTH)
 		mon.frame.pack(expand=True, fill=BOTH)
 
-
-
-
-
-		
-
-
+	def refresh(self, a):
+		self.check_if_open()
+		self.dir.delete(*self.dir.get_children())
+		self.build_tree("",self.path)
 
 	def change_pr(self):
 		def f():
@@ -960,7 +1002,7 @@ set_board("board_name", True)
 			self.console.write("Compiled sucessfully")
 
 		except Exception as e:
-			self.console.write_error(f"ERRORR!!!!!: {e}")
+			self.console.write_error(f"ERRORR!!!!!: {e}, {str(e)}")
 
 
 		
