@@ -6,11 +6,13 @@ import serial
 import os
 import sys
 
+
 def resource_path(relative):
 	if hasattr(sys, "_MEIPASS"):
 		return os.path.join(sys._MEIPASS, relative)
 	return os.path.join(os.path.abspath("."), relative)
 
+sys.path.insert(0, resource_path("Packages"))
 
 from tkinter.simpledialog import askinteger, askstring
 from tkinter import *
@@ -581,10 +583,8 @@ class GUI:
 				self.root.destroy()
 			elif ans is None:
 				pass
-
-			else:
-				self.console.write("Goodbye!")
-				self.root.destroy()
+		self.console.write("Goodbye!")
+		self.root.destroy()
 
 
 	def serial(self):
@@ -631,7 +631,8 @@ class GUI:
 			ab = {
 				"name":name.get() if name.get()!="" else self.name,
 				"birth":dt.date(2026, int(birthm.get()) if birthm.get()!="" else int(self.birthday.split("|")[1]), int(birthd.get()) if birthd.get()!="" else int(self.birthday.split("|")[0])).strftime("%d|%m"),
-				"age":int(age.get()) if age.get()!="" else self.age
+				"age":int(age.get()) if age.get()!="" else self.age,
+				"fin":self.fin
 
 			}
 			with open(self.config_file,"w") as f:
@@ -1183,7 +1184,6 @@ set_board("board_name", True)
 
 
 
-	
 
 a = Tk()
 b = GUI(a)
