@@ -310,7 +310,7 @@ class Tab:
 		else:
 			self.name = "Untitled"
 
-		self.modified = False
+		
 		self.header = Frame(tab_parent, relief=RAISED, bd=1)
 		self.label1=Label(self.header,text=self.name)
 		self.label2=Label(self.header, text="X")
@@ -323,13 +323,18 @@ class Tab:
 		tk.bind("<Control-s>", self.check2, add="+")
 
 
+
 		self.frame= Frame(editor_parent)
 		self.editor = WritingArea(self.frame)
 		self.editor.f.pack(expand=True, fill="both")
 		self.editor.text.bind("<<Modified>>", self.check)
+		self.modified = False
+		self.editor.text.edit_modified(False)
 
 	def check(self, a):
-		self.modified=True
+		if self.editor.text.edit_modified():
+			self.modified = True
+			self.editor.text.edit_modified(False)
 	def check2(self, a):
 		self.modified=False
 
@@ -582,7 +587,7 @@ class GUI:
 				self.console.write("Goodbye!")
 				self.root.destroy()
 			elif ans is None:
-				pass
+				return
 		self.console.write("Goodbye!")
 		self.root.destroy()
 
@@ -1086,6 +1091,8 @@ set_board("board_name", True)
 		except UnicodeError:
 			mb.showwarning("Unsupported file format warning", f"The file {os.path.basename(real)} with extension '{ext}' is not a supported file format. ", detail="Try file formats like .py, .hb, .ino, etc. ")
 
+		self.editor.current.editor.text.edit_modified(False)
+		self.editor.current.modified = False
 	def save(self, e=0):
 		self.console.write("Saving... ")
 
@@ -1096,6 +1103,9 @@ set_board("board_name", True)
 				self.console.write(f"Saved {os.path.basename(self.editor.current.name)}")
 		except Exception as f:
 			self.console.write_error(f"Failed to save: {f}")
+
+		self.editor.current.editor.text.edit_modified(False)
+		self.editor.current.modified = False
 
 	def on_right_click(self, event):
 		obj = self.dir.identify_row(event.y)
