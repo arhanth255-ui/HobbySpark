@@ -53,6 +53,7 @@ class VM:
 					value2 = self.pull()
 					value1 = self.pull()
 					self.push(value1==value2)
+					print("STACK IS ", self.stack)
 				case op.NEQ:
 					value2 = self.pull()
 					value1 = self.pull()
@@ -73,6 +74,16 @@ class VM:
 					value2 = self.pull()
 					value1 = self.pull()
 					self.push(value1>=value2)
-				
+				case op.JUMP:
+					self.ip = self.bytecode[self.ip]
+
+				case op.JUMP_IF_FALSE:
+					target = self.bytecode[self.ip]
+					self.ip += 1
+					print("STACK IS NOW", self.stack)
+					val = self.pull()
+					if val is False:
+						self.ip = target
+
 
 

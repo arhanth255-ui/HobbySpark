@@ -8,6 +8,8 @@ class Generator:
 		self.nodes:list = nodes
 		self.bytecode = []
 		self.current_index = 0
+		self.current_loop = None
+		self.breaks = []
 
 	def run(self):
 		for a in self.nodes:
@@ -79,6 +81,7 @@ class Generator:
 		self.bytecode.append(node.name)
 
 	def c_IfConditionNode(self, node:IfConditionNode):
+		jumps=[]
 		self.visit(node.condition)
 		self.add(op.JUMP_IF_FALSE)
 		to_jump = self.add(None)
@@ -86,9 +89,48 @@ class Generator:
 		for stmt in node.body:
 			self.visit(stmt)
 
+		self.add(op.JUMP)
+		jumps.append(self.add(None))
+
+		if node.elifs:
+			for el in node.elifs:
+				self.patch(to_jump)
+				self.visit(el.condition)
+				self.add(op.JUMP_IF_FALSE)
+				to_jump = self.add(None)
+				for n in el.body:
+					self.visit(n)
+				self.add(op.JUMP)
+				jumps.append(self.add(None))
+		if node.else_:
+			self.patch(to_jump)
+			for n in node.else_.body:
+				self.visit(n)
+			for j in jumps:
+				self.patch(j)
+			return
 		self.patch(to_jump)
+		for j in jumps:
+				self.patch(j)
 
+	def c_WhileLoopNode(self, node:WhileLoopNode):
+		self.current_loop=self.bytecode.__len__()
+		self.visit(node.condition)
+		self.add(op.JUMP_IF_FALSE)
+		jump = self.add(None)
+		for n in node.body: self.visit(n)
+		self.add(op.JUMP)
+		self.add(self.current_loop)
+		self.patch(jump)
+		for n in self.breaks: self.patch(n)
 
+	def c_ContinueNode(self, node:ContinueNode):
+		self.add(op.JUMP)
+		self.add(self.current_loop)
+
+	def c_BreakNode(self, node:BreakNode):
+		self.add(op.JUMP)
+		self.breaks.append(self.add(None))
 
 	def visit_unsup(self, node):
 		raise SyntaxError()
