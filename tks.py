@@ -5,6 +5,8 @@ from pygame import mixer
 import serial
 import os
 import sys
+import site
+import traceback
 
 
 def resource_path(relative):
@@ -12,7 +14,16 @@ def resource_path(relative):
 		return os.path.join(sys._MEIPASS, relative)
 	return os.path.join(os.path.abspath("."), relative)
 
-sys.path.insert(0, resource_path("Packages"))
+
+site_packages = site.getsitepackages()[0]
+
+src = "stub"
+dst = os.path.join(site_packages, "stub")
+
+if os.path.exists(dst):
+	shutil.rmtree(dst)
+
+shutil.copytree(src, dst)
 
 from tkinter.simpledialog import askinteger, askstring
 from tkinter import *
@@ -303,7 +314,6 @@ class WritingArea:
 class Tab:
 	def __init__(self, tab_parent, editor_parent,manager,tk:Tk,path=None) -> None:
 
-		print("NEW TAB CREATED")
 		self.path=path
 		if path:
 			self.name= os.path.basename(path)
@@ -326,8 +336,9 @@ class Tab:
 
 		self.frame= Frame(editor_parent)
 		self.editor = WritingArea(self.frame)
+		self.editor.update(None)
 		self.editor.f.pack(expand=True, fill="both")
-		self.editor.text.bind("<<Modified>>", self.check)
+		self.editor.text.bind("<<Modified>>", self.check, add="+")
 		self.modified = False
 		self.editor.text.edit_modified(False)
 
@@ -363,9 +374,6 @@ class TabManager:
 		
 
 	def delete(self, tab):
-		print("Deleting:", tab)
-		print("Current before:", self.current)
-		print("Tabs before:", [t.name for t in self.tabs])
 		was_current = self.current is tab
 		index=self.tabs.index(tab)-1 if tab in self.tabs else -1
 		self.tabs.remove(tab)
@@ -382,13 +390,6 @@ class TabManager:
 		print("Tabs after:", [t.name for t in self.tabs])
 
 	def change(self, tab:Tab):
-		print("=== CHANGE ===")
-		print("Current:", self.current)
-		print("Switching to:", tab)
-
-		print("Children before:")
-		for child in self.current_frame.winfo_children():
-			print(child, child.winfo_manager())
 		if self.current: self.current.frame.pack_forget()
 
 		self.current = tab
@@ -626,7 +627,10 @@ class GUI:
 		mon.frame.pack(expand=True, fill=BOTH)
 
 	def refresh(self, a):
+		if not self.path:
+			return
 		self.check_if_open()
+		print("PATH", self.path)
 		self.dir.delete(*self.dir.get_children())
 		self.build_tree("",self.path)
 
@@ -777,6 +781,9 @@ set_board("board_name", True)
 
 			if root in self.opened:
 				self.dir.item(parent, open=True)
+
+		print("ROOT =", repr(root))
+		print("PATH =", repr(self.path))
 
 		for a in os.listdir(root):
 
@@ -1194,7 +1201,93 @@ set_board("board_name", True)
 
 
 
+try:
+	a = Tk()
+	b = GUI(a)
+	a.mainloop()
+except Exception:
+	import webbrowser
+	error = traceback.format_exc()
 
-a = Tk()
-b = GUI(a)
-a.mainloop()
+	root = Toplevel(a)
+	root.title("Serious error")
+	root.geometry("900x500")
+
+	main = Frame(root)
+	main.pack(fill=BOTH, expand=True, padx=10, pady=10)
+
+	root.error_image  = PhotoImage(file=resource_path("assets\\close.png"))
+	# Windows error icon
+	icon = Label(main, image=root.error_image)
+	icon.grid(row=0, column=0, sticky="n", padx=(0, 10))
+
+	message = Label(
+		main,
+		text=(
+			"A serious internal error has occurred inside of HobbySpark.\n"
+			"Please reach out to us at our website. Include the error below."
+		),
+		justify=LEFT,
+		anchor="w"
+	)
+	message.grid(row=0, column=1, sticky="w")
+
+	# traceback box
+	frame = Frame(main)
+	frame.grid(row=1, column=1, sticky="nsew", pady=10)
+
+	scroll = Scrollbar(frame)
+	scroll.pack(side=RIGHT, fill=Y)
+
+	text = Text(
+		frame,
+		wrap="none",
+		yscrollcommand=scroll.set
+	)
+
+	text.pack(side=LEFT, fill=BOTH, expand=True)
+	scroll.config(command=text.yview)
+
+	text.insert("1.0", error)
+	text.config(state=DISABLED)
+
+	# clickable link
+	link = Label(
+		main,
+		text="https://sites.google.com/view/hobbyspark",
+		fg="blue",
+		cursor="hand2"
+	)
+
+	link.grid(row=2, column=1, sticky="w")
+
+	link.bind(
+		"<Button-1>",
+		lambda e: webbrowser.open(
+			"https://sites.google.com/view/hobbyspark"
+		)
+	)
+
+	Button(
+		main,
+		text="Copy Error",
+		command=lambda: (
+			root.clipboard_clear(),
+			root.clipboard_append(error)
+		)
+	).grid(row=3, column=1, sticky="w", pady=5)
+
+	Button(
+		main,
+		text="OK",
+		command=root.destroy
+	).grid(row=3, column=1, sticky="e", pady=5)
+
+	main.columnconfigure(1, weight=1)
+	main.rowconfigure(1, weight=1)
+
+
+	v=mb.askyesno("Serious error", "Should I close?", icon="error", default="yes")
+	if v:
+		a.destroy()
+	root.mainloop()
