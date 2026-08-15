@@ -245,7 +245,7 @@ jobs:
           name: MacOS
           path: |
             HobbySpark-${{ steps.version.outputs.version }}-MacOS-Installer.pkg
-            dist/HobbySpark-macOS-portable.app
+            HobbySpark-${{ steps.version.outputs.version }}-macOS-Portable.zip
           
 
   release:
