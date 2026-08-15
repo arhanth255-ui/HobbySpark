@@ -206,7 +206,7 @@ jobs:
       - name: Verify executable exists
         shell: bash
         run: |
-          if [ ! -d "dist/HobbySpark" ]; then
+          if [ ! -d "dist/HobbySpark/HobbySpark.app" ]; then
               echo "ERROR:"
               echo "PyInstaller failed"
               exit 1
