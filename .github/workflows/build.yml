@@ -236,29 +236,29 @@ jobs:
             dist/HobbySpark-macOS-portable.app
           
 
-  release:
-    needs:
-      - build
-      - macOS-build
-      - ubuntu-build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+  # release:
+  #   needs:
+  #     - build
+  #     - macOS-build
+  #     - ubuntu-build
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - name: Download artifacts
+  #       uses: actions/download-artifact@v4
 
-      - name: Show files
-        run: find .
+  #     - name: Show files
+  #       run: find .
 
-      - name: Publish Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{github.ref_name}}$
-          files: |
-            Window/*
-            Linux/*
-            MacOS/*
+  #     - name: Publish Release
+  #       uses: softprops/action-gh-release@v2
+  #       with:
+  #         tag_name: ${{github.ref_name}}$
+  #         files: |
+  #           Window/*
+  #           Linux/*
+  #           MacOS/*
       
       
         
