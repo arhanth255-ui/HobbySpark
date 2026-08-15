@@ -203,6 +203,10 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT" 
       - name: Compile excecutable
         run: pyinstaller tks.spec
+      - name: Debug output
+        run: |
+          pwd
+          find dist
       - name: Verify executable exists
         shell: bash
         run: |
