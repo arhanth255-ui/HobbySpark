@@ -104,3 +104,10 @@ coll = COLLECT(
 
     name="HobbySpark",
 )
+
+app = BUNDLE(
+    coll,
+    name="HobbySpark.app",
+    icon="installers/icon.icns",
+    bundle_identifier="com.hobbyspark.app",
+)

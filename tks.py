@@ -60,6 +60,35 @@ result = subprocess.run(
 )
 
 
+libs = subprocess.check_output(
+    ["arduino-cli", "lib", "list"],
+    text=True
+)
+
+if "Servo" not in libs:
+    subprocess.run(
+        ["arduino-cli", "lib", "install", "Servo"]
+    )
+
+if "LiquidCrystal_I2C" not in libs:
+    subprocess.run(
+        ["arduino-cli", "lib", "install", "LiquidCrystal I2C"]
+    )
+
+cores = subprocess.check_output(
+    ["arduino-cli", "core", "list"],
+    text=True
+)
+
+if "arduino:avr" not in cores:
+    subprocess.run(
+        ["arduino-cli", "core", "install", "arduino:avr"]
+    )
+
+if "esp32:esp32" not in cores:
+    subprocess.run(
+        ["arduino-cli", "core", "install", "esp32:esp32"]
+    )
 
 data = data_handle.loads(result.stdout)
 
