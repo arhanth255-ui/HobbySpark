@@ -210,12 +210,12 @@ jobs:
       - name: Verify executable exists
         shell: bash
         run: |
-          if [ ! -d "dist/HobbySpark/HobbySpark.app" ]; then
+          if [ ! -d "dist/HobbySpark.app" ]; then
               echo "ERROR:"
               echo "PyInstaller failed"
               exit 1
           fi
-          mv dist/HobbySpark/HobbySpark.app dist/HobbySpark-macOS-portable.app
+          mv dist/HobbySpark.app dist/HobbySpark-macOS-portable.app
       - name: Make the installer
         run: |
           pkgbuild \
