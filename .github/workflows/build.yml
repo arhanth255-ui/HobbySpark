@@ -176,7 +176,7 @@ jobs:
         with:
           name: Linux
           path: |
-              HobbySpark-${{ steps.version.outputs.version }}-amd64.deb
+              HobbySpark-${{ steps.version.outputs.version }}-Linux-amd64.deb
               HobbySpark-${{ steps.version.outputs.version }}-Linux-Portable.tar.gz
   macOS-build:
     runs-on: macos-latest
@@ -234,6 +234,11 @@ jobs:
             echo "PKG was not generated."
             exit 1
           fi 
+      - name: Create portable macOS ZIP
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            "dist/HobbySpark-${{ steps.version.outputs.version }}-macOS-portable.app" \
+            "HobbySpark-${{ steps.version.outputs.version }}-macOS-Portable.zip"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -263,7 +268,7 @@ jobs:
         with:
           tag_name: ${{github.ref_name}}
           files: |
-            Window/*
+            Windows/*
             Linux/*
             MacOS/*
       
