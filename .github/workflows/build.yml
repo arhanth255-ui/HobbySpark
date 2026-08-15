@@ -215,7 +215,7 @@ jobs:
               echo "PyInstaller failed"
               exit 1
           fi
-          mv dist/HobbySpark.app dist/HobbySpark-macOS-portable.app
+          mv dist/HobbySpark.app dist/HobbySpark-${{ steps.version.outputs.version }}-macOS-portable.app
       - name: Make the installer
         run: |
           pkgbuild \
