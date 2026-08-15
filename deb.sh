@@ -73,7 +73,7 @@ deb/usr/share/hobbyspark/
 ##############################################################################
 
 dpkg-deb --build deb \
-"HobbySpark-${VERSION}-Linux-amd64.deb"
+"HobbySpark-${VERSION}-Linux-amd64-Installer.deb"
 
 echo
 echo "Finished!"
