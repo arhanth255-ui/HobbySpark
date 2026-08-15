@@ -216,10 +216,10 @@ jobs:
         run: |
           pkgbuild \
             --install-location /Applications \
-            --component dist/HobbySpark.app \
+            --component dist/HobbySpark-${{ steps.version.outputs.version }}-macOS-portable.app \
             --identifier com.hobbyspark.app \
-            --version ${{steps.version.outputs.version}}$ \
-            HobbySpark-${{steps.version.outputs.version}}$-MacOS-Installer.pkg
+            --version "${{steps.version.outputs.version}}"\
+            HobbySpark-${{steps.version.outputs.version}}-MacOS-Installer.pkg
       
       - name: Verify PKG exists
         run: |
@@ -254,7 +254,7 @@ jobs:
   #     - name: Publish Release
   #       uses: softprops/action-gh-release@v2
   #       with:
-  #         tag_name: ${{github.ref_name}}$
+  #         tag_name: ${{github.ref_name}}
   #         files: |
   #           Window/*
   #           Linux/*
