@@ -167,7 +167,7 @@ jobs:
       - name: Verify Debian package
         shell: bash
         run: |
-          if [ ! -f HobbySpark-${{ steps.version.outputs.version }}-Linux-amd64.deb ]; then
+          if [ ! -f HobbySpark-${{ steps.version.outputs.version }}-Linux-amd64-Installer.deb ]; then
             echo "Debian package was not generated."
             exit 1
           fi
@@ -176,7 +176,7 @@ jobs:
         with:
           name: Linux
           path: |
-              HobbySpark-${{ steps.version.outputs.version }}-Linux-amd64.deb
+              HobbySpark-${{ steps.version.outputs.version }}-Linux-amd64-Installer.deb
               HobbySpark-${{ steps.version.outputs.version }}-Linux-Portable.tar.gz
   macOS-build:
     runs-on: macos-latest
@@ -238,14 +238,14 @@ jobs:
         run: |
           ditto -c -k --sequesterRsrc --keepParent \
             "dist/HobbySpark-${{ steps.version.outputs.version }}-macOS-portable.app" \
-            "HobbySpark-${{ steps.version.outputs.version }}-macOS-Portable.zip"
+            "HobbySpark-${{ steps.version.outputs.version }}-MacOS-Portable.zip"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: MacOS
           path: |
             HobbySpark-${{ steps.version.outputs.version }}-MacOS-Installer.pkg
-            HobbySpark-${{ steps.version.outputs.version }}-macOS-Portable.zip
+            HobbySpark-${{ steps.version.outputs.version }}-MacOS-Portable.zip
           
 
   release:
