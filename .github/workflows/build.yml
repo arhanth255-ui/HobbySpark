@@ -1,6 +1,6 @@
-# name: HobbySpark
-# on: push
-# jobs:
+name: HobbySpark
+on: push
+jobs:
 #   build:
 #     runs-on: windows-latest
 #     defaults:
