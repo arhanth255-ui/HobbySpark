@@ -95,7 +95,7 @@ jobs:
           Compress-Archive `
             -Path dist/HobbySpark/* `
             -DestinationPath `
-            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable-No-Save.zip
+            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable.zip
 
       - name: Rename installer
         shell: powershell
@@ -110,7 +110,7 @@ jobs:
           name: Windows
           path: |
             HobbySpark-${{ steps.version.outputs.version }}-WindowsSetup.exe
-            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable-No-Save.zip
+            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable.zip
             
   ubuntu-build:
     runs-on: ubuntu-latest
