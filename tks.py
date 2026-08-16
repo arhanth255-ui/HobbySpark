@@ -1368,8 +1368,9 @@ set_board("board_name", True)
 		
 
 	def open_project(self):
+		self.path=""
 		self.dir.delete(*self.dir.get_children())
-		for a in self.editor.tabs[:]:
+		for a in self.editor.tabs:
 			self.editor.delete(a)
 		self.path = fd.askdirectory()
 		try: 
