@@ -172,7 +172,7 @@ def get_installed_cores() -> str:
 			["arduino-cli", "core", "list"],
 			capture_output=True,
 			text=True,
-			check=True
+			check=True,creationflags=subprocess.CREATE_NO_WINDOW
 		)
 		return result.stdout
 	except (subprocess.CalledProcessError, FileNotFoundError):
@@ -684,7 +684,7 @@ class GUI:
 				    "InstallAllUsers=1",
 				    "PrependPath=1",
 				    "Include_pip=1",
-				])
+				],creationflags=subprocess.CREATE_NO_WINDOW)
 				mb.showinfo("Installed ","Python 3.13 was installed. HobbySpark will now restart. ")
 				os.execv(sys.executable, [sys.executable] + sys.argv)
 			else:
@@ -699,7 +699,7 @@ class GUI:
 				    "/i",
 				    resource_path("installers/arduino-cli.msi"),
 				    "/qn"
-				])
+				],creationflags=subprocess.CREATE_NO_WINDOW)
 				mb.showinfo("Installed ","arduino-cli was installed. HobbySpark will now restart. ")
 				os.execv(sys.executable, [sys.executable] + sys.argv)
 			else:
@@ -713,17 +713,17 @@ class GUI:
 
 		if "Servo" not in libs:
 			subprocess.run(
-				["arduino-cli", "lib", "install", "Servo"]
+				["arduino-cli", "lib", "install", "Servo"],creationflags=subprocess.CREATE_NO_WINDOW
 			)
 
 		if "LiquidCrystal_I2C" not in libs:
 			subprocess.run(
-				["arduino-cli", "lib", "install", "LiquidCrystal I2C"]
+				["arduino-cli", "lib", "install", "LiquidCrystal I2C"],creationflags=subprocess.CREATE_NO_WINDOW
 			)
 
 		if "ESP32Servo" not in libs:
 			subprocess.run(
-				["arduino-cli", "lib", "install", "ESP32Servo"]
+				["arduino-cli", "lib", "install", "ESP32Servo"],creationflags=subprocess.CREATE_NO_WINDOW
 			)
 		mixer.init()
 		root.iconbitmap(resource_path("installers\\icon.ico"))
@@ -1491,6 +1491,7 @@ set_board("board_name", True)
 				return
 			os.rename(path, name)
 			self.check_if_open()
+			subprocess.run
 			self.dir.delete(*self.dir.get_children())
 			self.build_tree("", self.path)
 
