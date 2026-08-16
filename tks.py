@@ -1406,11 +1406,12 @@ set_board("board_name", True)
 
 				self.editor.current.editor.text.delete("1.0", END)
 				self.editor.current.editor.text.insert("1.0", data)
+				self.editor.current.editor.text.edit_modified(False)
+				self.editor.current.modified = False
 		except UnicodeError:
 			mb.showwarning("Unsupported file format warning", f"The file {os.path.basename(real)} with extension '{ext}' is not a supported file format. ", detail="Try file formats like .py, .hb, .ino, etc. ")
 
-		self.editor.current.editor.text.edit_modified(False)
-		self.editor.current.modified = False
+		
 	def save(self, e=0):
 		self.console.write("Saving... ")
 
