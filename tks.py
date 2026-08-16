@@ -8,6 +8,8 @@ import sys
 import site
 import traceback
 
+from stub.Boards import ArduinoNano
+
 
 def resource_path(relative):
 	if hasattr(sys, "_MEIPASS"):
@@ -40,7 +42,8 @@ from transpiler import Transpiler
 from platformdirs import user_config_dir
 
 
-
+import threading
+import re
 import os
 import sys
 import subprocess
@@ -50,51 +53,285 @@ from pathlib import Path
 project_path = Path(user_config_dir("HobbySpark transpiler",appauthor=False, roaming=True))/"GUI"
 print(project_path)
 
-ALL_BOARDS = {}
+ALL_BOARDS = {
+	# Arduino AVR
+	"ArduinoUnoR3": "arduino:avr:uno",
+	"ArduinoNano": "arduino:avr:nano",
+	"ArduinoMega2560": "arduino:avr:mega",
+	"ArduinoLeonardo": "arduino:avr:leonardo",
+	"ArduinoMicro": "arduino:avr:micro",
+	"ArduinoMini": "arduino:avr:mini",
+	"ArduinoProMini": "arduino:avr:pro",
+	"ArduinoLilyPad": "arduino:avr:lilypad",
 
-result = subprocess.run(
-	["arduino-cli", "board", "listall", "--format", "json"],
-	capture_output=True,
-	text=True,
-    creationflags=subprocess.CREATE_NO_WINDOW
-)
+	# Arduino megaAVR
+	"ArduinoNanoEvery": "arduino:megaavr:nona4809",
+	"ArduinoUnoWiFiRev2": "arduino:megaavr:uno2018",
+
+	# Arduino SAM
+	"ArduinoDue": "arduino:sam:arduino_due_x",
+
+	# Arduino SAMD
+	"ArduinoZero": "arduino:samd:arduino_zero",
+
+	# Arduino GIGA
+	"ArduinoGigaR1": "arduino:mbed_giga:giga",
+
+	# ESP32
+	"ESP32DevKit": "esp32:esp32:esp32",
+	"ESP32C3": "esp32:esp32:esp32c3",
+	"ESP32S2": "esp32:esp32:esp32s2",
+	"ESP32S3": "esp32:esp32:esp32s3",
+	"ArduinoNanoESP32": "esp32:esp32:nano_nora",
+	"AdafruitFeatherESP32S2": "esp32:esp32:adafruit_feather_esp32s2",
+	"SeeeduinoXIAOESP32C3": "esp32:esp32:XIAO_ESP32C3",
+
+	# ESP8266
+	"ESP8266NodeMCU": "esp8266:esp8266:nodemcuv2",
+	"ESP8266D1Mini": "esp8266:esp8266:d1_mini",
+
+	# RP2040
+	"RaspberryPiPico": "rp2040:rp2040:rpipico",
+	"RaspberryPiPicoW": "rp2040:rp2040:rpipicow",
+
+	# STM32
+	"STM32BluePill": "STMicroelectronics:stm32:GenF1",
+	"STM32BlackPill": "STMicroelectronics:stm32:GenF4",
+
+	# Teensy
+	"Teensy40": "teensy:avr:teensy40",
+	"Teensy41": "teensy:avr:teensy41",
+
+	# Adafruit SAMD
+	"AdafruitFeatherM0": "adafruit:samd:adafruit_feather_m0",
+
+	# Seeed SAMD
+	"SeeeduinoXIAO": "Seeeduino:samd:seeed_XIAO_m0",
+}
+
+CORE_MAP = {
+	# Arduino AVR
+	"ArduinoUnoR3": "arduino:avr",
+	"ArduinoNano": "arduino:avr",
+	"ArduinoMega2560": "arduino:avr",
+	"ArduinoLeonardo": "arduino:avr",
+	"ArduinoMicro": "arduino:avr",
+	"ArduinoMini": "arduino:avr",
+	"ArduinoProMini": "arduino:avr",
+	"ArduinoLilyPad": "arduino:avr",
+
+	# Arduino megaAVR
+	"ArduinoNanoEvery": "arduino:megaavr",
+	"ArduinoUnoWiFiRev2": "arduino:megaavr",
+
+	# Arduino SAM
+	"ArduinoDue": "arduino:sam",
+
+	# Arduino SAMD
+	"ArduinoZero": "arduino:samd",
+
+	# Arduino GIGA
+	"ArduinoGigaR1": "arduino:mbed_giga",
+
+	# ESP32
+	"ESP32DevKit": "esp32:esp32",
+	"ESP32C3": "esp32:esp32",
+	"ESP32S2": "esp32:esp32",
+	"ESP32S3": "esp32:esp32",
+	"ArduinoNanoESP32": "esp32:esp32",
+	"AdafruitFeatherESP32S2": "esp32:esp32",
+	"SeeeduinoXIAOESP32C3": "esp32:esp32",
+
+	# ESP8266
+	"ESP8266NodeMCU": "esp8266:esp8266",
+	"ESP8266D1Mini": "esp8266:esp8266",
+
+	# RP2040
+	"RaspberryPiPico": "rp2040:rp2040",
+	"RaspberryPiPicoW": "rp2040:rp2040",
+
+	# STM32
+	"STM32BluePill": "STMicroelectronics:stm32",
+	"STM32BlackPill": "STMicroelectronics:stm32",
+
+	# Teensy
+	"Teensy40": "teensy:avr",
+	"Teensy41": "teensy:avr",
+
+	# Adafruit SAMD
+	"AdafruitFeatherM0": "adafruit:samd",
+
+	# Seeed SAMD
+	"SeeeduinoXIAO": "Seeeduino:samd",
+}
 
 
-libs = subprocess.check_output(
-    ["arduino-cli", "lib", "list"],
-    text=True
-)
+def get_installed_cores() -> str:
+	try:
+		result = subprocess.run(
+			["arduino-cli", "core", "list"],
+			capture_output=True,
+			text=True,
+			check=True
+		)
+		return result.stdout
+	except (subprocess.CalledProcessError, FileNotFoundError):
+		return ""
 
-if "Servo" not in libs:
-    subprocess.run(
-        ["arduino-cli", "lib", "install", "Servo"]
-    )
 
-if "LiquidCrystal_I2C" not in libs:
-    subprocess.run(
-        ["arduino-cli", "lib", "install", "LiquidCrystal I2C"]
-    )
+def is_core_installed(core: str) -> bool:
+	installed = get_installed_cores()
+	return core in installed
 
-cores = subprocess.check_output(
-    ["arduino-cli", "core", "list"],
-    text=True
-)
 
-if "arduino:avr" not in cores:
-    subprocess.run(
-        ["arduino-cli", "core", "install", "arduino:avr"]
-    )
+def install_core(root: Tk, board_name: str) -> bool:
+	"""
+	Install the core required by a HobbySpark board.
 
-if "esp32:esp32" not in cores:
-    subprocess.run(
-        ["arduino-cli", "core", "install", "esp32:esp32"]
-    )
+	Returns True if installation succeeds, False otherwise.
+	"""
 
-data = data_handle.loads(result.stdout)
+	core = CORE_MAP.get(board_name)
 
-for board in data["boards"]:
-	print(board["name"], board["fqbn"])
-	ALL_BOARDS[board["name"]] = board["fqbn"]
+	if core is None:
+		mb.showerror(
+			"HobbySpark",
+			f"No Arduino core is configured for:\n{board_name}",
+			parent=root
+		)
+		return False
+
+	if is_core_installed(core):
+		return True
+
+	window = Toplevel(root)
+	window.title("Arduino Setup")
+	window.geometry("500x180")
+	window.resizable(False, False)
+	window.transient(root)
+	window.grab_set()
+
+	title = ttk.Label(
+		window,
+		text="Installing Arduino Core",
+		font=("TkDefaultFont", 14, "bold")
+	)
+	title.pack(pady=(20, 5))
+
+	status = ttk.Label(
+		window,
+		text=f"I am installing {core}..."
+	)
+	status.pack(pady=5)
+
+	progress = ttk.Progressbar(
+		window,
+		mode="indeterminate",
+		length=420
+	)
+	progress.pack(pady=15)
+
+	progress.start(10)
+
+	result_holder = {
+		"success": False,
+		"error": ""
+	}
+
+	def worker():
+		try:
+			process = subprocess.Popen(
+				[
+					"arduino-cli",
+					"core",
+					"install",
+					core,
+					"--log-level",
+					"info"
+				],
+				stdout=subprocess.PIPE,
+				stderr=subprocess.STDOUT,
+				text=True,
+				bufsize=1
+			)
+
+			for line in process.stdout:
+				line = line.rstrip()
+
+				# Show the latest CLI message.
+				root.after(
+					0,
+					lambda text=line: status.config(
+						text=text if text else f"I am installing {core}..."
+					)
+				)
+
+				# If the CLI happens to expose a percentage,
+				# turn the bar into a determinate bar.
+				match = re.search(r"(\d{1,3})%", line)
+
+				if match:
+					percent = max(0, min(100, int(match.group(1))))
+
+					root.after(
+						0,
+						lambda value=percent: (
+							progress.stop(),
+							progress.configure(
+								mode="determinate",
+								value=value,
+								maximum=100
+							)
+						)
+					)
+
+			return_code = process.wait()
+
+			if return_code == 0:
+				result_holder["success"] = True
+			else:
+				result_holder["error"] = (
+					f"arduino-cli exited with code {return_code}"
+				)
+
+		except FileNotFoundError:
+			result_holder["error"] = (
+				"arduino-cli was not found on PATH."
+			)
+
+		except Exception as exc:
+			result_holder["error"] = str(exc)
+
+		root.after(0, finish)
+
+	def finish():
+		progress.stop()
+
+		try:
+			window.grab_release()
+		except tk.TclError:
+			pass
+
+		window.destroy()
+
+		if not result_holder["success"]:
+			messagebox.showerror(
+				"Arduino installation failed",
+				result_holder["error"],
+				parent=root
+			)
+
+	threading.Thread(target=worker, daemon=True).start()
+
+	root.wait_window(window)
+
+	return result_holder["success"]
+
+
+
+
+
+
 
 
 class Welcome:
@@ -179,7 +416,6 @@ def askcom(root, out = None, console:Console = None):
 	print(result.stdout)
 	data:dict = (data_handle.loads(result.stdout))["detected_ports"]
 	real_data = []
-	print("OUT2", out)
 
 	for w in data:
 		dat = {
@@ -232,13 +468,17 @@ def askprompt(root):
 	new = Toplevel(root)
 	new.title("Select board")
 	box = ttk.Combobox(new, values=list(ALL_BOARDS.keys()), width=50)
+	
 	def use():
 		nonlocal board
 		nonlocal fqbn
 		fqbn = ALL_BOARDS[box.get()]
+		install_core(new, box.get())
+
 		board = box.get()
 		print("SELECTED", board)
 		new.destroy()
+
 	button = Button(new, text="Use", command=use)
 	new.columnconfigure(0, weight=1)
 	new.columnconfigure(1, weight=1)
@@ -466,7 +706,25 @@ class GUI:
 				root.destroy()
 		
 
+		libs = subprocess.check_output(
+		    ["arduino-cli", "lib", "list"],
+		    text=True
+		)
 
+		if "Servo" not in libs:
+			subprocess.run(
+				["arduino-cli", "lib", "install", "Servo"]
+			)
+
+		if "LiquidCrystal_I2C" not in libs:
+			subprocess.run(
+				["arduino-cli", "lib", "install", "LiquidCrystal I2C"]
+			)
+
+		if "ESP32Servo" not in libs:
+			subprocess.run(
+				["arduino-cli", "lib", "install", "ESP32Servo"]
+			)
 		mixer.init()
 		root.iconbitmap(resource_path("installers\\icon.ico"))
 		root.title("HobbySpark")
@@ -623,12 +881,27 @@ class GUI:
 
 
 	def serial(self):
-		com = askcom(self.root,askprompt(self.root)[1], self.console)
-		baud = int(askinteger("Baudrate ", "Baud (must be int): "))
-		ser = serial.Serial(com, baud)
+		try:com = askcom(self.root,askprompt(self.root)[1], self.console)
+		except Exception: self.console.write_error("Don't dismiss the board asker"); return
+		try:baud = int(askinteger("Baudrate ", "Baud (must be int): "))
+		except Exception: self.console.write_error("Baud must be an int"); return
+		try:ser = serial.Serial(com, baud)
+		except Exception: self.console.write_error("Could not open serial monitor. Check if you have dismissed the COM port asker or the board asker."); return
 		new = Toplevel(self.root)
 		mon = Console(new, "Serial monitor")
 		errr = False
+		place = Entry(new)
+		send = Button(new, text="Send", command=but)
+
+		def but():
+			text = place.get()
+			if not text:
+				return
+			try:
+				ser.write((text+"\n").encode())
+				place.delete(0, END)
+			except Exception as e:
+				self.console.write_error("Error: ",str(e))
 
 		def see():
 			nonlocal errr
@@ -645,15 +918,18 @@ class GUI:
 
 			new.after(50, see)
 
-		def finish(self):
+		def finish():
 			if ser.is_open:
 				ser.close()
 			new.destroy()
+
 
 		new.protocol("WM_DELETE_WINDOW", finish)
 
 		mon.str.pack(expand=True, fill=BOTH)
 		mon.frame.pack(expand=True, fill=BOTH)
+		place.pack(expand=True, side="bottom",anchor='se')
+		send.pack(expand=True, side="bottom", anchor='sw')
 
 	def refresh(self, a):
 		if not self.path:
@@ -1228,13 +1504,7 @@ set_board("board_name", True)
 			f_m.tk_popup(event.x_root,event.y_root)
 
 
-
-
-try:
-	a = Tk()
-	b = GUI(a)
-	a.mainloop()
-except Exception:
+def handle(g, b ,c):
 	import webbrowser
 	error = traceback.format_exc()
 
@@ -1320,3 +1590,8 @@ except Exception:
 	if v:
 		a.destroy()
 	root.mainloop()
+
+a = Tk()
+a.report_callback_exception = handle
+b = GUI(a)
+a.mainloop()

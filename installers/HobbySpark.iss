@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 ; Non-commercial use only
 
-#define MyAppName "HobbySpark"
+#define MyAppName "HobbySpark Arduino IDE"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "HobbySpark industries"
-#define MyAppURL "https://www.example.com/"
+#define MyAppURL "https://sites.google.com/view/hobbyspark"
 #define MyAppExeName "HobbySpark.exe"
 #define MyAppAssocName MyAppName + " File"
 #define MyAppAssocExt ".hs"

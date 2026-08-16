@@ -1,5 +1,9 @@
 #include <Arduino.h>
+#ifdef ARDUINO_ARCH_ESP32
+#include <ESP32Servo.h>
+#else
 #include <Servo.h>
+#endif
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
@@ -587,7 +591,18 @@ public:
 
 
     I2C_LCD_Display(int sda, int scl, int width, int height, int address = 0x27):dis(address, width,height){
+        #if defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_MEGAAVR)||defined(ARDUINO_ARCH_SAMD)||defined(ARDUINO_ARCH_SAM)
         Wire.begin();
+        #elif defined(ARDUINO_ARCH_ESP32)
+        Wire.setPins(sda, scl);
+        Wire.begin();
+        #elif defined(ARDUINO_ARCH_ESP8266)
+        Wire.begin(sda, scl);
+        #elif defined(ARDUINO_ARCH_STM32)||defined(ARDUINO_ARCH_RP2040)|defined(ARDUINO_ARCH_TEENSY)
+        Wire.setSDA(sda); Wire.setSCL(scl); Wire.begin();
+        #endif
+    
+
         dis.init();
         dis.backlight();
         this->width = width;
@@ -714,5 +729,4 @@ public:
 
 
 };
-
 
