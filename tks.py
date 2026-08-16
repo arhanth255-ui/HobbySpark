@@ -473,7 +473,7 @@ def askprompt(root):
 		nonlocal board
 		nonlocal fqbn
 		fqbn = ALL_BOARDS[box.get()]
-		install_core(new, box.get())
+		if not install_core(new, box.get()): return
 
 		board = box.get()
 		print("SELECTED", board)
@@ -680,11 +680,10 @@ class GUI:
 			if a:
 				subprocess.run([
 				    resource_path("installers/python313.exe"),
-				    "/quiet",
 				    "InstallAllUsers=1",
 				    "PrependPath=1",
 				    "Include_pip=1",
-				],creationflags=subprocess.CREATE_NO_WINDOW)
+				])
 				mb.showinfo("Installed ","Python 3.13 was installed. HobbySpark will now restart. ")
 				os.execv(sys.executable, [sys.executable] + sys.argv)
 			else:
@@ -697,9 +696,8 @@ class GUI:
 				subprocess.run([
 				    "msiexec",
 				    "/i",
-				    resource_path("installers/arduino-cli.msi"),
-				    "/qn"
-				],creationflags=subprocess.CREATE_NO_WINDOW)
+				    resource_path("installers/arduino-cli.msi")
+				])
 				mb.showinfo("Installed ","arduino-cli was installed. HobbySpark will now restart. ")
 				os.execv(sys.executable, [sys.executable] + sys.argv)
 			else:
@@ -729,6 +727,7 @@ class GUI:
 		root.iconbitmap(resource_path("installers\\icon.ico"))
 		root.title("HobbySpark")
 		self.config_file = resource_path(project_path/"user_data.json")
+		os.makedirs(project_path, exist_ok=True)
 		if not os.path.exists(str(self.config_file)):
 			new = Welcome(root)
 			root.wait_window(new.root)
@@ -891,8 +890,6 @@ class GUI:
 		mon = Console(new, "Serial monitor")
 		errr = False
 		place = Entry(new)
-		send = Button(new, text="Send", command=but)
-
 		def but():
 			text = place.get()
 			if not text:
@@ -902,6 +899,9 @@ class GUI:
 				place.delete(0, END)
 			except Exception as e:
 				self.console.write_error("Error: ",str(e))
+		send = Button(new, text="Send", command=but)
+
+		
 
 		def see():
 			nonlocal errr
@@ -924,6 +924,7 @@ class GUI:
 			new.destroy()
 
 
+		new.after(100, see)
 		new.protocol("WM_DELETE_WINDOW", finish)
 
 		mon.str.pack(expand=True, fill=BOTH)
@@ -999,8 +1000,9 @@ class GUI:
 
 	def new(self):
 		self.path = fd.askdirectory(title="New project")
+		if not self.path: return
 		self.check_if_open()
-		for tab in self.editor.tabs:
+		for tab in self.editor.tabs[:]:
 			self.editor.delete(tab)
 		with open(os.path.join(self.path, "settings.json"), "w") as f:
 			default = {
@@ -1113,6 +1115,7 @@ set_board("board_name", True)
 			lexed = Lexer(text).evaluate()
 		except Exception as e:
 			self.console.write(f"Whoops, you made an error. {e}")
+			return
 
 		self.console.write(f"An example of a token list is {lexed}.")
 		self.console.write_warning("Do not worry if you do not understand this. This command is merely for curious users to see what happens inside of HobbySpark. ")
@@ -1124,11 +1127,13 @@ set_board("board_name", True)
 			lexed = Lexer(text).evaluate()
 		except Exception as e:
 			self.console.write(f"Whoops, you made an error while lexing. {e}")
+			return
 
 		try:
 			parsed = Parser(lexed).parse()
 		except Exception as e:
 			self.console.write(f"Whoops, you made an error {e}.")
+			return
 
 		self.console.write(
 		"Parsing is the process of turning a list of tokens into an Abstract Syntax Tree (AST). "
@@ -1148,18 +1153,18 @@ set_board("board_name", True)
 		try:
 			lexed = Lexer(text).evaluate()
 		except Exception as e:
-			self.console.write(f"Whoops, you made an error while lexing. {e}")
+			self.console.write(f"Whoops, you made an error while lexing. {e}");return
 
 		try:
 			parsed = Parser(lexed).parse()
 		except Exception as e:
-			self.console.write(f"Whoops, you made an error  while parsing {e}.")
+			self.console.write(f"Whoops, you made an error  while parsing {e}.");return
 
 		try:
 			transpiled = Transpiler(parsed).translate()
 
 		except Exception as e:
-			self.console.write(f"Whoops, you made an error {e}.")
+			self.console.write(f"Whoops, you made an error {e}.");return
 
 		self.console.write("HobbySpark at it's core, uses transpilation from python to C++.", "Transpiling is the process of turning source code (like python) to destination code (like C++). ", "A example of your code transpiled to C++ is: ", "\n".join(transpiled))
 		self.console.write_warning("The transpiled code is NOT supposed to be ''reader friendly''. ", "The code may have unreadable code.", "Do not worry if you cannot articulate or understand the C++. ")
@@ -1330,7 +1335,7 @@ set_board("board_name", True)
 
 
 	def transpile_check(self):
-		self.run__()
+		if self.run__():return
 		text = self.editor.current.editor.text.get("1.0",END)
 		self.console.write("Lexing")
 		try: 
@@ -1370,7 +1375,7 @@ set_board("board_name", True)
 	def open_project(self):
 		self.path=""
 		self.dir.delete(*self.dir.get_children())
-		for a in self.editor.tabs:
+		for a in self.editor.tabs[:]:
 			self.editor.delete(a)
 		self.path = fd.askdirectory()
 		try: 
