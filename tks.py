@@ -936,8 +936,11 @@ class GUI:
 			return
 		self.check_if_open()
 		print("PATH", self.path)
-		self.dir.delete(*self.dir.get_children())
-		self.build_tree("",self.path)
+		try:
+			self.dir.delete(*self.dir.get_children())
+			self.build_tree("",self.path)
+		except PermissionError:
+			return
 
 	def change_pr(self):
 		def f():
@@ -1366,12 +1369,15 @@ set_board("board_name", True)
 
 	def open_project(self):
 		self.dir.delete(*self.dir.get_children())
-		for a in self.editor.tabs:
+		for a in self.editor.tabs[:]:
 			self.editor.delete(a)
 		self.path = fd.askdirectory()
-		if self.path:
-			self.build_tree("",self.path)
-
+		try: 
+			if self.path:
+				self.build_tree("",self.path)
+		except PermissionError:
+			mb.showerror("Error",f"Permission denied to {self.path}")
+			self.open_project()
 	def open_file(self, e):
 		if self.editor.tabs.__len__()>0:
 			if self.editor.tabs[0].name=="Untitled":
@@ -1585,7 +1591,7 @@ def handle(g, b ,c):
 	main.columnconfigure(1, weight=1)
 	main.rowconfigure(1, weight=1)
 
-
+	root.wait_window()
 	v=mb.askyesno("Serious error", "Should I close?", icon="error", default="yes")
 	if v:
 		a.destroy()
