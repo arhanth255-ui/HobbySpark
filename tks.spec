@@ -9,7 +9,8 @@ block_cipher = None
 # Resources
 # -----------------------------------------------------------------------------
 
-datas = [("assets", "assets"), ("installers", "installers"), ("package.h", ".")]
+datas = [("assets", "assets"), ("installers", "installers"), ("package.h", "."), ("stub", "s_s")]
+stub_mod= Tree("stub", prefix="stub")
 
 
 

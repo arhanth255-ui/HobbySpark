@@ -8,7 +8,6 @@ import sys
 import site
 import traceback
 
-from stub.Boards import ArduinoNano
 
 
 def resource_path(relative):
@@ -19,7 +18,7 @@ def resource_path(relative):
 
 site_packages = site.getsitepackages()[0]
 
-src = "stub"
+src = resource_path("s_s")
 dst = os.path.join(site_packages, "stub")
 
 if os.path.exists(dst):
