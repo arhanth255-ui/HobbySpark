@@ -1379,7 +1379,7 @@ set_board("board_name", True)
 	def run__(self):
 		if self.editor.current is None:
 			mb.showerror("Error", "Could not run. Please open a tab first.")
-			return
+			return True
 		self.save()
 		self.console.write("Running")
 		result = subprocess.run([self.python, self.editor.current.path], capture_output=True, text=True,creationflags=subprocess.CREATE_NO_WINDOW)
