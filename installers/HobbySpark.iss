@@ -63,23 +63,6 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "..\dist\HobbySpark\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\dist\HobbySpark\_internal\*"; DestDir: "{app}\_internal"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; HobbySpark libraries
-Source: "..\stub\*"; DestDir: "{app}\stub"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\nodes\*"; DestDir: "{app}\nodes"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
-
-; Installer resources (same folder as this .iss)
-Source: "*"; Excludes: "Output\*"; DestDir: "{app}\installers"; Flags: ignoreversion recursesubdirs createallsubdirs
-
-; Project files
-Source: "..\lexer.py"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\NODE RULES---- TRANSPILE TO CPP.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\package.h"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\parser.py"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\requirements.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\tks.py"; DestDir: "{app}"; Flags: ignoreversion
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
