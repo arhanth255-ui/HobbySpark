@@ -1,3 +1,4 @@
+from ntpath import isdir
 import shutil
 from shutil import rmtree
 import datetime as dt
@@ -19,6 +20,8 @@ def resource_path(relative):
 site_packages = site.getsitepackages()[0]
 
 src = resource_path("s_s")
+if not os.path.isdir(src):
+	src = "stub"
 dst = os.path.join(site_packages, "stub")
 
 if os.path.exists(dst):
@@ -251,7 +254,8 @@ def install_core(root: Tk, board_name: str) -> bool:
 				stdout=subprocess.PIPE,
 				stderr=subprocess.STDOUT,
 				text=True,
-				bufsize=1
+				bufsize=1,
+				creationflags=subprocess.CREATE_NO_WINDOW
 			)
 
 			for line in process.stdout:
@@ -308,7 +312,7 @@ def install_core(root: Tk, board_name: str) -> bool:
 
 		try:
 			window.grab_release()
-		except tk.TclError:
+		except TclError:
 			pass
 
 		window.destroy()
@@ -371,12 +375,18 @@ class Welcome:
 		self.second.pack()
 
 	def but2(self):
-		self.age = int(self.text2.get())
+		try:self.age = int(self.text2.get())
+		except Exception: 
+			mb.showerror("Error", "Please enter a valid age")
+			return
 		self.second.pack_forget()
 		self.third.pack()
 
 	def but3(self):
-		self.birthday = dt.date(2026,*map(int,self.text3.get().split("-")))
+		try:self.birthday = dt.date(dt.date.today().year,*map(int,self.text3.get().split("-")))
+		except Exception: 
+			mb.showerror("Error", "Please enter a valid date of birth. Remember the format is M-D")
+			return
 		self.third.pack_forget()
 		self.root.destroy()
 
@@ -705,7 +715,8 @@ class GUI:
 
 		libs = subprocess.check_output(
 		    ["arduino-cli", "lib", "list"],
-		    text=True
+		    text=True,
+		    creationflags=subprocess.CREATE_NO_WINDOW
 		)
 
 		if "Servo" not in libs:
@@ -945,13 +956,18 @@ class GUI:
 	def change_pr(self):
 		def f():
 			print("BIRTH", int(self.birthday.split("|")[0]))
-			ab = {
-				"name":name.get() if name.get()!="" else self.name,
-				"birth":dt.date(2026, int(birthm.get()) if birthm.get()!="" else int(self.birthday.split("|")[1]), int(birthd.get()) if birthd.get()!="" else int(self.birthday.split("|")[0])).strftime("%d|%m"),
-				"age":int(age.get()) if age.get()!="" else self.age,
-				"fin":self.fin
+			try:
+				ab = {
+					"name":name.get() if name.get()!="" else self.name,
+					"birth":dt.date(2026, int(birthm.get()) if birthm.get()!="" else int(self.birthday.split("|")[1]), int(birthd.get()) if birthd.get()!="" else int(self.birthday.split("|")[0])).strftime("%d|%m"),
+					"age":int(age.get()) if age.get()!="" else self.age,
+					"fin":self.fin
 
-			}
+				}
+
+			except Exception:
+				mb.showerror("Error", "Make sure the values are correct")
+				return
 			with open(self.config_file,"w") as f:
 				data_handle.dump(ab, f)
 
