@@ -28,7 +28,7 @@ def check(self,function,args:dict):
     
     print(f"Device: {self.__class__.__name__} has run {function.co_name}({", ".join(variable_and_arg)})")
 
-def wait(time,unit=MS)->None:
+def sleep(time,unit=MS)->None:
     """Waits the for the given time in given unit. Button reads, pot reads etc run during the wait time."""
     if not isinstance(time,(int,float)):
         raise InvalidArgumentError(time,"int or float")
