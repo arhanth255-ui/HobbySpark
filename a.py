@@ -10,7 +10,7 @@ class VM:
 
 	def push(self, add):self.stack.append(add)
 
-	def pull(self): return self.stack.pop()
+	def pop(self): return self.stack.pop()
 	def current(self):
 		a= self.bytecode[self.ip]
 		self.ip+=1
@@ -28,51 +28,50 @@ class VM:
 					self.ip+=1
 					self.push(value)
 				case op.ADD:
-					value1 = self.pull()
-					value2 = self.pull()
+					value1 = self.pop()
+					value2 = self.pop()
 					self.push(value1+value2)
 				case op.SUB:
-					value2 = self.pull()
-					value1 = self.pull()
+					value2 = self.pop()
+					value1 = self.pop()
 					self.push(value1-value2)
 				case op.MUL:
-					value1 = self.pull()
-					value2 = self.pull()
+					value1 = self.pop()
+					value2 = self.pop()
 					self.push(value1*value2)
 				case op.DIV:
-					value2 = self.pull()
-					value1 = self.pull()
+					value2 = self.pop()
+					value1 = self.pop()
 					self.push(value1/value2)
 				case op.STORE:
 					val = self.current()
-					self.variables[val] = self.pull()
+					self.variables[val] = self.pop()
 				case op.LOAD:
 					val = self.current()
 					self.push(self.variables[val])
 				case op.EQ:
-					value2 = self.pull()
-					value1 = self.pull()
+					value2 = self.pop()
+					value1 = self.pop()
 					self.push(value1==value2)
-					print("STACK IS ", self.stack)
 				case op.NEQ:
-					value2 = self.pull()
-					value1 = self.pull()
+					value2 = self.pop()
+					value1 = self.pop()
 					self.push(value1!=value2)
 				case op.LT:
-					value2 = self.pull()
-					value1 = self.pull()
+					value2 = self.pop()
+					value1 = self.pop()
 					self.push(value1<value2)
 				case op.LTE:
-					value2 = self.pull()
-					value1 = self.pull()
+					value2 = self.pop()
+					value1 = self.pop()
 					self.push(value1<=value2)
 				case op.GT:
-					value2 = self.pull()
-					value1 = self.pull()
+					value2 = self.pop()
+					value1 = self.pop()
 					self.push(value1>=value2)
 				case op.GTE:
-					value2 = self.pull()
-					value1 = self.pull()
+					value2 = self.pop()
+					value1 = self.pop()
 					self.push(value1>=value2)
 				case op.JUMP:
 					self.ip = self.bytecode[self.ip]
@@ -80,10 +79,11 @@ class VM:
 				case op.JUMP_IF_FALSE:
 					target = self.bytecode[self.ip]
 					self.ip += 1
-					print("STACK IS NOW", self.stack)
-					val = self.pull()
+					val = self.pop()
 					if val is False:
 						self.ip = target
+				case op.POP:
+					self.pop()
 
 
 

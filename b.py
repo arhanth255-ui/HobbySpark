@@ -16,3 +16,5 @@ class op(IntEnum):
 	LTE = 13
 	JUMP = 14
 	JUMP_IF_FALSE = 15
+	CALL = 16
+	POP = 17

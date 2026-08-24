@@ -3,6 +3,16 @@ from lexer import *
 from nodes import *
 from b import *
 
+class Function:
+	def __init__(self, name, args, bytecode) -> None:
+		self.name=name
+		self.args=args
+		self.bytecode=bytecode
+	@property
+	def arity(self): return self.args.__len__()
+	def run(self):
+		pass
+
 class Generator:
 	def __init__(self, nodes) -> None:
 		self.nodes:list = nodes
@@ -14,6 +24,7 @@ class Generator:
 	def run(self):
 		for a in self.nodes:
 			self.visit(a)
+			if isinstance(a, (VariableNameNode)): self.add(op.POP)
 
 		self.bytecode.append(op.HALT)
 		return self.bytecode
@@ -131,6 +142,16 @@ class Generator:
 	def c_BreakNode(self, node:BreakNode):
 		self.add(op.JUMP)
 		self.breaks.append(self.add(None))
+
+	def c_CallNode(self, node:CallNode):
+		print(node)
+		for a in node.args:
+			self.visit(a)
+		self.add(op.CALL)
+		self.add(node.args.__len__())
+		self.visit(node.name)
+		
+
 
 	def visit_unsup(self, node):
 		raise SyntaxError()
