@@ -1,3 +1,4 @@
+from os import truncate
 from parser import *
 from lexer import *
 from json import load, dumps
@@ -279,7 +280,7 @@ class Transpiler:
 					output.append(f"#define {pin} {actual}")
 		output.append("#include \"package.h\"  \n")
 
-		ifs = []
+		self.ifs = []
 		print("UPDATERS", self.updaters)
 		for t,n in self.updaters.items():
 			update = t[0]
@@ -287,7 +288,7 @@ class Transpiler:
 			print("UPDATE", self.updaters)
 			print("VALUE", value)
 			print("N",n)
-			ifs.append(f"if ({update} {'>' if t[2] else '=='} {value}){{\n{n};\n}}")
+			self.ifs.append(f"if ({update} {'>' if t[2] else '=='} {value}){{\n{n};\n}}")
 		
 		output.extend(imports)
 		output.extend(vars_)
@@ -298,7 +299,7 @@ f"""void wait(unsigned long time, float unit){{
 
 	while (millis() < end)
 	{{
-		{"\n".join(ifs)}
+		{"\n".join(self.ifs)}
 		{"\n".join(self.already_added)}
 
 	}}
@@ -308,7 +309,7 @@ f"""void wait(unsigned long time, float unit){{
 		output.append("}\n")
 		output.append("void loop() {\n")
 
-		output.extend(ifs)
+		output.extend(self.ifs)
 		output.extend(self.already_added)
 		output.append("}")
 		return output
@@ -571,7 +572,7 @@ f"""void wait(unsigned long time, float unit){{
 		elif_block=[]
 		elif_newvars=[]
 		for elif_ in node.elifs:
-			elif_newtra=self.gen_transpiler(node.body)
+			elif_newtra=self.gen_transpiler(elif_.body)
 			elif_newtras.append(elif_newtra)
 			elif_bodies.append((elif_newtra.translate_body(),elif_.condition))
 
@@ -581,8 +582,8 @@ f"""void wait(unsigned long time, float unit){{
 		for newvar in elif_newtras:
 			elif_newvars.extend(newvar.newvars)
 
-		else_new_tra = self.gen_transpiler(node.body) if node.else_ else None
-		else_body=if_new_tra.translate_body() if else_new_tra is not None else None
+		else_new_tra = self.gen_transpiler(node.else_.body) if node.else_ else None
+		else_body=else_new_tra.translate_body() if else_new_tra is not None else None
 
 		total=[]
 		total.extend(if_new_tra.block_vars)
@@ -606,7 +607,7 @@ f"""void wait(unsigned long time, float unit){{
 		full_output.extend(if_body)
 		full_output.append("}")
 		for body,cond in elif_bodies:
-			full_output.append(f"else if {self.visit(cond)}{{")
+			full_output.append(f"else if ({self.visit(cond)[0]}){{")
 			full_output.extend(body)
 			full_output.append("}")
 		if else_new_tra is not None:
@@ -659,6 +660,8 @@ f"""void wait(unsigned long time, float unit){{
 						full_output.append(full)
 		full_output.append(f"while ({cond[0]}){{ ")
 		full_output.extend(body)
+		full_output.append(f"""{"\n".join(new_tra.ifs)}
+		{"\n".join(new_tra.already_added)}""")
 		full_output.append("}")
 		return Result("\n".join(full_output))
 
@@ -669,7 +672,7 @@ f"""void wait(unsigned long time, float unit){{
 		num=None
 		num2=None
 		num3=None
-		if isinstance(node.iterable, CallNode) and node.iterable.name=="range":
+		if isinstance(node.iterable, CallNode) and self.visit(node.iterable.name)[0]=="range":
 			iterable = self.visit(node.iterable)[0]
 			num=self.visit(node.iterable.args[0])[0]
 			num2=self.visit(node.iterable.args[1])[0] if len(node.iterable.args)>1 else None
@@ -686,10 +689,10 @@ f"""void wait(unsigned long time, float unit){{
 				val = self.orig_vars[var_names.index(node.iterable.name)]["value"]
 				print("val", val)
 
-				if isinstance(val, CallNode) and val.name=="range":
+				if isinstance(val, CallNode) and self.visit(val.name)[0]=="range":
 					iterable = node.iterable.name
 					num=self.visit(val.args[0])[0]
-					num2=self.visit(val.iterable.args[1])[0] if len(val.args)>1 else None
+					num2=self.visit(val.args[1])[0] if len(val.args)>1 else None
 					num3=self.visit(val.args[2])[0] if len(val.args)>2 else None
 
 				elif isinstance(val, ListNode):
@@ -876,7 +879,7 @@ f"""void wait(unsigned long time, float unit){{
 			kew_word+=f"{',' if len(node.args)>0 else ''}{k} = {v}"
 
 		if self.in_method and self.cur_class_arg.name == self.visit(node.obj)[0]:
-			return f"this->{node.name}({','.join([self.visit(n)[0] for n in node.args])}{kew_word if kew_word else ""})", False,False,True
+			return Result(f"this->{node.name}({','.join([self.visit(n)[0] for n in node.args])}{kew_word if kew_word else ""})", semi=True)
 		classes = [n["name"] for n in raw_data if n["requires_updt"]]
 		u_classes = [n["name"] for n in raw_data if n["requires_even"]]
 		return_=f"{self.visit(node.obj)[0]}.{node.name}({','.join([self.visit(n)[0] for n in node.args])}{kew_word if kew_word else ""})"
@@ -1005,8 +1008,8 @@ f"""void wait(unsigned long time, float unit){{
 	def visit_FromImportNode(self,node:FromImportNode):
 		return Result("")
 
-	def visit_BreakNode(self, node:BreakNode): return "break;"
-	def visit_ContinueNode(self, node): return "continue;"
+	def visit_BreakNode(self, node:BreakNode): return Result("break;")
+	def visit_ContinueNode(self, node): return Result("continue;")
 
 	def gen_transpiler(self, first, **kwargs):
 		std = {
