@@ -5,20 +5,34 @@ from instructions import *
 from vm import *
 
 class Function:
-	def __init__(self, name, args, bytecode, funcpool) -> None:
+	def __init__(self, name, args, bytecode, funcpool, defaults) -> None:
 		self.name=name
 		self.args=args
 		self.bytecode=bytecode
 		self.funcpool = funcpool
+		self.defaults = defaults
 	@property
 	def arity(self): return self.args.__len__()
+	@property
+	def required_arity(self): return self.args.__len__()-self.defaults.__len__()
 	def run(self, vars_:dict, environment:Environment):
-		if len(vars_)!=self.arity:
+		if len(vars_)<self.required_arity or len(vars_)>self.arity:
 			raise TypeError("Unexpected number of arguments: ", len(vars_))
+		new_args = dict(vars_)
+
+		# fill missing arguments
+		for name, default in zip(
+			self.args[-len(self.defaults):],
+			self.defaults
+		):
+			if name not in new_args:
+				new_args[name] = default
+
 		newvm = VM(self.bytecode, self.funcpool, Environment(environment))
-		for var, value in vars_.items():
+		for var, value in new_args.items():
 			environment.set(var, value)
 		out=newvm.run()
+		return out
 
 class Generator:
 	def __init__(self, nodes) -> None:
@@ -28,13 +42,14 @@ class Generator:
 		self.current_loop = None
 		self.breaks = []
 		self.funcpool = []
+		self.stop=False
 
 	def run(self):
 		for a in self.nodes:
 			self.visit(a)
 			if isinstance(a, (VariableNameNode)): self.add(op.POP)
 
-		self.bytecode.append(op.HALT)
+		if not self.stop: self.bytecode.append(op.HALT)
 		return self.bytecode, self.funcpool
 
 	def visit(self, node):
@@ -154,8 +169,8 @@ class Generator:
 	def c_CallNode(self, node:CallNode):
 		print(node)
 		if node.name.name == "print":
-			self.add(op.PRINT)
 			self.visit(node.args[0])
+			self.add(op.PRINT)
 			return
 		for a in node.args:
 			self.visit(a)
@@ -166,16 +181,27 @@ class Generator:
 	def c_FunctionDefineNode(self, node:FunctionDefineNode):
 		name = node.name
 		args=[]
+		defaults={}
 		for a in node.args:
 			assert isinstance(a, ArgNode), "Wrong AST"
 			args.append(a.name)
+			if a.default is not None:
+				
+				try:defaults[a.name]=int(a.default.value)
+				except Exception:
+					default[a.name]=a.default.value
 		new = Generator(node.body)
 		bytecode, funcpool=new.run()
 		self.funcpool.append(Function(
 				name,
 				args,
-				bytecode, funcpool
+				bytecode, funcpool, defaults
 			))
+	def c_ReturnNode(self, node:ReturnNode):
+		self.stop=True
+		self.visit(node.value)
+		self.add(op.RETURN)
+
 
 	def visit_unsup(self, node):
 		raise SyntaxError()
