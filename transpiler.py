@@ -500,11 +500,16 @@ f"""void wait(unsigned long time, float unit){{
 						print("cur_type", cur_type, "For ", n["type"])
 			
 			rhs_type = get_ctype(node.type, self.classes, node.right)
+			if isinstance(node.right, VariableNameNode):
+				for var in self.newvars:
+					if var["name"] == node.right.name:
+						rhs_type = var["type"]
+					break
 
 			print("LHS TYPE:", repr(cur_type))
 			print("RHS TYPE:", repr(rhs_type))
 			print(cur_type)
-			if cur_type != get_ctype(node.type, self.classes, node.right) and cur_type!="auto":
+			if cur_type != rhs_type and cur_type!="auto":
 				raise UnsupportedFeatureError("Object of type ", cur_type, " is not convertible to ", node.type, "Name of variable:  ", left)
 
 			if self.in_class and isinstance(node.left, AttributeAccessNode) and node.left.obj.name == self.cur_class_arg.name:
@@ -841,7 +846,7 @@ f"""void wait(unsigned long time, float unit){{
 		self.vars.append([])
 		self.vars[-1].extend([n.name for n in node.args])
 		newvars = [name["name"] for name in self.newvars]
-		tr = DunderMethodHelper(node, **std)
+		tr = DunderMethodHelper(node, **std, cur_Class=self.cur_Class)
 		print("NEWTRA.self", tr.newvars)
 		tr.orig_vars = self.orig_vars
 		tr.newvars = self.newvars
@@ -1001,8 +1006,10 @@ f"""void wait(unsigned long time, float unit){{
 				if isinstance(node, FunctionDefineNode):
 					class_arg = [arg.name for arg in node.args if arg.type_ == "Class_"][0]
 
-				variables = variables|self.find_vars(node.body, class_arg)[0]
-				newvars.extend(self.find_vars(node.body, class_arg)[1])
+				vars_, newvars_ = self.find_vars(node.body, class_arg)
+
+				variables = variables|vars_
+				newvars.extend(newvars_)
 		print(f"NEWVARS {newvars}")
 		return variables, newvars
 
@@ -1050,7 +1057,7 @@ f"""void wait(unsigned long time, float unit){{
 			"updaters":self.updaters
 		}
 		std.update(**kwargs)
-		tr = Transpiler(ProgramNode(first),**std)
+		tr = Transpiler(ProgramNode(first),**std, cur_Class=self.cur_Class)
 
 		tr.orig_vars = self.orig_vars
 		tr.newvars = self.newvars
