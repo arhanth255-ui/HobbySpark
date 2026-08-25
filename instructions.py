@@ -18,3 +18,4 @@ class op(IntEnum):
 	JUMP_IF_FALSE = 15
 	CALL = 16
 	POP = 17
+	PRINT = 18

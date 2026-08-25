@@ -5,14 +5,20 @@ from instructions import *
 from vm import *
 
 class Function:
-	def __init__(self, name, args, bytecode) -> None:
+	def __init__(self, name, args, bytecode, funcpool) -> None:
 		self.name=name
 		self.args=args
 		self.bytecode=bytecode
+		self.funcpool = funcpool
 	@property
 	def arity(self): return self.args.__len__()
-	def run(self, vars, environment):
-		pass
+	def run(self, vars_:dict, environment:Environment):
+		if len(vars_)!=self.arity:
+			raise TypeError("Unexpected number of arguments: ", len(vars_))
+		newvm = VM(self.bytecode, self.funcpool, Environment(environment))
+		for var, value in vars_.items():
+			environment.set(var, value)
+		out=newvm.run()
 
 class Generator:
 	def __init__(self, nodes) -> None:
@@ -21,6 +27,7 @@ class Generator:
 		self.current_index = 0
 		self.current_loop = None
 		self.breaks = []
+		self.funcpool = []
 
 	def run(self):
 		for a in self.nodes:
@@ -28,7 +35,7 @@ class Generator:
 			if isinstance(a, (VariableNameNode)): self.add(op.POP)
 
 		self.bytecode.append(op.HALT)
-		return self.bytecode
+		return self.bytecode, self.funcpool
 
 	def visit(self, node):
 		name = "c_"+node.__class__.__name__
@@ -146,13 +153,29 @@ class Generator:
 
 	def c_CallNode(self, node:CallNode):
 		print(node)
+		if node.name.name == "print":
+			self.add(op.PRINT)
+			self.visit(node.args[0])
+			return
 		for a in node.args:
 			self.visit(a)
 		self.add(op.CALL)
 		self.add(node.args.__len__())
-		self.visit(node.name)
+		self.add(node.name.name)
 		
-
+	def c_FunctionDefineNode(self, node:FunctionDefineNode):
+		name = node.name
+		args=[]
+		for a in node.args:
+			assert isinstance(a, ArgNode), "Wrong AST"
+			args.append(a.name)
+		new = Generator(node.body)
+		bytecode, funcpool=new.run()
+		self.funcpool.append(Function(
+				name,
+				args,
+				bytecode, funcpool
+			))
 
 	def visit_unsup(self, node):
 		raise SyntaxError()

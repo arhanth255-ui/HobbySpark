@@ -2,12 +2,14 @@ from vm import *
 from gen import *
 from gen import Generator
 a = Generator(Parser(Lexer("""
-a = 0
-b = a
-c = b<7
-a
+def call(a,b):
+	bn = a+b
+	print(bn)
+b=12
+c=14
 call(b,c)""").evaluate()).parse().body)
-v = VM(a.run())
-print("DHFNHEUI", v.bytecode)
-b=v.run()
-print("RETURNED", b)
+x,y=a.run()
+v = VM(x, y)
+print("DHFNHEUI", v.bytecode, "\n", y[0].bytecode)
+c=v.run()
+print("RETURNED", c)
