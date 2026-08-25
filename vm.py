@@ -15,11 +15,11 @@ class Environment:
 		self.vars[name]=value
 
 class VM:
-	def __init__(self, bytecode = [op.PUSH, 12, op.PUSH,14,op.ADD,op.HALT, op.PUSH, 12]) -> None:
+	def __init__(self, bytecode, env = Environment()) -> None:
 		self.ip = 0
 		self.bytecode = bytecode
 		self.stack = []
-		self.variables = Environment()
+		self.variables = env
 
 	def push(self, add):self.stack.append(add)
 
