@@ -1,7 +1,8 @@
 from parser import *
 from lexer import *
 from nodes import *
-from b import *
+from instructions import *
+from vm import *
 
 class Function:
 	def __init__(self, name, args, bytecode) -> None:
@@ -10,7 +11,7 @@ class Function:
 		self.bytecode=bytecode
 	@property
 	def arity(self): return self.args.__len__()
-	def run(self):
+	def run(self, vars, environment):
 		pass
 
 class Generator:
