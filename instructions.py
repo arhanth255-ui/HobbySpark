@@ -19,3 +19,4 @@ class op(IntEnum):
 	CALL = 16
 	POP = 17
 	PRINT = 18
+	RETURN = 19

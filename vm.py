@@ -45,6 +45,7 @@ class VM:
 				case op.ADD:
 					value1 = self.pop()
 					value2 = self.pop()
+					print("ADD:", repr(value1), type(value1), repr(value2), type(value2))
 					self.push(value1+value2)
 				case op.SUB:
 					value2 = self.pop()
@@ -100,6 +101,7 @@ class VM:
 				case op.POP:
 					self.pop()
 				case op.CALL:
+
 					number_of_args = self.current
 					name = self.current
 					print("NUMBER", number_of_args)
@@ -110,14 +112,19 @@ class VM:
 						args.append(self.pop())
 					args.reverse()
 					args = dict(zip(function.args, args))
-					function.run(args, self.variables)
+					print("FUNCTION ARGS:", function.args)
+					print("SUPPLIED:", args)
+					print("BOUND:", dict(zip(function.args, args)))
+					a=function.run(args, self.variables)
+					self.push(a)
+					print(a)
 				case op.PRINT:
 					print("*"*60)
 					print("BY PRINT")
-					self.ip+=1
-					val = self.variables.get(self.current)
-					print(val)
+					print(self.pop())
 					print("*"*60)
+				case op.RETURN:
+					return self.pop() if self.stack else None
 
 
 
