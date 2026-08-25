@@ -1,12 +1,25 @@
-from b import *
+from instructions import *
+
+class Environment:
+	def __init__(self, parent=None) -> None:
+		self.vars = {}
+		self.parent = parent
+	def get(self, name):
+		if name in self.vars:
+			return self.vars[name]
+		elif self.parent is not None:
+			return self.parent.get(name)
+		else:
+			raise NameError("The variable is not declared", name=name)
+	def set(self, name, value):
+		self.vars[name]=value
+
 class VM:
 	def __init__(self, bytecode = [op.PUSH, 12, op.PUSH,14,op.ADD,op.HALT, op.PUSH, 12]) -> None:
 		self.ip = 0
 		self.bytecode = bytecode
 		self.stack = []
-		self.variables = {
-
-		}
+		self.variables = Environment()
 
 	def push(self, add):self.stack.append(add)
 
@@ -45,10 +58,10 @@ class VM:
 					self.push(value1/value2)
 				case op.STORE:
 					val = self.current()
-					self.variables[val] = self.pop()
+					self.variables.set(val,self.pop())
 				case op.LOAD:
 					val = self.current()
-					self.push(self.variables[val])
+					self.push(self.variables.get(val))
 				case op.EQ:
 					value2 = self.pop()
 					value1 = self.pop()

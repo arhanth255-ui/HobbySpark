@@ -1,4 +1,4 @@
-from a import *
+from vm import *
 from gen import *
 from gen import Generator
 a = Generator(Parser(Lexer("""
