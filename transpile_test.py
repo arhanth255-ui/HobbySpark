@@ -1,4 +1,4 @@
-if x:
-    a = 1
-elif y:
-    b = a
+r = range(10, 0, -1)
+
+for i in r:
+    print(i)

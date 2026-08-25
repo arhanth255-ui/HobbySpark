@@ -751,7 +751,7 @@ f"""void wait(unsigned long time, float unit){{
 						full_output.append(full)
 
 		if not array:
-			full_output.append(f"for (int {iterable_name} = {num if num2 is not None else '0'}; {iterable_name} < {num2 if num2 is not None else num}; {iterable_name} +={num3 if num3 else 1} ) {{")
+			full_output.append(f"for (int {iterable_name} = {num if num2 is not None else '0'}; {iterable_name} {">" if num3.startswith("-") else "<"} {num2 if num2 is not None else num}; {iterable_name} +={num3 if num3 else 1} ) {{")
 		else:
 			full_output.append(f"for (auto& {iterable_name} : {iterable})")
 		full_output.extend(body)
