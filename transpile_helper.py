@@ -14,8 +14,8 @@ while a:
    ab=c.parse()
    tr = t.Transpiler(ab)
    print("\n".join(tr.translate()))
-a="zxyyyyyyyyy.py" 
-b="transpiler_new.py"
+a="transpile_test.py" 
+b="transpiler_test.py"
 with open(a) as f:
     q=f.read()
     f=lexer.Lexer(q)

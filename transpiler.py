@@ -44,7 +44,8 @@ def get_op(op):
 		return "<="
 
 
-def get_ctype(node, classes=[], orig:CallNode = CallNode("",[], {})):
+def get_ctype(node, classes=None, orig:CallNode = None):
+	classes = [] if classes is None else classes
 	if node in ("NUMBER","int"):
 		return "int"
 	elif node in ("STRING","str"):
@@ -79,7 +80,8 @@ class Result:
 		if index==3: return self.is_var
 		if index==4: return self.semi
 	@staticmethod
-	def join(st = "\n", iterable = []):
+	def join(st = "\n", iterable = None):
+		iterable = iterable if iterable is not None else []
 		l = []
 		for n in iterable:
 			if isinstance(n, Result):
@@ -108,7 +110,13 @@ methods = {
 }
 
 class DunderMethodHelper:
-	def __init__(self,method:FunctionDefineNode, give_var=False, scope = None, in_=False, in_class=False, cur_class_arg="", cur_class_scope=None, in_method=False, classes=None, cur_Class=None, vars_and_Classes = {}) -> None:
+	def __init__(self,method:FunctionDefineNode, give_var=False, scope = None, in_=False, in_class=False, cur_class_arg="", cur_class_scope=None, in_method=False, classes=None, cur_Class=None, vars_and_Classes = None,vars_and_types = None, 
+				 already_added = None, 
+				 already_added_names=None,
+				 updaters = None) -> None:
+		self.already_added = already_added if already_added is not None else []
+		self.already_added_names = already_added_names if already_added_names is not None else []
+		self.updaters:dict = updaters if updaters is not None else {}
 		self.obj=method
 		self.method_name, self.full = methods[method.name]
 		self.give_var=give_var
@@ -122,8 +130,9 @@ class DunderMethodHelper:
 		self.cur_class_scope = cur_class_scope if cur_class_scope is not None else []
 		self.in_method=in_method
 		self.classes=classes+list(data.keys()) if classes is not None else list(data.keys())
-		self.vars_and_Classes=vars_and_Classes
+		self.vars_and_Classes=vars_and_Classes if vars_and_Classes is not None else {}
 		self.number = 0
+		self.vars_and_types:dict=vars_and_types if vars_and_types is not None else {}
 
 		if self.method_name == "CONSTRUCTOR":
 			self.method_name, self.full = f"{cur_Class}", "init"
@@ -217,7 +226,7 @@ class Transpiler:
 				 vars_and_types = None, 
 				 already_added = None, 
 				 already_added_names=None,
-				 updaters = {}
+				 updaters = None
 				 ) -> None:
 		self.nodes=nodes.body
 		self.give_var=give_var
@@ -237,7 +246,7 @@ class Transpiler:
 		self.board = ""
 		self.already_added = already_added if already_added is not None else []
 		self.already_added_names = already_added_names if already_added_names is not None else []
-		self.updaters:dict = updaters
+		self.updaters:dict = updaters if updaters is not None else {}
 		self.pins:list = []
 
 	def translate(self):
@@ -565,14 +574,14 @@ f"""void wait(unsigned long time, float unit){{
 	def visit_IfConditionNode(self, node:IfConditionNode):
 		full_output=[]
 		cond= self.visit(node.condition)
-		if_new_tra = self.gen_transpiler(node.body)
+		if_new_tra = self.gen_transpiler(node.body, give_var=True)
 		if_body=if_new_tra.translate_body()
 		elif_bodies=[]
 		elif_newtras=[]
 		elif_block=[]
 		elif_newvars=[]
 		for elif_ in node.elifs:
-			elif_newtra=self.gen_transpiler(elif_.body)
+			elif_newtra=self.gen_transpiler(elif_.body, give_var=True)
 			elif_newtras.append(elif_newtra)
 			elif_bodies.append((elif_newtra.translate_body(),elif_.condition))
 
@@ -582,7 +591,7 @@ f"""void wait(unsigned long time, float unit){{
 		for newvar in elif_newtras:
 			elif_newvars.extend(newvar.newvars)
 
-		else_new_tra = self.gen_transpiler(node.else_.body) if node.else_ else None
+		else_new_tra = self.gen_transpiler(node.else_.body, give_var=True) if node.else_ else None
 		else_body=else_new_tra.translate_body() if else_new_tra is not None else None
 
 		total=[]
@@ -816,15 +825,31 @@ f"""void wait(unsigned long time, float unit){{
 		return "\n".join(full_output)
 
 	def make_dunder(self, node:FunctionDefineNode):
+		std = {
+			"scope":self.get_cur_scope(),
+			"in_class":self.in_class,
+			"cur_class_arg":self.cur_class_arg,
+			"cur_class_scope":self.cur_class_scope,
+			"in_method":self.in_method,
+			"classes":self.classes,
+			"vars_and_Classes":self.vars_and_Classes,
+			"already_added":self.already_added,
+			"already_added_names":self.already_added_names,
+			"updaters":self.updaters
+		}
 		full_output = []
 		self.vars.append([])
 		self.vars[-1].extend([n.name for n in node.args])
 		newvars = [name["name"] for name in self.newvars]
-		tra = DunderMethodHelper(node,scope=self.get_cur_scope(),in_class=self.in_class,cur_class_arg=self.cur_class_arg,cur_class_scope=self.cur_class_scope, in_method=self.in_method, classes=self.classes, cur_Class=self.cur_Class)
-		print("NEWTRA.self", tra.newvars)
-		self.newvars.extend(tra.newvars)
+		tr = DunderMethodHelper(node, **std)
+		print("NEWTRA.self", tr.newvars)
+		tr.orig_vars = self.orig_vars
+		tr.newvars = self.newvars
+		tr.block_vars = self.block_vars
+		tr.in_class = self.in_class
+		self.newvars.extend(tr.newvars)
 		self.vars.pop()
-		return tra.ran
+		return tr.ran
 
 
 
