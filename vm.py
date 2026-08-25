@@ -15,15 +15,17 @@ class Environment:
 		self.vars[name]=value
 
 class VM:
-	def __init__(self, bytecode, env = Environment()) -> None:
+	def __init__(self, bytecode, funcpool:list, env = Environment()) -> None:
 		self.ip = 0
 		self.bytecode = bytecode
 		self.stack = []
 		self.variables = env
+		self.funcpool=funcpool
 
 	def push(self, add):self.stack.append(add)
 
 	def pop(self): return self.stack.pop()
+	@property
 	def current(self):
 		a= self.bytecode[self.ip]
 		self.ip+=1
@@ -57,10 +59,10 @@ class VM:
 					value1 = self.pop()
 					self.push(value1/value2)
 				case op.STORE:
-					val = self.current()
+					val = self.current
 					self.variables.set(val,self.pop())
 				case op.LOAD:
-					val = self.current()
+					val = self.current
 					self.push(self.variables.get(val))
 				case op.EQ:
 					value2 = self.pop()
@@ -97,6 +99,26 @@ class VM:
 						self.ip = target
 				case op.POP:
 					self.pop()
+				case op.CALL:
+					number_of_args = self.current
+					name = self.current
+					print("NUMBER", number_of_args)
+					print("NAME", name)
+					function = {a.name:a for a in self.funcpool}[name]
+					args = []
+					for a in range(number_of_args):
+						args.append(self.pop())
+					args.reverse()
+					args = dict(zip(function.args, args))
+					function.run(args, self.variables)
+				case op.PRINT:
+					print("*"*60)
+					print("BY PRINT")
+					self.ip+=1
+					val = self.variables.get(self.current)
+					print(val)
+					print("*"*60)
+
 
 
 
