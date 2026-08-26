@@ -114,13 +114,13 @@ class VM:
 					args = dict(zip(function.args, args))
 					print("FUNCTION ARGS:", function.args)
 					print("SUPPLIED:", args)
-					print("BOUND:", dict(zip(function.args, args)))
 					a=function.run(args, self.variables)
 					self.push(a)
 					print(a)
 				case op.PRINT:
 					print("*"*60)
 					print("BY PRINT")
+					print("ALSO BY PRINT")
 					print(self.pop())
 					print("*"*60)
 				case op.RETURN:
