@@ -1,4 +1,3 @@
-from ntpath import isdir
 import shutil
 from shutil import rmtree
 import datetime as dt
@@ -51,6 +50,8 @@ import sys
 import subprocess
 import json as data_handle
 from pathlib import Path
+
+WINDOWS_CREATION_FLAGS = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 project_path = Path(user_config_dir("HobbySpark transpiler",appauthor=False, roaming=True))/"GUI"
 print(project_path)
@@ -174,7 +175,7 @@ def get_installed_cores() -> str:
 			["arduino-cli", "core", "list"],
 			capture_output=True,
 			text=True,
-			check=True,creationflags=subprocess.CREATE_NO_WINDOW
+			check=True,creationflags=WINDOWS_CREATION_FLAGS
 		)
 		return result.stdout
 	except (subprocess.CalledProcessError, FileNotFoundError):
@@ -255,7 +256,7 @@ def install_core(root: Tk, board_name: str) -> bool:
 				stderr=subprocess.STDOUT,
 				text=True,
 				bufsize=1,
-				creationflags=subprocess.CREATE_NO_WINDOW
+				creationflags=WINDOWS_CREATION_FLAGS
 			)
 
 			for line in process.stdout:
@@ -421,7 +422,7 @@ def askcom(root, out = None, console:Console = None):
 	com = ""
 	new = Toplevel(root)
 	new.title("Select COM port")
-	result = subprocess.run(["arduino-cli", "board", "list", "--format", "json"], capture_output=True, text=True,creationflags=subprocess.CREATE_NO_WINDOW)
+	result = subprocess.run(["arduino-cli", "board", "list", "--format", "json"], capture_output=True, text=True,creationflags=WINDOWS_CREATION_FLAGS)
 	print(result.stdout)
 	data:dict = (data_handle.loads(result.stdout))["detected_ports"]
 	real_data = []
@@ -716,22 +717,22 @@ class GUI:
 		libs = subprocess.check_output(
 		    ["arduino-cli", "lib", "list"],
 		    text=True,
-		    creationflags=subprocess.CREATE_NO_WINDOW
+		    creationflags=WINDOWS_CREATION_FLAGS
 		)
 
 		if "Servo" not in libs:
 			subprocess.run(
-				["arduino-cli", "lib", "install", "Servo"],creationflags=subprocess.CREATE_NO_WINDOW
+				["arduino-cli", "lib", "install", "Servo"],creationflags=WINDOWS_CREATION_FLAGS
 			)
 
 		if "LiquidCrystal_I2C" not in libs:
 			subprocess.run(
-				["arduino-cli", "lib", "install", "LiquidCrystal I2C"],creationflags=subprocess.CREATE_NO_WINDOW
+				["arduino-cli", "lib", "install", "LiquidCrystal I2C"],creationflags=WINDOWS_CREATION_FLAGS
 			)
 
 		if "ESP32Servo" not in libs:
 			subprocess.run(
-				["arduino-cli", "lib", "install", "ESP32Servo"],creationflags=subprocess.CREATE_NO_WINDOW
+				["arduino-cli", "lib", "install", "ESP32Servo"],creationflags=WINDOWS_CREATION_FLAGS
 			)
 		mixer.init()
 		root.iconbitmap(resource_path("installers\\icon.ico"))
@@ -1242,7 +1243,7 @@ set_board("board_name", True)
 		        os.path.join(self.path, "COMPILATION", self.editor.current.name)
 		    ],
 		    capture_output=True,
-		    text=True,creationflags=subprocess.CREATE_NO_WINDOW
+		    text=True,creationflags=WINDOWS_CREATION_FLAGS
 		)
 		if result.stderr:
 			self.console.write_error(f"Failed to compile, {result.stderr}")
@@ -1269,7 +1270,7 @@ set_board("board_name", True)
 		        os.path.join(self.path, "COMPILATION", self.editor.current.name)
 		    ],
 		    capture_output=True,
-		    text=True,creationflags=subprocess.CREATE_NO_WINDOW
+		    text=True,creationflags=WINDOWS_CREATION_FLAGS
 		)
 		if result.stderr:
 			self.console.write_error(f"Could not upload, {result.stderr}")
@@ -1335,7 +1336,7 @@ set_board("board_name", True)
 			    ],
 			    capture_output=True,
 			    text=True,
-			    creationflags=subprocess.CREATE_NO_WINDOW
+			    creationflags=WINDOWS_CREATION_FLAGS
 			)
 			if result.stderr:
 				self.console.write_error(f"Failed to compile, {result.stderr}")
@@ -1382,7 +1383,7 @@ set_board("board_name", True)
 			return True
 		self.save()
 		self.console.write("Running")
-		result = subprocess.run([self.python, self.editor.current.path], capture_output=True, text=True,creationflags=subprocess.CREATE_NO_WINDOW)
+		result = subprocess.run([self.python, self.editor.current.path], capture_output=True, text=True,creationflags=WINDOWS_CREATION_FLAGS)
 		if result.stderr:
 			self.console.write_error(f"Could not run: {result.stderr}")
 			return True
