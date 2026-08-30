@@ -35,7 +35,7 @@ def wait(time,unit=MS)->None:
     if not isinstance(unit,int):
         raise InvalidArgumentError(unit,"int")
 
-def interrupt(time,unit=MS)->None:
+def stop(time,unit=MS)->None:
     """Completely blocks the microcontroller for doing anything for the given time."""
     if not isinstance(time,(int,float)):
         raise InvalidArgumentError(time,"int or float")

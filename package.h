@@ -174,7 +174,7 @@ public:
     }
 };
 
-void interrupt(int t, int u){delay(t*u);}
+void stop(int t, int u){delay(t*u);}
 
 //Classes
 
@@ -648,7 +648,7 @@ public:
             while (true){
                 s.print("This is a loop that runs to notify you about the error. ");
                 s.print("scroll_with_millis has overflowed. ");
-                interrupt(1, SEC);
+                stop(1, SEC);
             }
         }
         
