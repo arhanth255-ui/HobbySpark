@@ -85,7 +85,7 @@ class Led:
         check(self,currentframe().f_code,locals())
 
 
-class RGBled:
+class RGBLed:
     """Standard class for programming RGB leds.\n
     It requires 3 argument:\n
         1. r - an int or string - the pin to which you have connected the r pin of the led to.\n
