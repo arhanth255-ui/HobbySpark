@@ -319,7 +319,7 @@ def install_core(root: Tk, board_name: str) -> bool:
 		window.destroy()
 
 		if not result_holder["success"]:
-			messagebox.showerror(
+			mb.showerror(
 				"Arduino installation failed",
 				result_holder["error"],
 				parent=root
@@ -1383,7 +1383,7 @@ set_board("board_name", True)
 			return True
 		self.save()
 		self.console.write("Running")
-		result = subprocess.run([self.python, self.editor.current.path], capture_output=True, text=True,creationflags=WINDOWS_CREATION_FLAGS)
+		result = subprocess.Popen([self.python, self.editor.current.path], capture_output=True, text=True,creationflags=WINDOWS_CREATION_FLAGS)
 		if result.stderr:
 			self.console.write_error(f"Could not run: {result.stderr}")
 			return True

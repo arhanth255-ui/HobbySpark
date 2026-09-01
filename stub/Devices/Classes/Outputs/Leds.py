@@ -16,7 +16,7 @@ class RGB:
 
 class Led:
     """
-                Standard class for progamming Leds.
+                Standard class for programming Leds.
 
                 It requires 1 argument:
                 1. pin - An int or string - The pin all methods write to.
