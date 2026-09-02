@@ -509,9 +509,12 @@ f"""void wait(unsigned long time, float unit){{
 			print("LHS TYPE:", repr(cur_type))
 			print("RHS TYPE:", repr(rhs_type))
 			print(cur_type)
-			if cur_type != rhs_type and cur_type!="auto":
-				raise UnsupportedFeatureError("Object of type ", cur_type, " is not convertible to ", node.type, "Name of variable:  ", left)
-
+			if cur_type != rhs_type and rhs_type != "auto" and cur_type!="auto":
+				raise UnsupportedFeatureError(
+					"Object of type ", cur_type,
+			        " is not convertible to ", get_ctype(node.type),
+			        "Name of variable: ", left
+			    )
 			if self.in_class and isinstance(node.left, AttributeAccessNode) and node.left.obj.name == self.cur_class_arg.name:
 				print("enter")
 				return Result( f"this-> {left[6:] if left.startswith('this->') else left} = {right}" if not self.give_var else f"{left} = {right}", False, False, False,True ,True)

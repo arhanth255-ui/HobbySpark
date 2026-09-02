@@ -1,3 +1,3 @@
-from stub import *
-import stub
-help(stub)
+a = 232
+a = a + 1
+

@@ -1,3 +1,4 @@
+from nt import kill
 import shutil
 from shutil import rmtree
 import datetime as dt
@@ -581,12 +582,16 @@ class WritingArea:
 
 	def update(self, e):
 		lines = int(self.text.index("end-1c").split(".")[0])
-		adding = "\n".join([str(i) for i in range(1, lines+1)])
+		adding = "\n".join([str(i) for i in range(1, lines + 1)])
+
+		first, last = self.lines.yview()
 
 		self.lines.config(state=NORMAL)
-		self.lines.delete("1.0", END )
+		self.lines.delete("1.0", END)
 		self.lines.insert("1.0", adding)
 		self.lines.config(state=DISABLED)
+
+		self.lines.yview_moveto(first)
 
 		self.text.edit_modified(False)
 
@@ -682,6 +687,7 @@ class TabManager:
 class GUI:
 	def __init__(self, root:Tk) -> None:
 		self.path=""
+
 		if shutil.which("python") is not None: self.python=shutil.which("python")	
 		elif shutil.which("python3") is not None: self.python=shutil.which("python3")
 		else:
@@ -1279,7 +1285,6 @@ set_board("board_name", True)
 
 
 	def test(self):
-		try:
 			if self.run__():
 				return
 			text = self.editor.current.editor.text.get("1.0",END)
@@ -1343,8 +1348,7 @@ set_board("board_name", True)
 				return
 			self.console.write("Compiled sucessfully")
 
-		except Exception as e:
-			self.console.write_error(f"ERRORR!!!!!: {e}, {str(e)}")
+		
 
 
 		
@@ -1383,12 +1387,29 @@ set_board("board_name", True)
 			return True
 		self.save()
 		self.console.write("Running")
-		result = subprocess.Popen([self.python, self.editor.current.path], capture_output=True, text=True,creationflags=WINDOWS_CREATION_FLAGS)
+		result = subprocess.Popen([self.python, self.editor.current.path], text=True,creationflags=WINDOWS_CREATION_FLAGS, stdout=subprocess.PIPE)
 		if result.stderr:
 			self.console.write_error(f"Could not run: {result.stderr}")
 			return True
 		self.console.write("Ran sucessfully: ")
-		self.console.write(result.stdout)
+		newconsole = Toplevel(self.root)
+		a = Console(newconsole, "Python output")
+		a.str.pack(expand=True, fill=BOTH)
+		a.frame.pack(expand=True, fill=BOTH)
+		closed = False
+		def read_output():
+			for line in result.stdout:
+				if closed: break
+				newconsole.after(0, lambda line=line: a.write(line))
+		t=threading.Thread(target=read_output, daemon=True).start()
+		def exit():
+			nonlocal closed
+			newconsole.destroy()
+			if result.poll() is None: result.kill()
+			closed=True
+		ok = Button(newconsole, text="OK", command=exit).pack(side="right")
+
+
 		
 
 	def open_project(self):
@@ -1452,6 +1473,8 @@ set_board("board_name", True)
 		self.editor.current.modified = False
 
 	def on_right_click(self, event):
+
+		int("67hfushh")
 		obj = self.dir.identify_row(event.y)
 		if not obj:return
 		path = self.dir.item(obj)['values'][0]
