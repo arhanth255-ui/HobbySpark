@@ -83,18 +83,7 @@ class BoardNotInitializedFirstError(BoardError):
         self.message=f"Please initialize the board before your code."
         self.hint=f"Use the 'set_board()' function to select your board."
         super().__init__(self.message,self.hint)
-class BoardNotDefinedError(BoardError):
-    def __init__(self, board):
-        self.board=board
-        self.message=f"Board {board} is not defined in the stub JSON file."
-        self.hint=f"""Define a new board by making a class with the following syntax:
-            class {board}(Board):
-                def setup():
-                    pins=[MCUpin.generate_array(Analog,Digital,map)]# use map to generate using your custom pins
-                    board={board}()
-                    board.export()
-                """
-        super().__init__(self.message,self.hint)
+
 class DeviceNotCompatibleWithCurrentBoardError(MicroControllerError):
     def __init__(self,device,currentboard,reason):
         self.device=device

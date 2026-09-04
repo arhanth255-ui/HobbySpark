@@ -1,3 +1,2 @@
-a = 232
-a = a + 1
-
+from stub import *
+set_board

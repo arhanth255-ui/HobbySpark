@@ -95,23 +95,23 @@ def startup():
 class   Pin():
     def __init__(self,pin:str|int,needed:str="both",speciality:str=None)->None:
         board_check()
-        raw_pin,mode=pin_value(pin,True)
+        self.raw_pin,mode=pin_value(pin,True)
         pin=pin_value(pin)
         global used_pins
         if int(pin)>max(pins[mode]):
             raise PinOutOfRangeError(pin,Boards.CURRENTBOARD)
-        if raw_pin in used_pins:
-            raise PinAlreadyInUseError(raw_pin)
-        if pins_and_specialities[raw_pin]!=speciality and speciality is not None:
-            raise PinNotApplicableError(raw_pin,mode, speciality)
+        if self.raw_pin in used_pins:
+            raise PinAlreadyInUseError(self.raw_pin)
+        if pins_and_specialities[self.raw_pin]!=speciality and speciality is not None:
+            raise PinNotApplicableError(self.raw_pin,mode, speciality)
         if needed!="both":    
             if mode!=needed:                  
-                raise PinNotApplicableError(raw_pin,mode,needed)
+                raise PinNotApplicableError(self.raw_pin,mode,needed)
         for name, reserved_pin in Boards.CURRENTBOARD.reservedpins.items():
-            if str(reserved_pin) == raw_pin:
-                print(f"Note that pin {raw_pin} is a reserved pin on the {Boards.CURRENTBOARD.boardname}. This may cause errors in the future. ")
+            if str(reserved_pin) == self.raw_pin:
+                print(f"Note that pin {self.raw_pin} is a reserved pin on the {Boards.CURRENTBOARD.boardname}. This may cause errors in the future. ")
                 break
-        used_pins.append(raw_pin)
+        used_pins.append(self.raw_pin)
         self.pinname=pin
 
 

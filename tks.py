@@ -427,40 +427,40 @@ def askcom(root, out = None, console:Console = None):
 	print(result.stdout)
 	data:dict = (data_handle.loads(result.stdout))["detected_ports"]
 	real_data = []
-
 	for w in data:
 		dat = {
 			"match":w["matching_boards"][0]["name"] if "matching_boards" in w else "Unknown",
 			"com":w["port"]["address"],
 			"serial":w["port"]["properties"]["serialNumber"]
-
-		}
+			}
 		real_data.append(dat)
-
-	with_board = {
+		with_board = {
 		b["com"]:{"com":b["com"], "match":b["match"]} for b in real_data
 	}
-
-	print("OUT3", out)
-
+		print("OUT3", out)
 
 	box = ttk.Combobox(new, values=[a["match"]+"-"+a["com"] for a in real_data], width=50)
 	def use():
-		nonlocal com
-		com = (box.get()).split("-")[1]
-		print("H", with_board[com]["match"])
-		print("dao",out)
-		if with_board[com]["match"]=="Unknown":
-			console.write_warning(f"Could not find board name, {com}. ")
-		if with_board[com]["match"]!=out:
-			a=mb.askokcancel("Board warning",f"Using another board than the {out}. This may cause an error", icon=mb.WARNING)
-			if not a:
-				new.destroy()
-				console.write("Process stopped: User abort")
-		
-		new.destroy()
-
-	button = Button(new, text="Use board", command=use)
+		try:
+			nonlocal com
+			com = (box.get()).split("-")[1]
+			print("H", with_board[com]["match"])
+			print("dao",out)
+			if with_board[com]["match"]=="Unknown":
+				console.write_warning(f"Could not find board name, {com}. ")
+			if with_board[com]["match"]!=out:
+				a=mb.askokcancel("Board warning",f"Using another board than the {out}. This may cause an error", icon=mb.WARNING)
+				if not a:
+						new.destroy()
+						console.write("Process stopped: User abort")
+				
+			new.destroy()
+		except Exception as e:
+			a = mb.askyesno("Unexpected error", "Please do not press use port button without selecting any port. If you haven't done so, then click yes on this question. If you have done so, then press no.", default="no", icon=mb.ERROR)
+			if a:
+				raise Exception(F"An unexpected error occurred in askcom function - {e}. Traceback--\n{traceback.format_exc()}")
+			
+	button = Button(new, text="Use port", command=use)
 	new.columnconfigure(0, weight=1)
 	new.columnconfigure(1, weight=1)
 	new.rowconfigure(0, weight=1)
@@ -468,6 +468,8 @@ def askcom(root, out = None, console:Console = None):
 	button.grid(column=1, row=1, sticky="nsew")
 	new.wait_window()
 	return com
+	
+
 
 
 
@@ -481,14 +483,20 @@ def askprompt(root):
 	box = ttk.Combobox(new, values=list(ALL_BOARDS.keys()), width=50)
 	
 	def use():
-		nonlocal board
-		nonlocal fqbn
-		fqbn = ALL_BOARDS[box.get()]
-		if not install_core(new, box.get()): return
+		try:
+			nonlocal board
+			nonlocal fqbn
+			fqbn = ALL_BOARDS[box.get()]
+			if not install_core(new, box.get()): return
 
-		board = box.get()
-		print("SELECTED", board)
-		new.destroy()
+			board = box.get()
+			print("SELECTED", board)
+			new.destroy()
+		except Exception as e:
+			a = mb.askyesno("Unexpected error", "Please do not press use board button without selecting any board. If you haven't done so, then click yes on this question. If you have done so, then press no.", default="no", icon=mb.ERROR)
+			if a:
+				raise Exception(F"An unexpected error occurred in askprompt function - {e}. Traceback--{traceback.format_exc()}")
+			
 
 	button = Button(new, text="Use", command=use)
 	new.columnconfigure(0, weight=1)
@@ -901,7 +909,7 @@ class GUI:
 		except Exception: self.console.write_error("Don't dismiss the board asker"); return
 		try:baud = int(askinteger("Baudrate ", "Baud (must be int): "))
 		except Exception: self.console.write_error("Baud must be an int"); return
-		try:ser = serial.Serial(com, baud)
+		try:ser = serial.Serial(com, baud, timeout=0)
 		except Exception: self.console.write_error("Could not open serial monitor. Check if you have dismissed the COM port asker or the board asker."); return
 		new = Toplevel(self.root)
 		mon = Console(new, "Serial monitor")
@@ -922,16 +930,19 @@ class GUI:
 
 		def see():
 			nonlocal errr
-			while ser.in_waiting:
-				line = ser.readline().decode().strip()
-				if line=="[@@@HOBBYSPARK ERROR 123@@@]":
-					errr = True
-					mon.write_error("ERROR!!!")
-					break
-				if errr:
-					mon.write_error(line)
-				else:
-					mon.write(line)
+			try:
+				while ser.in_waiting:
+					line = ser.readline().decode().strip()
+					if line=="[@@@HOBBYSPARK ERROR 123@@@]":
+						errr = True
+						mon.write_error("ERROR!!!")
+						break
+					if errr:
+						mon.write_error(line)
+					else:
+						mon.write(line)
+			except Exception as e:
+				mon.write_error(f"Unexpected serial error - {e}")
 
 			new.after(50, see)
 
@@ -1063,9 +1074,9 @@ A few folders and files in your project:
 
 	* COMPILATION - The C++ source code. Note that this appears **only after** you have either checked, uploaded, or transpiled. 
 
-	* COMPILATION\\package.h - The HobbySpark C++ module. Feel free to see what's inside.
+	* COMPILATION\\main.py\\package.h - The HobbySpark C++ module. Feel free to see what's inside.
 
-	* COMPILATION\\COMPILATION.ino - The transpiled code. Note: The indent levels may or may not be match your preferences. 
+	* COMPILATION\\main.py\\COMPILATION.ino - The transpiled code. Note: The indent levels may or may not be match your preferences. 
 
 
 
@@ -1077,7 +1088,7 @@ A few folders and files in your project:
 		with open(os.path.join(self.path, ".src", "main.py"), "w") as f:
 			code = \
 """from stub import *
-set_board("board_name", True)
+set_board(BoardName(), debug=True)#The debug option spits out some helpful debug prints to the console if true
 ###############
 #Your code here
 ###############
@@ -1566,7 +1577,7 @@ def handle(g, b ,c):
 
 	root = Toplevel(a)
 	root.title("Serious error")
-	root.geometry("900x500")
+	root.geometry("900x50")
 
 	main = Frame(root)
 	main.pack(fill=BOTH, expand=True, padx=10, pady=10)

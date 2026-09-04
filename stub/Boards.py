@@ -56,11 +56,10 @@ class Board:
         self.sda=None
         self.scl=None
         self.onboard_led=None
-        self.non_PWM_pins=[]
+        self.nonPWM_pins=[]
         self.has_wifi=False
         self.has_bluetooth=False
         self.has_EEPROM=False
-        self.non_pwm_pinno=0
         self.TX=0
         self.RX=1
         self.reservedpins={"TX":0,"RX":1}
@@ -68,15 +67,13 @@ class Board:
         self.pinnames:list[int]=[p.pinname for p in self.pins]
         if not self.boardname:
             self.boardname=self.__class__.__name__
-        self.PWMpins=[]
-        for pin in self.pinnames:
-            if self.non_pwm_pinno>=len(self.pins):
-                self.PWMpins=["No pins"]
-            elif pin not in self.non_PWM_pins:
-                self.PWMpins.append(pin)
-            else:
-                self.non_pwm_pinno+=1
-                continue
+        self.PWMpins = [
+            pin for pin in self.pinnames
+            if pin not in self.nonPWM_pins
+        ]
+
+        if not self.PWMpins:
+            self.PWMpins = ["No pins"]
         if self.reservedpins.get("RX",None)==None or self.reservedpins.get("TX",None)==None:
             raise InvalidArgumentError(self.reservedpins,"a dictionary with keys RX and TX","")
         self.to_dict()
@@ -123,7 +120,7 @@ class Board:
                 continue
             extra_reservedpins=extra_reservedpins|{name:reservedpin}
         for pin in self.pins:
-            is_pwm=False if pin in self.non_PWM_pins else True
+            is_pwm=False if pin in self.nonPWM_pins else True
             speciality=None
             if pin.pinname==self.sda:
                 speciality="sda"
@@ -187,7 +184,7 @@ class Board:
         self.sda=sda
         self.scl=scl
         self.onboard_led=onboard_led
-        self.non_PWM_pins=nonPWM_pins
+        self.nonPWM_pins=nonPWM_pins
         self.TX=TX
         self.RX=RX
         self.reservedpins={"TX":TX,"RX":RX}|reserved_pins
@@ -196,22 +193,4 @@ class Board:
         self.has_EEPROM=has_EEPROM
     def __str__(self):
         return self.boardname
-class ArduinoUnoR3(Board):
-    def setup(self):
-        self.pins=MCUpin.generate_pin_array(6,14)
-        self.sda="A4"
-        self.scl="A5"
-        self.onboard_led="13"
-class ArduinoNano(Board):
-    def setup(self):
-        self.pins=MCUpin.generate_pin_array(8,14)
-        self.sda="A4"
-        self.scl="A5"
-        self.onboard_led="14"
-        self.non_PWM_pins=["A0","A1","A2","A3","A4","A5","A6","A7"]
-        self.has_EEPROM=True
-
-class HobbySparkBoard(Board):
-    def setup(self):
-        self.set_variables(MCUpin.generate_pin_array(12, 500), 34, 56, 11, ["A0","A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11"],1, 0, {"QWERTY pin":122}, has_EEPROM=True)
 CURRENTBOARD:Board=None

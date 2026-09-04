@@ -62,8 +62,8 @@ class Led:
         """Sets the brightness of the led connected to pin to arg(PWM_output)(in percent, not 0 to 255)."""
         if not isinstance(PWM_output,int) or not 100<PWM_output>0:
             raise InvalidArgumentError(PWM_output,"int between 0 and 100")
-        if not self.pin.pinname in PWM_pins:
-            raise PinNotApplicableError(self.pin.pinname, "non PWM", "PWM")
+        if not self.pin.raw_pin in PWM_pins:
+            raise PinNotApplicableError(self.pin.raw_pin, "non PWM", "PWM")
         check(self,currentframe().f_code,locals())
 
     def fade(self,time,unit=MS)->None:
@@ -72,8 +72,8 @@ class Led:
             raise InvalidArgumentError(time,"int or float")
         if not isinstance(unit,(int,float)):
             raise InvalidArgumentError(unit,"int or float")
-        if not self.pin.pinname in PWM_pins:
-            raise PinNotApplicableError(self.pin.pinname, "non PWM", "PWM")
+        if not self.pin.raw_pin in PWM_pins:
+            raise PinNotApplicableError(self.pin.raw_pin, "non PWM", "PWM")
         check(self,currentframe().f_code,locals())
 
     def toggle(self)->None:
