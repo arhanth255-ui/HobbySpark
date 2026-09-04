@@ -12,3 +12,4 @@ Build:
 - IoT systems
 - Interactive electronics
 - Educational projects
+- Proffesional scrolling menus with alert systems included
