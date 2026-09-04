@@ -95,22 +95,22 @@ jobs:
           Compress-Archive `
             -Path dist/HobbySpark/* `
             -DestinationPath `
-            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable.zip
+            HobbySpark-Windows-Portable.zip
 
       - name: Rename installer
         shell: powershell
         run: |
           Move-Item `
             installers/Output/HobbySparkSetup.exe `
-            HobbySpark-${{ steps.version.outputs.version }}-WindowsSetup.exe
+            HobbySpark-WindowsSetup.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Windows
           path: |
-            HobbySpark-${{ steps.version.outputs.version }}-WindowsSetup.exe
-            HobbySpark-${{ steps.version.outputs.version }}-Windows-Portable.zip
+            HobbySpark-WindowsSetup.exe
+            HobbySpark-Windows-Portable.zip
             
   ubuntu-build:
     runs-on: ubuntu-latest
@@ -162,12 +162,12 @@ jobs:
           ./deb.sh "${{ steps.version.outputs.version }}"
 
       - name: Compress
-        run: tar -czf HobbySpark-${{steps.version.outputs.version}}-Linux-Portable.tar.gz dist/HobbySpark
+        run: tar -czf HobbySpark-Linux-Portable.tar.gz dist/HobbySpark
 
       - name: Verify Debian package
         shell: bash
         run: |
-          if [ ! -f HobbySpark-${{ steps.version.outputs.version }}-Linux-amd64-Installer.deb ]; then
+          if [ ! -f HobbySpark-Linux-amd64-Installer.deb ]; then
             echo "Debian package was not generated."
             exit 1
           fi
@@ -176,8 +176,8 @@ jobs:
         with:
           name: Linux
           path: |
-              HobbySpark-${{ steps.version.outputs.version }}-Linux-amd64-Installer.deb
-              HobbySpark-${{ steps.version.outputs.version }}-Linux-Portable.tar.gz
+              HobbySpark-Linux-amd64-Installer.deb
+              HobbySpark-Linux-Portable.tar.gz
   macOS-build:
     runs-on: macos-latest
     steps:
@@ -218,34 +218,34 @@ jobs:
               echo "PyInstaller failed"
               exit 1
           fi
-          mv dist/HobbySpark.app dist/HobbySpark-${{ steps.version.outputs.version }}-macOS-portable.app
+          mv dist/HobbySpark.app dist/HobbySpark-macOS-portable.app
       - name: Make the installer
         run: |
           pkgbuild \
             --install-location /Applications \
-            --component dist/HobbySpark-${{ steps.version.outputs.version }}-macOS-portable.app \
+            --component dist/HobbySpark-macOS-portable.app \
             --identifier com.hobbyspark.app \
             --version "${{steps.version.outputs.version}}"\
-            HobbySpark-${{steps.version.outputs.version}}-MacOS-Installer.pkg
+            HobbySpark-MacOS-Installer.pkg
       
       - name: Verify PKG exists
         run: |
-          if [ ! -f "HobbySpark-${{ steps.version.outputs.version }}-MacOS-Installer.pkg" ]; then
+          if [ ! -f "HobbySpark-MacOS-Installer.pkg" ]; then
             echo "PKG was not generated."
             exit 1
           fi 
       - name: Create portable macOS ZIP
         run: |
           ditto -c -k --sequesterRsrc --keepParent \
-            "dist/HobbySpark-${{ steps.version.outputs.version }}-macOS-portable.app" \
-            "HobbySpark-${{ steps.version.outputs.version }}-MacOS-Portable.zip"
+            "dist/HobbySpark-macOS-portable.app" \
+            "HobbySpark-MacOS-Portable.zip"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: MacOS
           path: |
-            HobbySpark-${{ steps.version.outputs.version }}-MacOS-Installer.pkg
-            HobbySpark-${{ steps.version.outputs.version }}-MacOS-Portable.zip
+            HobbySpark-MacOS-Installer.pkg
+            HobbySpark-MacOS-Portable.zip
           
 
   release:
