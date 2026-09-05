@@ -448,17 +448,17 @@ def askcom(root, out = None, console:Console = None):
 			print("dao",out)
 			if with_board[com]["match"]=="Unknown":
 				console.write_warning(f"Could not find board name, {com}. ")
-			if with_board[com]["match"]!=out:
-				a=mb.askokcancel("Board warning",f"Using another board than the {out}. This may cause an error", icon=mb.WARNING)
-				if not a:
-						new.destroy()
-						console.write("Process stopped: User abort")
+			# if with_board[com]["match"]!=out:
+			# 	a=mb.askokcancel("Board warning",f"Using another board than the {out}. This may cause an error", icon=mb.WARNING)
+			# 	if not a:
+			# 			new.destroy()
+			# 			console.write("Process stopped: User abort")
 				
 			new.destroy()
 		except Exception as e:
 			a = mb.askyesno("Unexpected error", "Please do not press use port button without selecting any port. If you haven't done so, then click yes on this question. If you have done so, then press no.", default="no", icon=mb.ERROR)
 			if a:
-				raise Exception(F"An unexpected error occurred in askcom function - {e}. Traceback--\n{traceback.format_exc()}")
+				raise
 			
 	button = Button(new, text="Use port", command=use)
 	new.columnconfigure(0, weight=1)
@@ -495,7 +495,7 @@ def askprompt(root):
 		except Exception as e:
 			a = mb.askyesno("Unexpected error", "Please do not press use board button without selecting any board. If you haven't done so, then click yes on this question. If you have done so, then press no.", default="no", icon=mb.ERROR)
 			if a:
-				raise Exception(F"An unexpected error occurred in askprompt function - {e}. Traceback--{traceback.format_exc()}")
+				raise #Exception(F"An unexpected error occurred in askprompt function - {e}. Traceback--{traceback.format_exc()}")
 			
 
 	button = Button(new, text="Use", command=use)
@@ -1577,7 +1577,7 @@ def handle(g, b ,c):
 
 	root = Toplevel(a)
 	root.title("Serious error")
-	root.geometry("900x50")
+	root.geometry("900x500")
 
 	main = Frame(root)
 	main.pack(fill=BOTH, expand=True, padx=10, pady=10)
