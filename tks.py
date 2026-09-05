@@ -1484,8 +1484,6 @@ set_board(BoardName(), debug=True)#The debug option spits out some helpful debug
 		self.editor.current.modified = False
 
 	def on_right_click(self, event):
-
-		int("67hfushh")
 		obj = self.dir.identify_row(event.y)
 		if not obj:return
 		path = self.dir.item(obj)['values'][0]
