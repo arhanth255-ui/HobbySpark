@@ -43,6 +43,12 @@ def get_op(op):
 	elif op == TT_LTE:
 		return "<="
 
+	elif op == TT_KEYWORDS["and"]:
+		return "and"
+	elif op == TT_KEYWORDS["or"]:
+		return "or"
+	elif op == TT_KEYWORDS["not"]:
+		return "not"
 
 def get_ctype(node, classes=None, orig:CallNode = None):
 	classes = [] if classes is None else classes
