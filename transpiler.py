@@ -3,14 +3,10 @@ from parser import *
 from lexer import *
 from json import load, dumps
 from pathlib import Path
-raw_data = {}
 folder=Path.home()/"AppData"/"Roaming"/"HobbySpark transpiler"
 file=folder/"ClassData.json"
-with open(file) as f:
-	raw_data = load(f)["special"]
-data={}
-for dat in raw_data:
-	data[dat["name"]] = dat
+
+
 def get_op(op):
 	if op == TT_ADD:
 		return "+"
@@ -135,6 +131,11 @@ class DunderMethodHelper:
 		self.cur_class_arg = cur_class_arg
 		self.cur_class_scope = cur_class_scope if cur_class_scope is not None else []
 		self.in_method=in_method
+		with open(file) as f:
+			raw_data = load(f)["special"]
+		data={}
+		for dat in raw_data:
+			data[dat["name"]] = dat
 		self.classes=classes+list(data.keys()) if classes is not None else list(data.keys())
 		self.vars_and_Classes=vars_and_Classes if vars_and_Classes is not None else {}
 		self.number = 0
@@ -245,6 +246,11 @@ class Transpiler:
 		self.cur_class_arg = cur_class_arg
 		self.cur_class_scope = cur_class_scope if cur_class_scope is not None else []
 		self.in_method=in_method
+		with open(file) as f:
+			raw_data = load(f)["special"]
+		data={}
+		for dat in raw_data:
+			data[dat["name"]] = dat
 		self.classes=classes+list(data.keys()) if classes is not None else list(data.keys())
 		self.cur_Class = cur_Class
 		self.vars_and_Classes:dict=vars_and_Classes if vars_and_Classes is not None else {}
@@ -919,6 +925,11 @@ f"""void wait(unsigned long time, float unit){{
 
 		if self.in_method and self.cur_class_arg.name == self.visit(node.obj)[0]:
 			return Result(f"this->{node.name}({','.join([self.visit(n)[0] for n in node.args])}{kew_word if kew_word else ""})", semi=True)
+		with open(file) as f:
+			raw_data = load(f)["special"]
+		data={}
+		for dat in raw_data:
+			data[dat["name"]] = dat
 		classes = [n["name"] for n in raw_data if n["requires_updt"]]
 		u_classes = [n["name"] for n in raw_data if n["requires_even"]]
 		return_=f"{self.visit(node.obj)[0]}.{node.name}({','.join([self.visit(n)[0] for n in node.args])}{kew_word if kew_word else ""})"

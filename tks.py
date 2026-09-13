@@ -406,7 +406,6 @@ class Welcome:
 		try:self.birthday = dt.date(dt.date.today().year,*map(int,self.text3.get().split("-")))
 		except Exception as f: 
 			mb.showerror("Error", "Please enter a valid date of birth. Remember the format is M-D")
-			mb.showinfo("DEBUG", F"ERROR WAS {f}")
 			return
 		self.third.pack_forget()
 		self.root.destroy()
