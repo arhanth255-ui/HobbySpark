@@ -1,4 +1,3 @@
-from nt import kill
 import shutil
 from shutil import rmtree
 import datetime as dt
@@ -37,10 +36,7 @@ from tkinter import messagebox as mb
 from tkinter import colorchooser
 from tkinter.colorchooser import askcolor
 
-from nodes.General import ProgramNode
-from lexer import Lexer
-from parser import *
-from transpiler import Transpiler
+
 from platformdirs import user_config_dir
 
 
@@ -56,6 +52,28 @@ WINDOWS_CREATION_FLAGS = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" 
 
 project_path = Path(user_config_dir("HobbySpark transpiler",appauthor=False, roaming=True))/"GUI"
 print(project_path)
+os.makedirs(project_path, exist_ok=True)
+path = os.path.join(
+    os.path.expanduser("~"),
+    "AppData",
+    "Roaming",
+    "HobbySpark transpiler",
+    "ClassData.json"
+)
+
+try:
+    with open(path, "x") as f:
+        f.write("""{
+        	"special":[]
+        	}""")
+except FileExistsError:
+    pass
+
+from nodes.General import ProgramNode
+from lexer import Lexer
+from parser import *
+from transpiler import Transpiler
+
 
 ALL_BOARDS = {
 	# Arduino AVR
@@ -386,8 +404,9 @@ class Welcome:
 
 	def but3(self):
 		try:self.birthday = dt.date(dt.date.today().year,*map(int,self.text3.get().split("-")))
-		except Exception: 
+		except Exception as f: 
 			mb.showerror("Error", "Please enter a valid date of birth. Remember the format is M-D")
+			mb.showinfo("DEBUG", F"ERROR WAS {f}")
 			return
 		self.third.pack_forget()
 		self.root.destroy()
