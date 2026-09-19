@@ -173,14 +173,14 @@ class DunderMethodHelper:
 						"type":get_ctype(obj.type_)
 					} for obj in self.obj.args])
 
-		new_tra=Transpiler(ProgramNode(self.obj.body),scope=self.get_cur_scope(),in_class=self.in_class,cur_class_arg=self.cur_class_arg, cur_class_scope=self.cur_class_scope, in_method=self.in_method, classes=self.classes, vars_and_Classes= self.vars_and_Classes)
+		new_tra = self.gen_transpiler(self.obj.body)
 		new_tra.cur_class_arg = [n for n in self.obj.args if n.type_ == "Class_"][0]
 		new_tra.in_method=True
 		body=new_tra.translate_body()
 		
 		self.cur_class_scope=new_tra.cur_class_scope
 		full_output.extend(body)
-		full_output.append("}")
+        full_output.append("}")
 		self.vars.pop(-1)
 
 		return "\n".join(full_output)
@@ -195,7 +195,7 @@ class DunderMethodHelper:
 						"name":obj.name,
 						"type":get_ctype(obj.type_)
 					} for obj in self.obj.args])
-		new_tra=Transpiler(ProgramNode(self.obj.body),scope=self.get_cur_scope(),in_class=self.in_class,cur_class_arg=self.cur_class_arg, cur_class_scope=self.cur_class_scope, in_method=self.in_method, classes=self.classes, vars_and_Classes= self.vars_and_Classes)
+		new_tra=self.gen_transpiler(self.obj.body)
 		new_tra.cur_class_arg = [n for n in self.obj.args if n.type_ == "Class_"][0]
 		new_tra.in_method=True
 		body=new_tra.translate_body()
@@ -206,6 +206,27 @@ class DunderMethodHelper:
 		self.vars.pop(-1)
 
 		return "\n".join(full_output)
+	def gen_transpiler(self, first, **kwargs):
+		std = {
+			"scope":self.get_cur_scope(),
+			"in_class":self.in_class,
+			"cur_class_arg":self.cur_class_arg,
+			"cur_class_scope":self.cur_class_scope,
+			"in_method":self.in_method,
+			"classes":self.classes,
+			"vars_and_Classes":self.vars_and_Classes,
+			"already_added":self.already_added,
+			"already_added_names":self.already_added_names,
+			"updaters":self.updaters
+		}
+		std.update(**kwargs)
+		tr = Transpiler(ProgramNode(first),**std, cur_Class=self.cur_Class)
+
+		tr.orig_vars = self.orig_vars
+		tr.newvars = self.newvars
+		tr.block_vars = self.block_vars
+		tr.in_class = self.in_class
+		return tr
 
 	
 
@@ -428,7 +449,7 @@ f"""void wait(unsigned long time, float unit){{
 				return Result(f"{type__ if not self.in_class and  (isinstance(node.left, AttributeAccessNode) and node.left.obj.name == self.cur_class_arg.name) else 'this->'} {left} = {right} "if not self.give_var else f"{left} = {right}", False, False,"",True ,True)  
 			
 			elif type_=="tuple<>":
-				return Result(self.make_tuple(left, right, node), False, False, "",True ,True)
+				return Result(self.make_tuple(left, right, node), False, False, "", True ,True)
 
 			elif isinstance(node.right, CallNode) and node.right.name.name in self.classes:
 				print("hello")
