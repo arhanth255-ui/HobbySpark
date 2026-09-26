@@ -1,9 +1,9 @@
-from os import truncate
 from parser import *
 from lexer import *
 from json import load, dumps
 from pathlib import Path
-folder=Path.home()/"AppData"/"Roaming"/"HobbySpark transpiler"
+from platformdirs import user_config_dir
+folder=Path(user_config_dir("HobbySpark transpiler", appauthor=False, roaming=True))
 file=folder/"ClassData.json"
 
 
@@ -268,11 +268,11 @@ class Transpiler:
         self.cur_class_scope = cur_class_scope if cur_class_scope is not None else []
         self.in_method=in_method
         with open(file) as f:
-            raw_data = load(f)["special"]
-        data={}
-        for dat in raw_data:
-            data[dat["name"]] = dat
-        self.classes=classes+list(data.keys()) if classes is not None else list(data.keys())
+            self.raw_data = load(f)["special"]
+        self.data={}
+        for dat in self.raw_data:
+            self.data[dat["name"]] = dat
+        self.classes=classes+list(self.data.keys()) if classes is not None else list(self.data.keys())
         self.cur_Class = cur_Class
         self.vars_and_Classes:dict=vars_and_Classes if vars_and_Classes is not None else {}
         self.vars_and_types:dict=vars_and_types if vars_and_types is not None else {}
@@ -459,16 +459,16 @@ f"""void wait(unsigned long time, float unit){{
                     kew_word+=f"{',' if len(node.right.args)>0 else ''}{k}={v}"
 
                 args = []
-                classes = [n["name"] for n in raw_data]
+                classes = [n["name"] for n in self.raw_data]
                 n = 0
                 for arg in node.right.args:
                     classname = self.visit(node.right.name)[0]
 
                         
-                    if self.visit(node.right.name)[0] not in classes or str(n) not in raw_data[classes.index(self.visit(node.right.name)[0])]["pin_args"]:
+                    if self.visit(node.right.name)[0] not in classes or str(n) not in self.raw_data[classes.index(self.visit(node.right.name)[0])]["pin_args"]:
                         args.append(self.visit(arg)[0])
                     else:
-                        catalog:dict = raw_data[classes.index(self.visit(node.right.name)[0])]["pin_args"]
+                        catalog:dict = self.raw_data[classes.index(self.visit(node.right.name)[0])]["pin_args"]
                         if str(n) in catalog:
                             args.append(arg.value.upper() if isinstance(arg.value,str) and arg.value.upper() in self.pins else arg.value)
                         else:
@@ -906,7 +906,11 @@ f"""void wait(unsigned long time, float unit){{
         if self.visit(node.name)[0] =="set_board":
             self.board = [self.visit(n)[0] for n in node.args][0]
             return Result("//SetBoard")
-
+        with open(file) as f:
+            raw_data = load(f)["special"]
+        data={}
+        for dat in raw_data:
+            data[dat["name"]] = dat
         kew_word=""
         count=0
         for k,v in node.kwargs.items():

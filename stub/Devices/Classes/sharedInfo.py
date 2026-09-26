@@ -130,7 +130,7 @@ def set_board(board:Board, debug_mode:bool = True):
             startup()
         else:
             board.export()
-            set_board(board)
+            set_board(board, debug_mode)
 
 
         

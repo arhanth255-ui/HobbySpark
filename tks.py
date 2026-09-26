@@ -7,13 +7,16 @@ import os
 import sys
 import site
 import traceback
-
+from pathlib import Path
 
 
 def resource_path(relative):
     if hasattr(sys, "_MEIPASS"):
-        return os.path.join(sys._MEIPASS, relative)
-    return os.path.join(os.path.abspath("."), relative)
+        base = Path(sys._MEIPASS)
+    else:
+        base = Path(__file__).resolve().parent
+
+    return str(base / relative)
 
 
     
@@ -48,7 +51,7 @@ import os
 import sys
 import subprocess
 import json as data_handle
-from pathlib import Path
+
 
 WINDOWS_CREATION_FLAGS = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
@@ -436,7 +439,7 @@ def askcom(root, out = None, console:Console = None):
     print("OUT", out)
     com = ""
     new = Toplevel(root)
-    new.title("Select COM port")
+    new.title("Select serial port")
     result = subprocess.run(["arduino-cli", "board", "list", "--format", "json"], capture_output=True, text=True,creationflags=WINDOWS_CREATION_FLAGS)
     print(result.stdout)
     data:dict = (data_handle.loads(result.stdout))["detected_ports"]
@@ -649,11 +652,14 @@ class Tab:
         self.editor.text.edit_modified(False)
 
     def check(self, a):
-        if self.editor.text.edit_modified():
-            self.modified = True
-            self.editor.text.edit_modified(False)
+        #if self.editor.text.edit_modified():
+        self.modified = True
+        self.editor.text.edit_modified(False)
+        print("GUASGHFWEGYUCTEYRTQYURCT4YTRW3F", "CAHNGED")
+
     def check2(self, a):
         self.modified=False
+        print("GUASGHFWEGYUCTEYRTQYURCT4YTRW3F", "CAHNGED")
 
     def __repr__(self) -> str:
         return f"Tab at {self.name}"
@@ -731,11 +737,28 @@ class GUI:
             mb.showwarning("arduino-cli not found on PATH", "arduino-cli was not found on your system. ")
             a = mb.askokcancel("Install", "Install arduino-cli automatically? ")
             if a:
-                subprocess.run([
-                    "msiexec",
-                    "/i",
-                    resource_path("installers/arduino-cli.msi")
-                ])
+                if sys.platform=="win32":
+                    subprocess.run([
+                        "msiexec",
+                        "/i",
+                        resource_path("installers/arduino-cli.msi")
+                    ])
+                elif sys.platform=="darwin":
+                    subprocess.run(
+                    ["install", "-m", "755", "installers/arduino-cli",
+                    os.path.expanduser("~/bin/arduino-cli")],
+                    check=True
+                )
+
+                elif sys.platform.startswith("linux"):
+                    subprocess.run([
+    "x-terminal-emulator",
+    "-e",
+    "sudo",
+    "apt",
+    "install",
+    "./installers/arduino-cli.deb"
+])
                 mb.showinfo("Installed ","arduino-cli was installed. HobbySpark will now restart. ")
                 os.execv(sys.executable, [sys.executable] + sys.argv)
             else:
@@ -763,7 +786,11 @@ class GUI:
                 ["arduino-cli", "lib", "install", "ESP32Servo"],creationflags=WINDOWS_CREATION_FLAGS
             )
         mixer.init()
-        root.iconbitmap(resource_path("installers\\icon.ico"))
+        if sys.platform == "win32":
+            root.iconbitmap(resource_path("installers/icon.ico"))
+        else:
+            icon = PhotoImage(file=resource_path("assets/icon.png"))
+            root.iconphoto(True, icon)  
         root.title("HobbySpark")
         self.config_file = resource_path(project_path/"user_data.json")
         os.makedirs(project_path, exist_ok=True)
@@ -915,7 +942,10 @@ class GUI:
             elif ans is None:
                 return
         self.console.write("Goodbye!")
+        print("DIAGNOSTIC PRINT", any_modified, modified)
         self.root.destroy()
+
+
 
 
     def serial(self):
@@ -1211,7 +1241,7 @@ set_board(BoardName(), debug=True)#The debug option spits out some helpful debug
             transpiled = Transpiler(parsed).translate()
 
         except Exception as e:
-            self.console.write(f"Whoops, you made an error {e}.");return
+            self.console.write(f"Whoops, you made an error {e}.\n {traceback.format_exc()}");return
 
         self.console.write("HobbySpark at it's core, uses transpilation from python to C++.", "Transpiling is the process of turning source code (like python) to destination code (like C++). ", "A example of your code transpiled to C++ is: ", "\n".join(transpiled))
         self.console.write_warning("The transpiled code is NOT supposed to be ''reader friendly''. ", "The code may have unreadable code.", "Do not worry if you cannot articulate or understand the C++. ")
@@ -1412,9 +1442,9 @@ set_board(BoardName(), debug=True)#The debug option spits out some helpful debug
             return True
         self.save()
         self.console.write("Running")
-        result = subprocess.Popen([self.python, self.editor.current.path], text=True,creationflags=WINDOWS_CREATION_FLAGS, stdout=subprocess.PIPE)
+        result = subprocess.Popen([self.python, self.editor.current.path], text=True,creationflags=WINDOWS_CREATION_FLAGS, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.stderr:
-            self.console.write_error(f"Could not run: {result.stderr}")
+            self.console.write_error(f"Could not run: {result.stderr.read()}")
             return True
         self.console.write("Ran sucessfully: ")
         newconsole = Toplevel(self.root)
