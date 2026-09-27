@@ -1443,10 +1443,12 @@ set_board(BoardName(), debug=True)#The debug option spits out some helpful debug
         self.save()
         self.console.write("Running")
         result = subprocess.Popen([self.python, self.editor.current.path], text=True,creationflags=WINDOWS_CREATION_FLAGS, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if result.stderr:
+        print(result.stderr)
+        result.wait()
+        if result.returncode!=0:
             self.console.write_error(f"Could not run: {result.stderr.read()}")
             return True
-        self.console.write("Ran sucessfully: ")
+        self.console.write("Ran sucessfully ")
         newconsole = Toplevel(self.root)
         a = Console(newconsole, "Python output")
         a.str.pack(expand=True, fill=BOTH)
