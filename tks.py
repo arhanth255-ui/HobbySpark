@@ -21,11 +21,14 @@ def resource_path(relative):
 
     
 
-site_packages = site.getsitepackages()[0]
+site_packages = site.getusersitepackages()
 
 src = resource_path("s_s")
 if not os.path.isdir(src):
     src = "stub"
+    
+if not os.path.isdir(src):
+    raise FileNotFoundError(f"File not found {stub}")
 dst = os.path.join(site_packages, "stub")
 
 if os.path.exists(dst):
@@ -652,10 +655,8 @@ class Tab:
         self.editor.text.edit_modified(False)
 
     def check(self, a):
-        #if self.editor.text.edit_modified():
-        self.modified = True
-        self.editor.text.edit_modified(False)
-        print("GUASGHFWEGYUCTEYRTQYURCT4YTRW3F", "CAHNGED")
+        if self.editor.text.edit_modified():
+            self.modified = True
 
     def check2(self, a):
         self.modified=False
@@ -683,6 +684,7 @@ class TabManager:
         self.tabs.append(current)
         self.change(current)
         self.current = current
+        self.current.modified = False
         
 
     def delete(self, tab):
