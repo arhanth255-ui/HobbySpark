@@ -753,6 +753,7 @@ class GUI:
                 )
 
                 elif sys.platform.startswith("linux"):
+                    mb.showinfo("Notice", "After this, a window will open up and ask your system password. Note that HobbySpark does not store passwords in any way.")
                     subprocess.run([
     "x-terminal-emulator",
     "-e",
@@ -766,6 +767,9 @@ class GUI:
             else:
                 root.destroy()
         
+        if sys.platform.startswith("linux"):
+            mb.showinfo("Extra step before usage", "HobbySpark has detected that you are running linux. Due to permissions in linux, you will have to do an extra step before you use HobbySpark. Run the following command \"sudo usermod -aG dialout \"$USER\"\" and login and logout for the changes to apply. This will not affect you're system, it will only let HobbySpark access your ports to upload code to the microcontroller.")
+            root.kill()
 
         libs = subprocess.check_output(
             ["arduino-cli", "lib", "list"],
@@ -1134,7 +1138,7 @@ A few folders and files in your project:
         with open(os.path.join(self.path, ".src", "main.py"), "w") as f:
             code = \
 """from stub import *
-set_board(BoardName(), debug=True)#The debug option spits out some helpful debug prints to the console if true
+set_board(BoardName(), debug_mode=True)
 ###############
 #Your code here
 ###############
