@@ -717,6 +717,10 @@ class TabManager:
 class GUI:
     def __init__(self, root:Tk) -> None:
         self.path=""
+ 
+        if sys.platform.startswith("linux") and "dialout" not in subprocess.run(["groups"], capture_output=True, text=True, creationflags=WINDOWS_CREATION_FLAGS).stdout.split(" "):
+            mb.showinfo("Extra step before usage", "HobbySpark has detected that you are running linux. Due to permissions in linux, you will have to do an extra step before you use HobbySpark. Run the following command \"sudo usermod -aG dialout \"$USER\"\" and login and logout for the changes to apply. This will not affect you're system, it will only let HobbySpark access your ports to upload code to the microcontroller.")
+            root.kill()
 
         if shutil.which("python") is not None: self.python=shutil.which("python")    
         elif shutil.which("python3") is not None: self.python=shutil.which("python3")
@@ -766,11 +770,6 @@ class GUI:
                 os.execv(sys.executable, [sys.executable] + sys.argv)
             else:
                 root.destroy()
-        
-        if sys.platform.startswith("linux"):
-            mb.showinfo("Extra step before usage", "HobbySpark has detected that you are running linux. Due to permissions in linux, you will have to do an extra step before you use HobbySpark. Run the following command \"sudo usermod -aG dialout \"$USER\"\" and login and logout for the changes to apply. This will not affect you're system, it will only let HobbySpark access your ports to upload code to the microcontroller.")
-            root.kill()
-
         libs = subprocess.check_output(
             ["arduino-cli", "lib", "list"],
             text=True,
