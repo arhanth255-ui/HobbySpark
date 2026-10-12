@@ -60,7 +60,7 @@ class Led:
 
     def set_brightness(self,PWM_output)->None:
         """Sets the brightness of the led connected to pin to arg(PWM_output)(in percent, not 0 to 255)."""
-        if not isinstance(PWM_output,int) or not 100<PWM_output>0:
+        if not isinstance(PWM_output,int) or 0<PWM_output>100:
             raise InvalidArgumentError(PWM_output,"int between 0 and 100")
         if not self.pin.raw_pin in PWM_pins:
             raise PinNotApplicableError(self.pin.raw_pin, "non PWM", "PWM")
@@ -113,11 +113,11 @@ class RGBLed:
         
     def set(self,r,g,b)->None:
         """Sets the led to the values given in r, g and b(values in percentage)."""
-        if not isinstance(r,int) and not 100<r>0:
+        if not isinstance(r,int) or 0<r>100:
             raise InvalidArgumentError(r,"int between 0 and 100")
-        if not isinstance(g,int) and not 100<g>0:
+        if not isinstance(g,int) or 0<g>100:
             raise InvalidArgumentError(g,"int between 0 and 100")
-        if not isinstance(b,int) and not 100<b>0:
+        if not isinstance(b,int) or 0<b>100:
             raise InvalidArgumentError(b,"int between 0 and 100")
         check(self,currentframe().f_code,locals())
         
@@ -131,11 +131,11 @@ class RGBLed:
             raise InvalidArgumentError(time,"int or float")
         if not isinstance(unit,int):
             raise InvalidArgumentError(unit,"int")
-        if not isinstance(r,int) and not 100<r>0:
+        if not isinstance(r,int) or 0<r>100:
             raise InvalidArgumentError(r,"int between 0 and 100")
-        if not isinstance(g,int) and not 100<g>0:
+        if not isinstance(g,int) or 0<g>100:
             raise InvalidArgumentError(g,"int between 0 and 100")
-        if not isinstance(b,int) and not 100<b>0:
+        if not isinstance(b,int) or 0<b>100:
             raise InvalidArgumentError(b,"int between 0 and 100")
         check(self,currentframe().f_code,locals())
         
@@ -145,11 +145,11 @@ class RGBLed:
         
     def blink(self,r,g,b,times,speed,unit)->None:
         """Blinks the led with the given values speed arg(times) times, waiting arg(speed) before each blink with the unit of time as arg(times)."""
-        if not isinstance(r,int) and not 100<r>0:
+        if not isinstance(r,int) or 0<r>100:
             raise InvalidArgumentError(r,"int between 0 and 100")
-        if not isinstance(g,int) and not 100<g>0:
+        if not isinstance(g,int) or 0<g>100:
             raise InvalidArgumentError(g,"int between 0 and 100")
-        if not isinstance(b,int) and not 100<b>0:
+        if not isinstance(b,int) or 0<b>100:
             raise InvalidArgumentError(b,"int between 0 and 100")
         check(self,currentframe().f_code,locals())
     def set_color(self,color=RED)->None:

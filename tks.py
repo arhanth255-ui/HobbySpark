@@ -28,7 +28,7 @@ if not os.path.isdir(src):
     src = "stub"
     
 if not os.path.isdir(src):
-    raise FileNotFoundError(f"File not found {stub}")
+    raise FileNotFoundError(f"File not found {src}")
 dst = os.path.join(site_packages, "stub")
 
 if os.path.exists(dst):
@@ -1711,4 +1711,5 @@ a = Tk()
 a.report_callback_exception = handle
 b = GUI(a)
 a.mainloop()
+
 

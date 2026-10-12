@@ -263,14 +263,6 @@ jobs:
       - name: Show files
         run: find .
       
-      - name: Get annotated tag message
-        id: tag_message
-        run: |
-          git for-each-ref \
-            --format='%(contents)' \
-            "refs/tags/${GITHUB_REF_NAME}" > release-notes.md
-
-          cat release-notes.md
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
