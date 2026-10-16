@@ -17,7 +17,7 @@ while a:
 a="transpile_test.py" 
 b="transpiler_test.py"
 with open(a) as f:
-    q=f.read()
+    q="a = 12; b = \" Hello \"; c = a + b"
     f=lexer.Lexer(q)
     l=f.evaluate()
     print(l)
