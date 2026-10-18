@@ -1,64 +1,119 @@
 
+/* ========================================
+   HobbySpark — Shared Theme
+   ======================================== */
+
+:root {
+    color-scheme: dark;
+
+    --hs-app-bg: #17191f;
+    --hs-editor-bg: #1b1c22;
+    --hs-panel-bg: #20232b;
+    --hs-header-bg: #22252d;
+    --hs-tab-bg: #22252d;
+
+    --hs-border: #383b45;
+    --hs-text: #e5e7eb;
+    --hs-muted: #9ca3af;
+
+    --hs-accent: #fbbf24;
+    --hs-hover: #30343e;
+    --hs-selection: #49402a;
+
+    --hs-sidebar-width: 220px;
+    --hs-header-height: 52px;
+    --hs-tab-height: 38px;
+
+    --hs-font: "Inter", "Segoe UI", sans-serif;
+    --hs-font-size: 13px;
+}
+
+/* ========================================
+   Reset and application shell
+   ======================================== */
+
 * {
     box-sizing: border-box;
 }
-
-
 
 html,
 body {
     width: 100%;
     height: 100%;
     margin: 0;
+    overflow: hidden;
 }
 
 body {
     display: flex;
     flex-direction: column;
-    background: #17191f;
-    color: #e5e7eb;
-    font-family: sans-serif;
+    background: var(--hs-app-bg);
+    color: var(--hs-text);
+    font-family: var(--hs-font);
+    font-size: var(--hs-font-size);
 }
+
+/* ========================================
+   Application header
+   ======================================== */
 
 header {
     display: flex;
+    flex: 0 0 var(--hs-header-height);
     align-items: center;
     justify-content: space-between;
     gap: 18px;
-    padding: 16px 24px;
-    background: #22252d;
-    border-bottom: 1px solid #383b45;
+    padding: 0 20px;
+    background: var(--hs-header-bg);
+    border-bottom: 1px solid var(--hs-border);
 }
 
 header h1 {
     margin: 0;
-    font-size: 22px;
+    font-size: 21px;
+    font-weight: 650;
+    letter-spacing: -0.4px;
 }
 
 header span {
-    color: #9ca3af;
+    color: var(--hs-muted);
+    font-size: 13px;
 }
 
+/* ========================================
+   Main workspace
+   ======================================== */
 
-
-
-
-.work{
+.work {
     display: flex;
     flex: 1;
+    min-width: 0;
     min-height: 0;
-    align-items: stretch;   
+    overflow: hidden;
 }
 
+/* ========================================
+   Project explorer
+   ======================================== */
+
 .tree {
-    width: 240px;
-    padding: 12px;
-    background: #20232b;
-    color: #e5e7eb;
-    font-family: sans-serif;
+    flex: 0 0 var(--hs-sidebar-width);
+    width: var(--hs-sidebar-width);
+    min-width: 0;
+    padding: 10px 8px;
+    overflow-x: hidden;
     overflow-y: auto;
-    flex: 0 0 240px;
-    align-self: stretch;
+    background: var(--hs-panel-bg);
+    color: var(--hs-text);
+    border-right: 1px solid var(--hs-border);
+    scrollbar-width: thin;
+    scrollbar-color: #454955 transparent;
+}
+
+.tree-folder,
+.tree-file {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .tree-folder-label,
@@ -67,13 +122,14 @@ header span {
     align-items: center;
     gap: 8px;
     width: 100%;
+    min-width: 0;
     padding: 6px 8px;
-    border: none;
+    border: 0;
     border-radius: 4px;
     background: transparent;
     color: inherit;
     font: inherit;
-    font-size: 13px;
+    font-size: var(--hs-font-size);
     text-align: left;
 }
 
@@ -83,16 +139,18 @@ header span {
 
 .tree-folder-label:hover,
 .tree-file:hover {
-    background: #30343e;
+    background: var(--hs-hover);
 }
 
-.tree-folder-label:focus-visible {
-    outline: 2px solid #fbbf24;
+.tree-folder-label:focus-visible,
+.tree-file:focus-visible {
+    outline: 2px solid var(--hs-accent);
     outline-offset: -2px;
 }
 
 .tree-children {
-    padding-left: 16px;
+    min-width: 0;
+    padding-left: 12px;
 }
 
 .tree-children[hidden] {
@@ -100,60 +158,85 @@ header span {
 }
 
 .tree-chevron {
+    flex: 0 0 12px;
     width: 12px;
-    flex-shrink: 0;
-    color: #9ca3af;
+    color: var(--hs-muted);
 }
 
+.tree-file span:first-child {
+    flex-shrink: 0;
+}
 
-.editor {
+.tree-file span:last-child,
+.tree-folder-label span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ========================================
+   Editor panel
+   ======================================== */
+
+.editor-panel {
     display: flex;
-    flex-direction: column;
     flex: 1;
+    flex-direction: column;
     min-width: 0;
     min-height: 0;
-    background: #17191f;
+    overflow: hidden;
+    background: var(--hs-editor-bg);
 }
+
+/* ========================================
+   Editor tabs
+   ======================================== */
 
 .editor-tabs {
     display: flex;
+    flex: 0 0 var(--hs-tab-height);
     align-items: stretch;
-    flex-shrink: 0;
-    height: 38px;
+    min-width: 0;
     overflow-x: auto;
-    background: #22252d;
-    border-bottom: 1px solid #383b45;
+    overflow-y: hidden;
+    background: var(--hs-tab-bg);
+    border-bottom: 1px solid var(--hs-border);
+    scrollbar-width: thin;
+    scrollbar-color: #454955 transparent;
 }
 
 .editor-tab {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
     gap: 12px;
     padding: 0 12px;
-    border: none;
-    border-right: 1px solid #383b45;
+    border: 0;
+    border-right: 1px solid var(--hs-border);
     border-top: 2px solid transparent;
     background: transparent;
-    color: #9ca3af;
+    color: var(--hs-muted);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--hs-font-size);
     white-space: nowrap;
     cursor: pointer;
 }
 
 .editor-tab:hover {
-    background: #2a2d36;
-    color: #e5e7eb;
+    background: var(--hs-hover);
+    color: var(--hs-text);
 }
 
 .editor-tab.active {
-    background: #17191f;
-    color: #e5e7eb;
-    border-top-color: #fbbf24;
+    background: var(--hs-editor-bg);
+    color: var(--hs-text);
+    border-top-color: var(--hs-accent);
 }
 
 .tab-close {
     display: inline-flex;
+    flex: 0 0 18px;
     align-items: center;
     justify-content: center;
     width: 18px;
@@ -163,16 +246,44 @@ header span {
 }
 
 .tab-close:hover {
-    background: #383b45;
+    background: var(--hs-hover);
 }
+
+/* ========================================
+   Monaco editor container
+   ======================================== */
 
 .editor-content {
     flex: 1;
     min-width: 0;
     min-height: 0;
+    overflow: hidden;
+    background: var(--hs-editor-bg);
 }
+
 #editor {
     width: 100%;
     height: 100%;
     overflow: hidden;
+}
+
+/* ========================================
+   Scrollbars
+   ======================================== */
+
+.tree::-webkit-scrollbar,
+.editor-tabs::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.tree::-webkit-scrollbar-thumb,
+.editor-tabs::-webkit-scrollbar-thumb {
+    background: #454955;
+    border-radius: 4px;
+}
+
+.tree::-webkit-scrollbar-thumb:hover,
+.editor-tabs::-webkit-scrollbar-thumb:hover {
+    background: #626778;
 }

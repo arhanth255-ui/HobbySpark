@@ -1,5 +1,5 @@
-
-class EditorTabs {
+import { openFile } from "./editor.js";
+export class EditorTabs {
     constructor(element) {
         this.element = typeof element === "string"
             ? document.querySelector(element)
@@ -9,15 +9,17 @@ class EditorTabs {
             throw new Error("Editor tabs element not found");
         }
         this.openFiles = [];
+        this.openFilesAndPaths = {};
     }
 
-    add(name) {
+    add(name, path) {
         if (this.openFiles.includes(name)){
             return;
         }
         const tab = document.createElement("button");
         tab.className = "editor-tab";
         tab.type = "button";
+        tab.addEventListener("click", async (event)=>{await this.onClick(event)})
 
         const title = document.createElement("span");
         title.className = "tab-name"
@@ -25,6 +27,7 @@ class EditorTabs {
         title.textContent = name;
 
         this.openFiles.push(name)
+        this.openFilesAndPaths[name] = path;
 
         const close = document.createElement("span");
         close.className = "tab-close";
@@ -35,6 +38,19 @@ class EditorTabs {
         this.element.appendChild(tab);
 
         return tab;
+    }
+
+    async onClick(event) {
+        const tab = event.target.closest(".editor-tab");
+        console.log("Clicked on ", tab)
+
+        if (!tab) return;
+        
+        const name = tab.querySelector(".tab-name").textContent;
+        console.log("Got name ", name)
+        const path = this.openFilesAndPaths[name];
+        await openFile(path)
+        
     }
 
     close(event){

@@ -13,38 +13,35 @@
         <span>Arduino Transpiler</span>
     </header>
 
-    <div class="work">
+    
+<div class="work">
     <div class="tree" id="project-tree">
+        <div class="tree-folder">
+            <button class="tree-folder-label"
+                    type="button"
+                    aria-expanded="true">
+            </button>
 
-    <div class="tree-folder">
-        <button class="tree-folder-label"
-                type="button"
-                aria-expanded="true">
-        </button>
-
-        <div class="tree-children">
-
-            
-
+            <div class="tree-children"></div>
         </div>
     </div>
 
-</div>
+    <div class="editor-panel">
+        <div class="editor-tabs" id="editor-tabs"></div>
 
-
-    <div class="editor-tabs" id="editor-tabs"></div>
-
-    <div class="editor-content">
-        <!-- Editor will go here later -->
+        <div class="editor-content">
+            <div id="editor"></div>
+        </div>
     </div>
- 
+</div>
+
 
 </div>
 
 
-    <div id="editor"></div>
-    <script src="tabmanager.js"></script>
-<script src="tree.js"></script>
-<script src="app.js"></script>
+
+<script type="module" src="/editor.js"></script>
+<script type="module" src="/app.js"></script>
+
 </body>
 </html>

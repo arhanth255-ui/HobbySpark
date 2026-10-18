@@ -2,6 +2,7 @@ const fs = require("fs");
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("path");
 
+
 function createWindow() {
     const win = new BrowserWindow({
         width: 1136,
@@ -16,7 +17,7 @@ function createWindow() {
         }
     });
 
-    win.loadFile(path.join(__dirname, "renderer", "index.html"));
+    win.loadURL("http://127.0.0.1:5173");
 }
 
 ipcMain.handle("project:open-folder", async function () {
@@ -47,6 +48,17 @@ ipcMain.handle("project:read-folder", async function (event, folderPath) {
 
     return files;   
 })
+
+
+ipcMain.handle("file:read", async function (event, filePath) {
+    return await fs.promises.readFile(filePath, "utf8");
+});
+
+ipcMain.handle("file:write", async function (event, filePath, contents) {
+    await fs.promises.writeFile(filePath, contents, "utf8");
+    return true;
+});
+
 
 app.whenReady().then(() => {
     createWindow();

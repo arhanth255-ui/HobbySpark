@@ -1,7 +1,10 @@
+import { EditorTabs } from "./tabmanager.js";
+import { Tree } from "./tree.js";
 var filesAndFolders;
 var folderPath;
 const editorTabs = new EditorTabs("#editor-tabs");
 let projectTree;
+
 
 
 async function startApp() {
@@ -28,7 +31,7 @@ async function add(folderPath, root = null) {
 
     for (var item of items) {
         if (!item.isDirectory) {
-            projectTree.addFile(item.name, root);
+            projectTree.addFile(item.name, item.path, root);
         } else {
             projectTree.addFolder(item.name, root);
             await add(item.path, item.name);
@@ -36,18 +39,17 @@ async function add(folderPath, root = null) {
     }
 }
 
+
+
 document.addEventListener("DOMContentLoaded", async function () {
     await startApp();
-    projectTree = new Tree("#project-tree", getPathName(folderPath));
+    projectTree = new Tree("#project-tree", editorTabs, getPathName(folderPath));
     await add(folderPath, projectTree.root_name);
 });
 
 console.log("Type of files", typeof filesAndFolders)
 
 
-editorTabs.add("main.hsp");
-editorTabs.add("boards.json");
-editorTabs.add("README.md");
 
 
 

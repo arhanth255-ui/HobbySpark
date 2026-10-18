@@ -1,6 +1,6 @@
 console.log("tree.js loaded!");
-class Tree {
-    constructor(element, root_name="UnSelected") {
+export class Tree {
+    constructor(element, editorTabs, root_name="UnSelected") {
         if (typeof element === "string") {
             element = document.querySelector(element);
         }
@@ -16,6 +16,8 @@ class Tree {
         });
         this.root_name = root_name;
         this.addFolder(root_name, null, true)
+        this.editorTabs = editorTabs;
+        this.tabsAndPaths = {};
 
     }
 
@@ -55,7 +57,7 @@ class Tree {
     }
 
     openFile (name){
-        editorTabs.add(name)
+        this.editorTabs.add(name, )
     }
 
     addFolder(name, parentName = null, special = false) {
@@ -140,7 +142,8 @@ class Tree {
     }
 
     
-addFile(name, parentName = null) {
+addFile(name, path, parentName = null) {
+    this.tabsAndPaths[name] = path;
     if (parentName === null) {
         parentName = this.root_name;
     }
