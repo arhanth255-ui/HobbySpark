@@ -1,0 +1,13 @@
+{
+  "name": "hobbyspark-electron",
+  "version": "1.0.0",
+  "description": "Electron GUI for the HobbySpark transpiler",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "private": true,
+  "devDependencies": {
+    "electron": "^39.0.0"
+  }
+}
