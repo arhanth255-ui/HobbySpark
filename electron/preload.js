@@ -1,4 +1,10 @@
+const { contextBridge, ipcRenderer } = require("electron");
 
-window.addEventListener("DOMContentLoaded", () => {
-    console.log("HobbySpark interface is ready!");
+contextBridge.exposeInMainWorld("hobbySpark", {
+    openProjectFolder: function () {
+        return ipcRenderer.invoke("project:open-folder");
+    },
+    listFilesAndFolders: function (f) {
+        return ipcRenderer.invoke("project:read-folder", f)
+    }
 });

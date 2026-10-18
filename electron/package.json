@@ -9,5 +9,8 @@
   "private": true,
   "devDependencies": {
     "electron": "^39.0.0"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.57.0"
   }
 }
