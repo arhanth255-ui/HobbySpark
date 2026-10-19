@@ -80,7 +80,7 @@ if (!editorElement) {
 }
 
 monacoEditor = monaco.editor.create(editorElement, {
-    value: "# Welcome to HobbySpark!\n\n",
+    value: "# No file currently open",
     language: "python",
     theme: "hobbySpark-dark",
     automaticLayout: true,
@@ -97,5 +97,8 @@ monacoEditor = monaco.editor.create(editorElement, {
 export async function openFile(filepath) {
     const content = await window.hobbySpark.readFile(filepath);
     monacoEditor.setValue(content)
+}
+export async function clearEditor() {
+    monacoEditor.setValue("# No file currently open")
 }
 

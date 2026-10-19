@@ -1,4 +1,4 @@
-import { openFile } from "./editor.js";
+import { openFile, clearEditor } from "./editor.js";
 export class EditorTabs {
     constructor(element) {
         this.element = typeof element === "string"
@@ -10,9 +10,12 @@ export class EditorTabs {
         }
         this.openFiles = [];
         this.openFilesAndPaths = {};
+        this.active;
+        this.historyOfActive = [];
+        this.closed = [];
     }
 
-    add(name, path) {
+    async add(name, path) {
         if (this.openFiles.includes(name)){
             return;
         }
@@ -32,28 +35,53 @@ export class EditorTabs {
         const close = document.createElement("span");
         close.className = "tab-close";
         close.textContent = "×";
-        close.addEventListener("click", (event)=>this.close(event));
+        close.addEventListener("click", async function (event) {
+            event.stopPropagation();
+            await this.close(event);
+        }.bind(this));
 
         tab.append(title, close);
         this.element.appendChild(tab);
+        await openFile(path)
+        this.active = name;
+        const previous = this.historyOfActive.indexOf(name);
+        if (previous !== -1) {
+            this.historyOfActive.splice(previous, 1);
+        }
 
+        this.historyOfActive.push(name);
+        
         return tab;
     }
 
-    async onClick(event) {
+    async onClick(event=null) {
+        if (!event.target|| !event.target.isConnected) {
+            return;
+        }
+        
         const tab = event.target.closest(".editor-tab");
-        console.log("Clicked on ", tab)
-
         if (!tab) return;
         
         const name = tab.querySelector(".tab-name").textContent;
+        this.active = name;
+        const previous = this.historyOfActive.indexOf(name);
+
+        if (previous !== -1) {
+            this.historyOfActive.splice(previous, 1);
+        }
+
+        this.historyOfActive.push(name);
+        
+        console.log("Clicked on ", tab)
+
+        
         console.log("Got name ", name)
         const path = this.openFilesAndPaths[name];
         await openFile(path)
         
     }
 
-    close(event){
+    async close(event){
         const tab = event.target.parentElement;
         const name = tab.querySelector(".tab-name")
         const index = this.openFiles.indexOf(name.textContent);
@@ -62,8 +90,35 @@ export class EditorTabs {
             this.openFiles.splice(index, 1);
             console.log("Removed", name.textContent)
         }
+        this.closed.push(name.textContent)
+        delete this.openFilesAndPaths[name.textContent];
 
+        if (this.active===name.textContent){
+            let toOpen;
+            let before = this.historyOfActive.indexOf(name.textContent);
+            do {
+                toOpen = this.historyOfActive[before-1];
+                before = before-1
+            }
+            while (this.closed.includes(toOpen));
+            if (!toOpen){
+                await clearEditor()
+                tab.remove()
+
+            }
+            await openFile(this.openFilesAndPaths[toOpen])
+
+            this.active = tab;
+            const previous = this.historyOfActive.indexOf(name);
+            if (previous !== -1) {
+                this.historyOfActive.splice(previous, 1);
+            }
+
+            this.historyOfActive.push(name);
+            tab.remove()
+        }
         tab.remove()
+        
 
     }
 }

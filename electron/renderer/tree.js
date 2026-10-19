@@ -11,8 +11,8 @@ export class Tree {
 
         this.element = element;
 
-        this.element.addEventListener("click", (event) => {
-            this.handleClick(event);
+        this.element.addEventListener("click", async (event) => {
+            await this.handleClick(event);
         });
         this.root_name = root_name;
         this.addFolder(root_name, null, true)
@@ -21,7 +21,7 @@ export class Tree {
 
     }
 
-    handleClick(event) {
+    async handleClick(event) {
         const label = event.target.closest(".tree-folder-label");
 
         const file = event.target.closest(".tree-file")
@@ -30,7 +30,7 @@ export class Tree {
             // Do something with the clicked file
             console.log("File clicked:", file.dataset.name);
 
-            this.openFile(file.dataset.name)
+            await this.openFile(file.dataset.name)
 
             return;
         }
@@ -56,8 +56,8 @@ export class Tree {
         chevron.textContent = shouldExpand ? "▾" : "▸";
     }
 
-    openFile (name){
-        this.editorTabs.add(name, )
+    async openFile (name){
+        await this.editorTabs.add(name, this.tabsAndPaths[name])
     }
 
     addFolder(name, parentName = null, special = false) {

@@ -28,6 +28,11 @@ function getPathName(path) {
 
 async function add(folderPath, root = null) {
     var items = await window.hobbySpark.listFilesAndFolders(folderPath);
+    items.sort(function (a, b){
+        if (a.isDirectory && !b.isDirectory){return -1}
+        if (!a.isDirectory && b.isDirectory){return 1}
+        return a.name.localeCompare(b.name)
+    });
 
     for (var item of items) {
         if (!item.isDirectory) {
