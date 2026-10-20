@@ -1,4 +1,4 @@
-import { openFile, clearEditor } from "./editor.js";
+import { openFile, clearEditor, saveFile } from "./editor.js";
 export class EditorTabs {
     constructor(element) {
         this.element = typeof element === "string"
@@ -92,33 +92,41 @@ export class EditorTabs {
         }
         this.closed.push(name.textContent)
         delete this.openFilesAndPaths[name.textContent];
+        this.historyOfActive = this.historyOfActive.filter(
+            function (fileName) {
+                return fileName !== name.textContent;
+            }
+        );
 
         if (this.active===name.textContent){
             let toOpen;
             let before = this.historyOfActive.indexOf(name.textContent);
-            do {
-                toOpen = this.historyOfActive[before-1];
-                before = before-1
-            }
-            while (this.closed.includes(toOpen));
-            if (!toOpen){
-                await clearEditor()
-                tab.remove()
 
-            }
-            await openFile(this.openFilesAndPaths[toOpen])
+            while (before > 0) {
+                before--;
+                const candidate = this.historyOfActive[before];
 
-            this.active = tab;
-            const previous = this.historyOfActive.indexOf(name);
-            if (previous !== -1) {
-                this.historyOfActive.splice(previous, 1);
+                if (
+                    !this.closed.includes(candidate) &&
+                    this.openFiles.includes(candidate)
+                ) {
+                    toOpen = candidate;
+                    break;
+                }
             }
 
-            this.historyOfActive.push(name);
-            tab.remove()
+            if (toOpen) {
+                await openFile(this.openFilesAndPaths[toOpen]);
+            } else {
+                await clearEditor();
+            }
         }
         tab.remove()
         
 
+    }
+    async saveCurrentFile(){
+        await saveFile(this.openFilesAndPaths[this.active]);
+        return this.openFilesAndPaths[this.active]
     }
 }

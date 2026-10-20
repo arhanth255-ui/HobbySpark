@@ -16,6 +16,15 @@
     "wait-on": "^9.5.1"
   },
   "dependencies": {
-    "monaco-editor": "^0.57.0"
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "monaco-editor": "^0.57.0",
+    "monaco-languageclient": "^11.0.3",
+    "node-pty": "^1.1.0",
+    "tree-sitter-wasm": "^2.0.4",
+    "vscode-jsonrpc": "^9.0.3",
+    "vscode-ws-jsonrpc": "^4.0.3",
+    "web-tree-sitter": "^0.27.1",
+    "ws": "^8.22.0"
   }
 }

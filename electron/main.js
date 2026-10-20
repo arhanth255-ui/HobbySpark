@@ -1,10 +1,18 @@
+const { spawn } = require("node:child_process");
 const fs = require("fs");
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("path");
+const {
+    startLanguageServer,
+    stopLanguageServer
+} = require("./lsp-connect.js");
+const os = require("node:os");
+const pty = require("node-pty");
 
 
+let win;
 function createWindow() {
-    const win = new BrowserWindow({
+    win = new BrowserWindow({
         width: 1136,
         height: 651,
         minWidth: 800,
@@ -60,7 +68,77 @@ ipcMain.handle("file:write", async function (event, filePath, contents) {
 });
 
 
+
+
+
+let terminalProcess = null;
+
+function startTerminal() {
+    if (terminalProcess) {
+        return;
+    }
+
+    terminalProcess = pty.spawn("/bin/bash", ["-i"], {
+        name: "xterm-256color",
+        cols: 100,
+        rows: 30,
+        cwd: os.homedir(),
+        env: {
+            ...process.env,
+            TERM: "xterm-256color",
+            PS1: "\\[\\e[1;32m\\]\\u\\[\\e[0m\\]@\\[\\e[1;36m\\]\\h\\[\\e[0m\\]:\\[\\e[1;34m\\]\\w\\[\\e[0m\\]\\[\\e[1;33m\\]\\$\\[\\e[0m\\] "
+        }
+    });
+
+    terminalProcess.onData(function (data) {
+        if (win && !win.isDestroyed()) {
+            win.webContents.send("terminal:data", data);
+        }
+    });
+
+    terminalProcess.onExit(function (event) {
+        terminalProcess = null;
+
+        if (win && !win.isDestroyed()) {
+            win.webContents.send("terminal:exit", event.exitCode);
+        }
+    });
+    // terminalProcess.write("source ~/.bashrc\n");
+}
+
+ipcMain.on("terminal:write", function (event, data) {
+    if (typeof data === "string" && terminalProcess) {
+        terminalProcess.write(data);
+    }
+});
+
+ipcMain.on("terminal:resize", function (event, size) {
+    if (
+        terminalProcess &&
+        Number.isInteger(size.cols) &&
+        Number.isInteger(size.rows) &&
+        size.cols > 0 &&
+        size.rows > 0
+    ) {
+        terminalProcess.resize(size.cols, size.rows);
+    }
+});
+
+ipcMain.on("terminal:start", function () {
+    startTerminal();
+});
+
+function stopTerminal() {
+    if (terminalProcess) {
+        terminalProcess.kill();
+        terminalProcess = null;
+    }
+}
+
+
 app.whenReady().then(() => {
+    startLanguageServer();
+    startTerminal();
     createWindow();
 
     app.on("activate", () => {
@@ -71,6 +149,8 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
+    stopLanguageServer();
+    stopTerminal();
     if (process.platform !== "darwin") {
         app.quit();
     }

@@ -2,7 +2,7 @@ import { EditorTabs } from "./tabmanager.js";
 import { Tree } from "./tree.js";
 var filesAndFolders;
 var folderPath;
-const editorTabs = new EditorTabs("#editor-tabs");
+export const editorTabs = new EditorTabs("#editor-tabs");
 let projectTree;
 
 
@@ -52,7 +52,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     await add(folderPath, projectTree.root_name);
 });
 
+
+
 console.log("Type of files", typeof filesAndFolders)
+console.log("Testing hobbyspark")
 
 
 
