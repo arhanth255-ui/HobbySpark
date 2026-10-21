@@ -3,6 +3,7 @@ var work = document.querySelector(".work");
 var sidebar = document.getElementById("project-tree");
 var editorPanel = document.querySelector(".editor-panel");
 var terminal = document.getElementById("console-panel");
+var arduinoPanel = document.getElementById("arduino-panel");
 
 function makeResizer(element, onMove) {
     if (!element) {
@@ -41,7 +42,7 @@ if (!work || !sidebar || !editorPanel || !terminal) {
         "HobbySpark resizers: .work, #project-tree, .editor-panel, or #console-panel is missing."
     );
 } else {
-    // Create the tree divider without changing the existing tree contents.
+    // Create the sidebar divider.
     var treeResizer = document.createElement("div");
     treeResizer.id = "sidebar-resizer";
     treeResizer.className = "resizer";
@@ -50,7 +51,7 @@ if (!work || !sidebar || !editorPanel || !terminal) {
 
     work.insertBefore(treeResizer, editorPanel);
 
-    // Create the terminal divider without changing the editor or terminal.
+    // Create the terminal divider.
     var terminalResizer = document.createElement("div");
     terminalResizer.id = "terminal-resizer";
     terminalResizer.className = "resizer horizontal";
@@ -59,21 +60,29 @@ if (!work || !sidebar || !editorPanel || !terminal) {
 
     terminal.parentNode.insertBefore(terminalResizer, terminal);
 
-    // Resize the project tree horizontally.
+    // Resize whichever sidebar panel is visible.
     makeResizer(treeResizer, function (event) {
         var bounds = work.getBoundingClientRect();
         var width = event.clientX - bounds.left;
 
         width = Math.max(150, Math.min(500, width));
 
-        sidebar.style.flex = "0 0 " + width + "px";
-        sidebar.style.width = width + "px";
+        var activeSidebar = sidebar.hidden
+            ? arduinoPanel
+            : sidebar;
+
+        if (!activeSidebar || activeSidebar.hidden) {
+            return;
+        }
+
+        activeSidebar.style.flex = "0 0 " + width + "px";
+        activeSidebar.style.width = width + "px";
     });
 
     // Resize the terminal vertically.
     makeResizer(terminalResizer, function (event) {
-        var availableHeight = terminal.parentElement.getBoundingClientRect().height;
         var bounds = terminal.parentElement.getBoundingClientRect();
+        var availableHeight = bounds.height;
         var height = bounds.bottom - event.clientY;
 
         height = Math.max(80, Math.min(availableHeight - 100, height));

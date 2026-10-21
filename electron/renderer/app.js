@@ -23,7 +23,11 @@ async function startApp() {
     console.log("Is array:", Array.isArray(filesAndFolders));
 }
 function getPathName(path) {
-    return path.split(/[\\/]/).pop();
+    if (typeof path !== "string" || path.length === 0) {
+        return "";
+    }
+
+    return path.split("/").pop();
 }
 
 async function add(folderPath, root = null) {
@@ -55,7 +59,28 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
 console.log("Type of files", typeof filesAndFolders)
-console.log("Testing hobbyspark")
+var portSelector = document.getElementById("port-selector");
+
+async function loadPorts() {
+    var result = await window.hobbySpark.getPorts();
+
+    portSelector.innerHTML = "";
+
+    for (const item of result.detected_ports ?? []) {
+        var address = item.port.address;
+        var option = document.createElement("option");
+
+        option.value = address;
+        option.textContent = address;
+
+        portSelector.appendChild(option);
+    }
+}
+loadPorts()
+
+export function runHobbySparkCommand(command){
+    console.log("Got command, ", command)
+}
 
 
 

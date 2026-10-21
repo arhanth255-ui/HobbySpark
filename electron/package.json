@@ -18,6 +18,7 @@
   "dependencies": {
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
+    "lucide-static": "^1.60.0",
     "monaco-editor": "^0.57.0",
     "monaco-languageclient": "^11.0.3",
     "node-pty": "^1.1.0",

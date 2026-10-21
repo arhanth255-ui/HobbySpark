@@ -1,4 +1,4 @@
-
+import { runHobbySparkCommand } from "./app";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
@@ -39,7 +39,40 @@ window.hobbySpark.onTerminalExit(function (code) {
     terminal.write("\r\n[Shell exited: " + code + "]\r\n");
 });
 
+var commandBuffer = "";
+
 terminal.onData(function (data) {
+    if (data === "\r") {
+        var command = commandBuffer.trim();
+        commandBuffer = "";
+
+        if (command === "hobbyspark" ||
+            command.startsWith("hobbyspark ")) {
+            window.hobbySpark.writeTerminal("\r\n");
+
+            runHobbySparkCommand(command);
+            return;
+        }
+
+        window.hobbySpark.writeTerminal(data);
+        return;
+    }
+
+    if (data === "\u007f" || data === "\b") {
+        if (commandBuffer.length > 0) {
+            commandBuffer = commandBuffer.slice(0, -1);
+        }
+
+        window.hobbySpark.writeTerminal(data);
+        return;
+    }
+
+    if (!data.startsWith("\u001b") && data.length === 1) {
+        commandBuffer += data;
+    } else if (data.length > 1) {
+        commandBuffer = "";
+    }
+
     window.hobbySpark.writeTerminal(data);
 });
 

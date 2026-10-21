@@ -474,14 +474,201 @@ header span {
     overflow: hidden;
 }
 
-html,
-body {
-    height: 100%;
-    margin: 0;
-}
 
-body {
+
+
+#activity-bar {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    align-items: stretch;
+    flex: 0 0 48px;
+    width: 48px;
+    min-width: 48px;
+    background: var(--hs-bg);
+    border-right: 1px solid var(--hs-border);
+    padding-top: 8px;
+    gap: 6px;
+}
+
+.activity-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+
+    padding: 0;
+    border: none;
+    border-left: 3px solid transparent;
+    border-radius: 0;
+
+    background: transparent;
+    color: var(--hs-text-muted, #858585);
+
+    font: inherit;
+    font-size: 24px;
+    cursor: pointer;
+
+    transition:
+        color 120ms ease,
+        background 120ms ease;
+}
+
+.activity-button:hover {
+    color: var(--hs-text, #ffffff);
+    background: var(--hs-hover, #2a2d2e);
+}
+
+.activity-button img {
+    width: 22px;
+    height: 22px;
+    opacity: 0.7;
+    filter: invert(1);
+    transition: opacity 120ms ease;
+}
+
+
+
+.activity-button {
+    border-left: 3px solid transparent;
+}
+
+.activity-button.selected {
+    border-left: 3px solid var(--hs-accent);
+
+}
+
+.activity-button:focus-visible {
+    outline: 1px solid var(--hs-accent);
+    outline-offset: -3px;
+}
+
+.activity-button:active {
+    background: var(--hs-hover, #2a2d2e);
+}
+
+.activity-icon {
+    width: 22px;
+    height: 22px;
+    display: block;
+    background-color: currentColor;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    -webkit-mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+}
+
+.icon-folder {
+    mask-image: url("./assets/icons/folder.svg");
+    -webkit-mask-image: url("./assets/icons/folder.svg");
+}
+
+.icon-cpu {
+    mask-image: url("./assets/icons/cpu.svg");
+    -webkit-mask-image: url("./assets/icons/cpu.svg");
+}
+#activity-bar {
+    width: 48px;
+    min-width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--hs-sidebar);
+}
+
+/* .activity-button {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+    color: #a0a0a0;
+    border: none;
+    border-left: 5px solid transparent;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    cursor: pointer;
+} */
+
+.activity-button:hover {
+    color: #ffffff;
+    background: #ffffff08;
+}
+
+#activity-bar {
+    width: 48px;
+    min-width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    background: #18181f;
+    border-right: 1px solid #303039;
+}
+
+.activity-button {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    color: #85858f;
+
+    border: none;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.activity-button::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: #ff8800;
+}
+
+.activity-button:hover {
+    color: #eeeeee;
+    background: #ffffff08;
+}
+
+
+
+.activity-icon {
+    width: 22px;
+    height: 22px;
+    display: block;
+    background-color: currentColor;
+    flex-shrink: 0;
+}
+
+h4 {
+    padding-left: 10px;
+}
+
+#board-selector{
+    padding-left: 10px;
+}
+
+#port-selector{
+    padding-left: 10px;
 }

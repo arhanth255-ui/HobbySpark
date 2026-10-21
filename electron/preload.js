@@ -49,6 +49,15 @@ contextBridge.exposeInMainWorld("hobbySpark", {
         return function () {
             ipcRenderer.removeListener("terminal:exit", listener);
         };
+    },
+    // onHobbySparkCommand: function (callback) {
+    // return ipcRenderer.invoke("project:change-callback")
+    // },
+    // runHobbySparkCommand: function (input) {
+    //     return ipcRenderer.invoke("project:run-command-hobbyspark")
+    // },
+    getPorts: function () {
+        return ipcRenderer.invoke("project:get-com-ports")
     }
 
 });

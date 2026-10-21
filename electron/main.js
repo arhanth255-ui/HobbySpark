@@ -8,6 +8,8 @@ const {
 } = require("./lsp-connect.js");
 const os = require("node:os");
 const pty = require("node-pty");
+const { execFile } = require("node:child_process");
+const { promisify } = require("node:util");
 
 
 let win;
@@ -69,6 +71,26 @@ ipcMain.handle("file:write", async function (event, filePath, contents) {
 
 
 
+const execFileAsync = promisify(execFile);
+
+ipcMain.handle("project:get-com-ports", async function (event) {
+    const result = await execFileAsync("arduino-cli", [
+        "board", "list", "--format", "json"
+    ]);
+
+    return JSON.parse(result.stdout);
+});
+let callback;
+
+// ipcMain.handle("project:change-callback", function (event, callbackForHobbySpark){
+//     callback = callbackForHobbySpark;
+// })
+
+// ipcMain.handle("project:run-command-hobbyspark", function(ev, command){
+//     return callback(command);
+// })
+
+
 
 
 let terminalProcess = null;
@@ -106,10 +128,10 @@ function startTerminal() {
     // terminalProcess.write("source ~/.bashrc\n");
 }
 
+
+
 ipcMain.on("terminal:write", function (event, data) {
-    if (typeof data === "string" && terminalProcess) {
-        terminalProcess.write(data);
-    }
+    terminalProcess.write(data);
 });
 
 ipcMain.on("terminal:resize", function (event, size) {

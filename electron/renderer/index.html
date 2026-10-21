@@ -15,7 +15,87 @@
 
     
 <div class="work">
-    <div class="tree" id="project-tree">
+    <div id="activity-bar">
+        <button class="activity-button selected" id="explorer-button">
+            <span class="activity-icon icon-folder"></span>
+        </button>
+
+        <button class="activity-button" id="arduino-button">
+            <span class="activity-icon icon-cpu"></span>
+        </button>
+    </div>
+
+    <aside class="panel"  id="arduino-panel">
+        <h4>Choose your board</h4>
+        <select id="board-selector" name="board">
+            <optgroup label="Arduino AVR">
+                <option value="ArduinoUnoR3" selected>Arduino Uno R3</option>
+                <option value="ArduinoNano">Arduino Nano</option>
+                <option value="ArduinoMega2560">Arduino Mega 2560</option>
+                <option value="ArduinoLeonardo">Arduino Leonardo</option>
+                <option value="ArduinoMicro">Arduino Micro</option>
+                <option value="ArduinoMini">Arduino Mini</option>
+                <option value="ArduinoProMini">Arduino Pro Mini</option>
+                <option value="ArduinoLilyPad">Arduino LilyPad</option>
+            </optgroup>
+
+            <optgroup label="Arduino megaAVR">
+                <option value="ArduinoNanoEvery">Arduino Nano Every</option>
+                <option value="ArduinoUnoWiFiRev2">Arduino Uno WiFi Rev2</option>
+            </optgroup>
+
+            <optgroup label="Arduino SAM">
+                <option value="ArduinoDue">Arduino Due</option>
+            </optgroup>
+
+            <optgroup label="Arduino SAMD">
+                <option value="ArduinoZero">Arduino Zero</option>
+                <option value="AdafruitFeatherM0">Adafruit Feather M0</option>
+                <option value="SeeeduinoXIAO">Seeeduino XIAO</option>
+            </optgroup>
+
+            <optgroup label="Arduino GIGA">
+                <option value="ArduinoGigaR1">Arduino GIGA R1</option>
+            </optgroup>
+
+            <optgroup label="ESP32">
+                <option value="ESP32DevKit">ESP32 DevKit</option>
+                <option value="ESP32C3">ESP32-C3</option>
+                <option value="ESP32S2">ESP32-S2</option>
+                <option value="ESP32S3">ESP32-S3</option>
+                <option value="ArduinoNanoESP32">Arduino Nano ESP32</option>
+                <option value="AdafruitFeatherESP32S2">Adafruit Feather ESP32-S2</option>
+                <option value="SeeeduinoXIAOESP32C3">Seeed XIAO ESP32-C3</option>
+            </optgroup>
+
+            <optgroup label="ESP8266">
+                <option value="ESP8266NodeMCU">ESP8266 NodeMCU</option>
+                <option value="ESP8266D1Mini">ESP8266 D1 Mini</option>
+            </optgroup>
+
+            <optgroup label="RP2040">
+                <option value="RaspberryPiPico">Raspberry Pi Pico</option>
+                <option value="RaspberryPiPicoW">Raspberry Pi Pico W</option>
+            </optgroup>
+
+            <optgroup label="STM32">
+                <option value="STM32BluePill">STM32 Blue Pill</option>
+                <option value="STM32BlackPill">STM32 Black Pill</option>
+            </optgroup>
+
+            <optgroup label="Teensy">
+                <option value="Teensy40">Teensy 4.0</option>
+                <option value="Teensy41">Teensy 4.1</option>
+            </optgroup>
+        </select>
+        <h4>Select your port</h4>
+        <select id="port-selector" name="port">
+            <option value="" selected disabled>Select a port...</option>
+        </select>
+        
+    </aside>
+
+    <div class= "panel"  id="project-tree" >
         <div class="tree-folder">
             <button class="tree-folder-label"
                     type="button"
@@ -47,7 +127,7 @@
     <div id="console-output"></div>
 </section>
 
-
+<script type="module" src="/sidebar.js"></script>
 <script type="module" src="./resizers.js"></script>
 <script type="module" src="./console.js"></script>
 <script type="module" src="/editor.js"></script>
