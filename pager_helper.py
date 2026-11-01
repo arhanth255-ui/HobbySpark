@@ -5,7 +5,7 @@ import subprocess
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
-    QLabel,
+    QMessageBox,
     QPushButton,
     QVBoxLayout,
     QPlainTextEdit
@@ -160,10 +160,8 @@ class MainWindow(QDialog):
             process_code==9 
             and stat==QProcess.ExitStatus.CrashExit
         ):  
-            
-            print("You seem to have cancelled the program before it finished running.")
-            a=input("Do you want to continue(Y/n)? [Note that typing n will stop the execution of whatever process you have started using the hobbyspark cli] ")
-            if a.lower()=="y":
+            ans = QMessageBox.question(self, "Cancellation", "You seem to have cancelled the program before it finished running. Do you want to continue? [Note that selecting no will stop the execution of whatever process you have started using the hobbyspark cli] ", QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No)
+            if ans==QMessageBox.StandardButton.Yes:
                 self.success=True
             else:
                 self.success=None
@@ -174,17 +172,8 @@ class MainWindow(QDialog):
 
             self.success = False
 
-        self.close()
-
 
     def closeEvent(self, event):
-        if (
-            self.process is not None
-            and self.process.state()
-            != QProcess.ProcessState.NotRunning
-        ):
-            self.process.kill()
-            self.process.waitForFinished(-1)
 
         event.accept()
 

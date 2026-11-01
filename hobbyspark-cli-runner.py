@@ -41,7 +41,7 @@ if len(sys.argv) < 2:
     banner()
     error("No command provided.")
     print(f"\n{BOLD}Usage:{RESET} hobbyspark <command> <arguments>")
-    print(f"{DIM}Commands: build, upload, transpile-test{RESET}\n")
+    print(f"{DIM}Available commands: build, upload, transpile-test, run, boards, ports{RESET}\n")
     sys.exit(1)
 
 import lexer
@@ -140,6 +140,29 @@ def show_help():
 
     print(f"\n{DIM}HobbySpark — From Python-like code to microcontrollers. ⚡{RESET}\n")
     print("For more information, please go to HobbySpark's website, sites.google.com/view/hobbyspark.")
+
+def run(file_in_question):
+    banner()
+    info("Run mode: run only — no transpilation.")
+    python = shutil.which("python") or shutil.which("python3")
+    
+    if python is None:
+        error("Python was not found on your system. Please install python on your system to use HobbySpark.")
+        raise RuntimeError("Python is not installed or could not be found.")
+    
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    
+    success_ = window.run(file_in_question, python)
+    if success_ is False:
+        info("The program will not compile due to an error.")
+        raise RuntimeError("Program execution failed.")
+    if success_ is None:
+        warning("You closed the run window before it finished running. The program will not compile.")
+        raise RuntimeError("Program execution was cancelled.")
+    
+    success("Ran succesfully")
 
 def build(file_in_question, board, verbose=False):
     banner()
@@ -518,6 +541,15 @@ try:
             if type(e).__name__ == "IndexError":
                 print(f"{BOLD} Usage: {RESET} {CYAN} hobbyspark upload {MAGENTA}<file> <board> <port> {CYAN}[{RESET} {YELLOW}--verbose{RESET}{CYAN}] {RESET}")
 
+    elif command == "run":
+        try:
+            run(
+                args[0]
+            )
+        except Exception as e:
+            if type(e).__name__ == "IndexError":
+                print(f"{BOLD} Usage: {RESET} {CYAN} hobbyspark run {MAGENTA}<file>{RESET}")
+
     elif command == "boards":
         boards()
     elif command == "ports":
@@ -536,7 +568,7 @@ try:
 
     else:
         error(f"Unknown command: {command}")
-        print(f"{DIM}Available commands: build, upload, transpile-test{RESET}")
+        print(f"{DIM}Available commands: build, upload, transpile-test, run, boards, ports{RESET}")
         command_exit_code = 1
 
 except KeyboardInterrupt:
@@ -545,7 +577,7 @@ except KeyboardInterrupt:
 
 finally:
     # Only notify the IDE about operations whose completion it needs to track.
-    if command in ("build", "upload", "transpile-test"):
+    if command in ("build", "upload", "transpile-test", "run"):
         notify_command_finished(command_exit_code)
 
 sys.exit(command_exit_code)

@@ -147,10 +147,9 @@ function startTerminal() {
         }
     });
 
-    const runnerPath = path.resolve(
-        __dirname,
-        "../hobbyspark-cli-runner.py"
-    );
+
+
+    const runnerPath = path.resolve(__dirname, "../hobbyspark-cli-runner.py");
 
     terminalProcess.write(
         `function hobbyspark() { python3 "${runnerPath}" "$@"; }\n`
