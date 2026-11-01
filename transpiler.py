@@ -6,6 +6,10 @@ from platformdirs import user_config_dir
 folder=Path(user_config_dir("HobbySpark transpiler", appauthor=False, roaming=True))
 file=folder/"ClassData.json"
 
+verbose = False
+def log(*args, **kwargs):
+    if verbose:
+        print(*args, **kwargs)
 
 def get_op(op):
     if op == TT_ADD:
@@ -61,7 +65,7 @@ def get_ctype(node, classes=None, orig:CallNode = None):
     elif node == "None":
         return "void"
     elif (orig.name if isinstance(orig, CallNode) else "") in  classes and node=="CALL":
-        print("ENETR")
+        log("ENETR")
         return orig.name
     else:
         return "auto"
@@ -164,7 +168,7 @@ class DunderMethodHelper:
 
     def init(self):
         full_output=[f"{self.method_name} ({','.join([self.visit(n)[0] for n in self.obj.args if n.type_ != "Class_"])}){{"]
-        print("fullo", ','.join([self.visit(n)[0] for n in self.obj.args if n.type_ != "Class_"]))
+        log("fullo", ','.join([self.visit(n)[0] for n in self.obj.args if n.type_ != "Class_"]))
 
         self.vars.append([])
         self.vars[-1].extend([n.name for n in self.obj.args])
@@ -187,7 +191,7 @@ class DunderMethodHelper:
 
     def shared(self):
         full_output=[f"{self.method_name}({','.join([self.visit(n)[0] for n in self.obj.args if n.type_ != "Class_"])}){{"]
-        print("fullo", ','.join([self.visit(n)[0] for n in self.obj.args if n.type_ != "Class_"]))
+        log("fullo", ','.join([self.visit(n)[0] for n in self.obj.args if n.type_ != "Class_"]))
 
         self.vars.append([])
         self.vars[-1].extend([n.name for n in self.obj.args])
@@ -291,9 +295,9 @@ class Transpiler:
         adders = []
         with open(folder/"BoardsData.json", "r") as f:
             boards = load(f)
-            print("ENTER", repr(self.board[:-2]))
+            log("ENTER", repr(self.board[:-2]))
             if self.board[:-2] in boards.keys():
-                print("ENTER")
+                log("ENTER")
                 pins:dict = boards[self.board[:-2]]
                 pins:dict = {pin:actual for pin,actual in pins.items() if not pin.isdigit()}
                 for pin, actual in pins.items():
@@ -313,9 +317,9 @@ class Transpiler:
 
         with open(folder/"BoardsData.json", "r") as f:
             boards = load(f)
-            print("ENTER", repr(self.board[:-2]))
+            log("ENTER", repr(self.board[:-2]))
             if self.board[:-2] in boards.keys():
-                print("ENTER")
+                log("ENTER")
                 pins:dict = boards[self.board[:-2]]
                 pins:dict = {pin:actual for pin,actual in pins.items() if not pin.isdigit()}
                 for pin, actual in pins.items():
@@ -323,13 +327,13 @@ class Transpiler:
         output.append("#include \"package.h\"  \n")
 
         self.ifs = []
-        print("UPDATERS", self.updaters)
+        log("UPDATERS", self.updaters)
         for t,n in self.updaters.items():
             update = t[0]
             value = t[1]
-            print("UPDATE", self.updaters)
-            print("VALUE", value)
-            print("N",n)
+            log("UPDATE", self.updaters)
+            log("VALUE", value)
+            log("N",n)
             self.ifs.append(f"if ({update} {'>' if t[2] else '=='} {value}){{\n{n};\n}}")
         
         output.extend(imports)
@@ -371,11 +375,20 @@ f"""void wait(unsigned long time, float unit){{
             elif cpp.is_import:
                 imports.append(cpp.cpp)         
             elif cpp.is_var:
-                print("ADDING TO VARS:", cpp.cpp)
+                log("ADDING TO VARS:", cpp.cpp)
                 vars_.append(cpp.cpp)
             else:
                 extras.append(cpp.cpp)
-                print("GOT_EXTRA WITH ADDER", repr(cpp.adder))
+                log("GOT_EXTRA WITH ADDER", repr(cpp.adder))
+        self.ifs = []
+        log("UPDATERS", self.updaters)
+        for t,n in self.updaters.items():
+            update = t[0]
+            value = t[1]
+            log("UPDATE", self.updaters)
+            log("VALUE", value)
+            log("N",n)
+            self.ifs.append(f"if ({update} {'>' if t[2] else '=='} {value}){{\n{n};\n}}")
         output.extend(imports)
         output.extend(vars_)
         output.extend(funcs)
@@ -452,7 +465,7 @@ f"""void wait(unsigned long time, float unit){{
                 return Result(self.make_tuple(left, right, node), False, False, "", True ,True)
 
             elif isinstance(node.right, CallNode) and node.right.name.name in self.classes:
-                print("hello")
+                log("hello")
                 kew_word=""
                 for k,v in node.right.kwargs.items():
                     v=self.visit(v)[0]
@@ -501,24 +514,24 @@ f"""void wait(unsigned long time, float unit){{
                         }
                     )
 
-                print("type",type_)
-                print("ke",left)
-                print("rig",right)
-                print("ENDS")
+                log("type",type_)
+                log("ke",left)
+                log("rig",right)
+                log("ENDS")
 
                 if self.in_class and isinstance(node.left, AttributeAccessNode) and node.left.obj.name == self.cur_class_arg.name:
-                    print("left: ", left)
+                    log("left: ", left)
                     return Result(f"{ "this->"} {left[6:] if left.startswith('this->') else left}  = {self.vars_and_Classes[left[6:] if left.startswith('this->') else left]}({",".join(args)} {kew_word})", is_var=True, semi=True)
                 else:
-                    print("IS:",node.right.name.name in self.vars_and_Classes.keys())
-                    print("SELF.vars_and_Classes", self.vars_and_Classes)
-                    print("LEFT", repr(left))
+                    log("IS:",node.right.name.name in self.vars_and_Classes.keys())
+                    log("SELF.vars_and_Classes", self.vars_and_Classes)
+                    log("LEFT", repr(left))
                     if left in self.vars_and_Classes:
                         return Result(f"{left[6:] if left.startswith('this->') else left} = {self.vars_and_Classes[left[6:] if left.startswith('this->') else left]}({','.join(args)} {kew_word})",is_var=True, semi=True)
                     else:
                         self.vars_and_Classes[left] = node.right.name.name
                         return Result(f"{node.right.name.name} {left}({','.join(args)} {kew_word})",is_var=True, semi=True)
-            print("SELF.NEWVARS: ", self.newvars)
+            log("SELF.NEWVARS: ", self.newvars)
             cur_type  = ""
             already_seen = []
             for n in self.orig_vars:
@@ -527,10 +540,10 @@ f"""void wait(unsigned long time, float unit){{
                     if n["name"]==left:
                         if n["type"] in self.classes:
                             cur_type = n["value"].name.name 
-                            print("ctype: ", cur_type)
+                            log("ctype: ", cur_type)
                         else:
                             cur_type = get_ctype(n["type"]) if n["type"] not in ["String", "int", "bool", "void", "tuple<>", "vector<>"] else n["type"]
-                        print("cur_type", cur_type, "For ", n["type"])
+                        log("cur_type", cur_type, "For ", n["type"])
             
             rhs_type = get_ctype(node.type, self.classes, node.right)
             if isinstance(node.right, VariableNameNode):
@@ -539,9 +552,9 @@ f"""void wait(unsigned long time, float unit){{
                         rhs_type = var["type"]
                     break
 
-            print("LHS TYPE:", repr(cur_type))
-            print("RHS TYPE:", repr(rhs_type))
-            print(cur_type)
+            log("LHS TYPE:", repr(cur_type))
+            log("RHS TYPE:", repr(rhs_type))
+            log(cur_type)
             if cur_type != rhs_type and rhs_type != "auto" and cur_type!="auto":
                 raise UnsupportedFeatureError(
                     "Object of type ", cur_type,
@@ -549,7 +562,7 @@ f"""void wait(unsigned long time, float unit){{
                     "Name of variable: ", left
                 )
             if self.in_class and isinstance(node.left, AttributeAccessNode) and node.left.obj.name == self.cur_class_arg.name:
-                print("enter")
+                log("enter")
                 return Result( f"this-> {left[6:] if left.startswith('this->') else left} = {right}" if not self.give_var else f"{left} = {right}", False, False, False,True ,True)
             else:
                 return Result(f"{type_} {left[6:] if left.startswith('this->') else left} = {right}" if not self.give_var else f"{left}= {right}", False, False, False,True ,True)
@@ -737,7 +750,7 @@ f"""void wait(unsigned long time, float unit){{
 
             if node.iterable.name in var_names:
                 val = self.orig_vars[var_names.index(node.iterable.name)]["value"]
-                print("val", val)
+                log("val", val)
 
                 if isinstance(val, CallNode) and self.visit(val.name)[0]=="range":
                     iterable = node.iterable.name
@@ -746,7 +759,7 @@ f"""void wait(unsigned long time, float unit){{
                     num3=self.visit(val.args[2])[0] if len(val.args)>2 else None
 
                 elif isinstance(val, ListNode):
-                    print("hello")
+                    log("hello")
                     iterable = node.iterable.name
                     array=True
 
@@ -776,7 +789,7 @@ f"""void wait(unsigned long time, float unit){{
 
 
         for var in total:
-            print(var)
+            log(var)
             if var["name"] not in self.get_cur_scope():
                 self.block_vars.append(var)
                 full = f"{var['type']} {var['name']};"
@@ -829,7 +842,7 @@ f"""void wait(unsigned long time, float unit){{
                         "type":obj.type_
                     } for obj in node.args])
         new_tra=self.gen_transpiler(node.body)
-        print("ORIGVARS FROM",new_tra.orig_vars)
+        log("ORIGVARS FROM",new_tra.orig_vars)
         new_tra.orig_vars = self.orig_vars
         body=new_tra.translate_body()
         full_output.extend(body)
@@ -837,7 +850,7 @@ f"""void wait(unsigned long time, float unit){{
         self.vars.pop(-1)
         variables = [var.name for var in node.args]
         self.newvars = [obj for obj in self.newvars if obj["name"] not in variables]
-        print("FULL_OUTPUT", full_output)
+        log("FULL_OUTPUT", full_output)
         return Result("\n".join(full_output),True)
 
     def make_method(self, node:FunctionDefineNode):
@@ -883,7 +896,7 @@ f"""void wait(unsigned long time, float unit){{
         self.vars[-1].extend([n.name for n in node.args])
         newvars = [name["name"] for name in self.newvars]
         tr = DunderMethodHelper(node, **std, cur_Class=self.cur_Class)
-        print("NEWTRA.self", tr.newvars)
+        log("NEWTRA.self", tr.newvars)
         tr.orig_vars = self.orig_vars
         tr.newvars = self.newvars
         tr.block_vars = self.block_vars
@@ -919,7 +932,7 @@ f"""void wait(unsigned long time, float unit){{
             kew_word+=f"{',' if len(node.args)>0 else ''}{k} = {v}"
         args = []
         classes = [n["name"] for n in raw_data]
-        print("ARGS", node.args)
+        log("ARGS", node.args)
         n = 0
         for arg in node.args:
             classname = self.visit(node.name)[0]
@@ -929,7 +942,7 @@ f"""void wait(unsigned long time, float unit){{
             if self.visit(node.name)[0] not in classes and str(n) not in dat:
                 args.append(self.visit(arg)[0])
             else:
-                print("ENTERED CATALOG")
+                log("ENTERED CATALOG")
                 catalog:dict = raw_data[classes.index(self.visit(node.name)[0])]["pin_args"]
                 for k,v in catalog.items():
                     if str(n)==k:
@@ -937,7 +950,7 @@ f"""void wait(unsigned long time, float unit){{
             n+=1
         args = [str(arg_) for arg_ in args]
         return_=f"{self.visit(node.name)[0]}({','.join(args)}{kew_word if kew_word else ""})"
-        print(return_)
+        log(return_)
         return Result(return_,semi=True)
 
     def visit_MethodCallNode(self, node:MethodCallNode):
@@ -971,15 +984,15 @@ f"""void wait(unsigned long time, float unit){{
 
         if self.visit(node.obj)[0] in u_classes or (isinstance(cond,CallNode) and self.visit(cond.name)[0] in u_classes):
             methods = [n["methods"] for n in raw_data if isinstance(cond,CallNode) and n["name"]==self.visit(cond.name)[0]][0]
-            print("METHODS")
+            log("METHODS")
             big_data = {}
-            print("DATA", dumps(data, indent=4))
+            log("DATA", dumps(data, indent=4))
             if self.visit(node.obj)[0] in u_classes or (isinstance(cond,CallNode) and node.name in methods):
                 self.updaters[(f"{self.visit(node.obj)[0]}.update()", 'true' if methods[node.name]["arg"] is None  else self.visit(node.args[methods[node.name]["arg"]])[0],data[self.visit(cond.name)[0]]["big"] if isinstance(cond, CallNode) else False) ] = f"{self.visit(node.args[methods[node.name]["i"]])[0]}({'true' if methods[node.name]["arg"] is None else self.visit(node.args[methods[node.name]["arg"]])[0]})"
             
             return Result("")
 
-        print("RETURN FOR ", node, "IS", return_, "AND ", self.orig_vars)
+        log("RETURN FOR ", node, "IS", return_, "AND ", self.orig_vars)
         result = Result(return_,semi=True)
         return result
 
@@ -995,8 +1008,8 @@ f"""void wait(unsigned long time, float unit){{
         new_tra.in_class=True
         new_tra.cur_Class = node.name
         new_tra.vars_and_Classes, new_tra.newvars = self.find_vars(node.body)
-        print("VARS GEN BY FIND VARS",new_tra.vars_and_Classes)
-        print("NEWVARS GEN", new_tra.newvars)
+        log("VARS GEN BY FIND VARS",new_tra.vars_and_Classes)
+        log("NEWVARS GEN", new_tra.newvars)
         body=new_tra.translate_body()
         for var in new_tra.cur_class_scope:
             if var["name"] not in self.get_cur_scope()[0]:
@@ -1004,25 +1017,25 @@ f"""void wait(unsigned long time, float unit){{
                 self.vars[-1].append(var)
                 type_ = var["type"]
 
-                print("NEWVARS", self.newvars)
-                print("NEWVARS123", new_tra.newvars)
+                log("NEWVARS", self.newvars)
+                log("NEWVARS123", new_tra.newvars)
                 for var_dict in new_tra.newvars:
                     if var_dict["name"] == (var['name'][6:] if var['name'].startswith('this->') else var['name']):
                         type_=var_dict["type"]
 
-                print(F"TYPE FOR {var["name"]} IS {type_}.")
+                log(F"TYPE FOR {var["name"]} IS {type_}.")
                 if isinstance(var["type"], VariableNameNode):
-                    print("TYPE", type_)
+                    log("TYPE", type_)
                     full = f"{type_.name} {var["raw_val"] if not var["raw_val"].startswith("this->") else var["raw_val"][6:]};"
                 else:
                     full = f"{type_} {var['name'][6:] if var['name'].startswith('this->') else var['name']};"
-                    print("full",full)
+                    log("full",full)
 
                 if var["name"] not in self.vars[-1]:
-                    print("hello world!!!")
+                    log("hello world!!!")
                     if not self.in_:
                         self.vars_and_Classes[var["name"]] = var["type"]
-                        print("added", var["type"])
+                        log("added", var["type"])
                         self.vars[-1].append(var["name"])
                         full_output.append(full)
 
@@ -1055,7 +1068,7 @@ f"""void wait(unsigned long time, float unit){{
 
                 variables = variables|vars_
                 newvars.extend(newvars_)
-        print(f"NEWVARS {newvars}")
+        log(f"NEWVARS {newvars}")
         return variables, newvars
 
     def visit_GetItemNode(self, node:GetItemNode):
