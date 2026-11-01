@@ -547,6 +547,8 @@ try:
                 args[0]
             )
         except Exception as e:
+            command_exit_code = 1
+            error(str(e))
             if type(e).__name__ == "IndexError":
                 print(f"{BOLD} Usage: {RESET} {CYAN} hobbyspark run {MAGENTA}<file>{RESET}")
 

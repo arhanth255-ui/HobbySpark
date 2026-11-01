@@ -5,6 +5,7 @@ import { notify, notifyError } from "./toasts.js";
 
 const build = document.getElementById("build-button");
 const upload = document.getElementById("upload-button");
+const run = document.getElementById("run-button")
 
 const boardSelector = document.getElementById("board-selector");
 const portSelector = document.getElementById("port-selector");
@@ -19,6 +20,7 @@ let activeButton = null;
 let originalIcon = null;
 let originalTooltip = null;
 let commandRunning = false;
+let command = null;
 
 // ── Button management ─────────────────────────────────────────
 
@@ -41,6 +43,8 @@ function setButtonRunning(button) {
     img.setAttribute("src", STOP_ICON);
     button.dataset.tooltip = "Stop";
 
+    button.classList.add("stop-button");
+
     commandRunning = true;
 
     return true;
@@ -55,6 +59,8 @@ function resetButton() {
 
     img.setAttribute("src", originalIcon);
     activeButton.dataset.tooltip = originalTooltip;
+
+    activeButton.classList.remove("stop-button");
 
     activeButton = null;
     originalIcon = null;
@@ -73,6 +79,34 @@ function onStop() {
     window.hobbySpark.writeTerminal("\x03");
 
     notify("Stopping operation...");
+    resetButton();
+}
+
+function onRun() {
+    if (commandRunning) {
+        if (activeButton === run) {
+            onStop();
+        }
+
+        return;
+    }
+
+    const file = editorTabs.active;
+
+    if (!file) {
+        notifyError("Please open a tab before running the file.");
+        return;
+    }
+
+    if (!setButtonRunning(run)) {
+        return;
+    }
+
+    window.hobbySpark.writeTerminal(
+        `hobbyspark run "${file}" \n`
+    );
+    command = "running"
+    notify("Run started");
 }
 
 // ── Build ─────────────────────────────────────────────────────
@@ -107,6 +141,7 @@ function onBuild() {
         `hobbyspark build "${file}" "${board}"\n`
     );
 
+    command = "compiling"
     notify("Build started");
 }
 
@@ -147,7 +182,7 @@ function onUpload() {
     window.hobbySpark.writeTerminal(
         `hobbyspark upload "${file}" "${board}" "${port}"\n`
     );
-
+    command = "upload"
     notify("Upload started");
 }
 
@@ -155,6 +190,7 @@ function onUpload() {
 
 build.addEventListener("click", onBuild);
 upload.addEventListener("click", onUpload);
+run.addEventListener("click", onRun)
 
 // ── Command completion ────────────────────────────────────────
 
@@ -168,7 +204,7 @@ window.hobbySpark.assignHobbySparkCommand(function (exitCode) {
     resetButton();
 
     if (exitCode === 0) {
-        notify("Operation completed successfully!");
+        notify(`Successfully finished ${command}!`);
     } else {
         notifyError(`Operation failed (exit code: ${exitCode}).`);
     }
