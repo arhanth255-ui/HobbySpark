@@ -572,6 +572,74 @@ header span {
     mask-image: url("./assets/icons/cpu.svg");
     -webkit-mask-image: url("./assets/icons/cpu.svg");
 }
+
+.editor-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 40px;
+    background: #1e1e1e;
+    border-bottom: 1px solid #333333;
+}
+
+.editor-tabs {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.run-buttons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
+    padding: 0 8px;
+    flex-shrink: 0;
+    background-color: var(--hs-tab-bg);
+    border-bottom: 1px solid var(--hs-border);
+}
+
+.toolbar-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    color: #ffffff;
+}
+
+.toolbar-button.stop img {
+    filter: brightness(0) saturate(100%) invert(13%) sepia(100%) saturate(7483%) hue-rotate(1deg) brightness(102%) contrast(119%);
+}
+
+.toolbar-button.start img {
+    filter: brightness(0) saturate(100%) invert(61%) sepia(78%) saturate(449%) hue-rotate(78deg) brightness(96%) contrast(90%);
+}
+
+.toolbar-button:hover {
+    background: #ffffff18;
+}
+
+.toolbar-button img {
+    width: 17px;
+    height: 17px;
+    filter: brightness(0) invert(1);
+    opacity: 0.85;
+}
+
+.toolbar-button:hover img {
+    opacity: 1;
+}
+
 #activity-bar {
     width: 48px;
     min-width: 48px;
