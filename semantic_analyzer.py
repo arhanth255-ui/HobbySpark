@@ -91,7 +91,7 @@ class SemanticAnalyzer:
                     "type":right_sem["type"]
                 }
         self.symbols[node.left.name] = {"type":self.visit(node.right)[1]["type"]}
-        print("Symbols", self.symbols)
+        log("Symbols", self.symbols)
 
         return node, tree
 
