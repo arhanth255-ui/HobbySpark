@@ -33,16 +33,19 @@ function createWindow() {
 }
 
 ipcMain.handle("project:open-folder", async function () {
-    var result = await dialog.showOpenDialog({
-        title: "Open HobbySpark Project",
-        properties: ["openDirectory"]
-    });
+    // var result = await dialog.showOpenDialog({
+    //     title: "Open HobbySpark Project",
+    //     properties: ["openDirectory"]
+    // });
 
-    if (result.canceled) {
-        return null;
-    }
+    // if (result.canceled) {
+    //     return null;
+    // }
 
-    return result.filePaths[0];
+    // return result.filePaths[0];
+    // TODO: Restore the native folder picker before release.
+    console.log("PLEASE REMOVE THESE COMMENTS LATER")
+    return "/home/arhanth/Documents/Tests/HobbySpark"
 });
 
 ipcMain.handle("project:read-folder", async function (event, folderPath) {
