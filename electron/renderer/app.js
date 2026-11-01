@@ -53,7 +53,14 @@ async function add(folderPath, root = null) {
 document.addEventListener("DOMContentLoaded", async function () {
     await startApp();
     projectTree = new Tree("#project-tree", editorTabs, getPathName(folderPath));
+    console.log(folderPath)
+    if (folderPath!==null){window.hobbySpark.writeTerminal("cd \""+folderPath+"\"\n")}
     await add(folderPath, projectTree.root_name);
+    const folderNameElement = document.getElementById("folder-name")
+    if (folderPath!==null){
+        folderNameElement.textContent = getPathName(folderPath)
+    }
+    projectTree.closeAllFolders()
 });
 
 

@@ -1,6 +1,6 @@
 console.log("tree.js loaded!");
 export class Tree {
-    constructor(element, editorTabs, root_name="UnSelected") {
+    constructor(element, editorTabs, root_name = "UnSelected") {
         if (typeof element === "string") {
             element = document.querySelector(element);
         }
@@ -56,7 +56,7 @@ export class Tree {
         chevron.textContent = shouldExpand ? "▾" : "▸";
     }
 
-    async openFile (name){
+    async openFile(name) {
         await this.editorTabs.add(name, this.tabsAndPaths[name])
     }
 
@@ -141,44 +141,44 @@ export class Tree {
         children.appendChild(folder);
     }
 
-    
-addFile(name, path, parentName = null) {
-    this.tabsAndPaths[name] = path;
-    if (parentName === null) {
-        parentName = this.root_name;
-    }
 
-    const folders = this.element.querySelectorAll(".tree-folder");
-
-    const folder = Array.from(folders).find(
-        function (folder) {
-            return folder.dataset.name === parentName;
+    addFile(name, path, parentName = null) {
+        this.tabsAndPaths[name] = path;
+        if (parentName === null) {
+            parentName = this.root_name;
         }
-    );
 
-    if (!folder) {
-        throw new Error(`Parent folder "${parentName}" not found`);
+        const folders = this.element.querySelectorAll(".tree-folder");
+
+        const folder = Array.from(folders).find(
+            function (folder) {
+                return folder.dataset.name === parentName;
+            }
+        );
+
+        if (!folder) {
+            throw new Error(`Parent folder "${parentName}" not found`);
+        }
+
+        const parent = folder.querySelector(":scope > .tree-children");
+
+        if (!parent) {
+            throw new Error(`Children container for "${parentName}" not found`);
+        }
+
+        const file = document.createElement("div");
+        file.className = "tree-file";
+        file.dataset.name = name;
+
+        const icon = document.createElement("span");
+        icon.textContent = this.getFileIcon(name);
+
+        const label = document.createElement("span");
+        label.textContent = name;
+
+        file.append(icon, label);
+        parent.appendChild(file);
     }
-
-    const parent = folder.querySelector(":scope > .tree-children");
-
-    if (!parent) {
-        throw new Error(`Children container for "${parentName}" not found`);
-    }
-
-    const file = document.createElement("div");
-    file.className = "tree-file";
-    file.dataset.name = name;
-
-    const icon = document.createElement("span");
-    icon.textContent = this.getFileIcon(name);
-
-    const label = document.createElement("span");
-    label.textContent = name;
-
-    file.append(icon, label);
-    parent.appendChild(file);
-}
 
 
     getFileIcon(name) {
@@ -187,6 +187,47 @@ addFile(name, path, parentName = null) {
         if (name.endsWith(".md")) return "📄";
         if (name.endsWith(".cpp") || name.endsWith(".h")) return "⚙️";
         return "📄";
+    }
+
+    closeAllFolders() {
+        const root = Array.from(
+            this.element.querySelectorAll(".tree-folder")
+        ).find(folder => folder.dataset.name === this.root_name);
+
+        if (!root) return;
+
+        const folders = root.querySelectorAll(".tree-folder");
+
+        folders.forEach((folder) => {
+            const label = folder.querySelector(":scope > .tree-folder-label");
+            const children = folder.querySelector(":scope > .tree-children");
+
+            if (!label || !children) return;
+
+            label.setAttribute("aria-expanded", "false");
+            children.hidden = true;
+
+            const chevron = label.querySelector(".tree-chevron");
+
+
+            if (chevron !== null) {
+                chevron.textContent = "▸";
+            }
+        });
+
+        // Keep the root expanded
+        const rootLabel = root.querySelector(":scope > .tree-folder-label");
+        const rootChildren = root.querySelector(":scope > .tree-children");
+
+        console.log(rootChildren)
+
+        if (rootLabel) rootLabel.setAttribute("aria-expanded", "true");
+        rootChildren.hidden = false;
+
+        if (rootLabel) {
+            console.log(rootLabel)
+            rootLabel.querySelector(".tree-chevron").textContent = "▾";
+        }
     }
 
 
