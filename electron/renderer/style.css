@@ -925,14 +925,26 @@ h4 {
 
     cursor: pointer;
     font-family: inherit;
+
+    transition: background-color 0.2s ease,
+                color 0.2s ease;
 }
 
 .menu-item:hover,
 .menu-container:hover > .menu-item {
-    background: #383838;
-    color: white;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
 }
 
+.dropdown-item {
+    transition: background-color 0.15s ease,
+                color 0.15s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
 /* =========================
    DROPDOWN
 ========================= */
@@ -983,10 +995,7 @@ h4 {
     white-space: nowrap;
 }
 
-.dropdown-item:hover {
-    background: #094771;
-    color: white;
-}
+
 
 .dropdown-item span {
     color: #999999;

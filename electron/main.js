@@ -28,6 +28,7 @@ function createWindow() {
             nodeIntegration: false
         }
     });
+    win.setMenu(null);
 
     win.loadURL("http://127.0.0.1:5173");
 }
