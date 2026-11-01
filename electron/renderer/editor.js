@@ -332,6 +332,7 @@ function highlightPython() {
 
 monacoEditor.onDidChangeModelContent(function () {
     highlightPython();
+    editorTabs.fileContents[editorTabs.active] = monacoEditor.getValue();
 });
 
 initializeTreeSitter().catch(function (error) {
@@ -350,4 +351,8 @@ export async function clearEditor() {
 export async function saveFile(filepath) {
     const content = monacoEditor.getValue()
     return await window.hobbySpark.writeFile(filepath, content)
+}
+
+export function writeData(data) {
+    monacoEditor.setValue(data)
 }
