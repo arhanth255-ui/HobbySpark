@@ -58,6 +58,15 @@ contextBridge.exposeInMainWorld("hobbySpark", {
     // },
     getPorts: function () {
         return ipcRenderer.invoke("project:get-com-ports")
+    },
+
+    assignHobbySparkCommand: function (func) {
+        console.log("PRELOAD: Registering listener");
+
+        ipcRenderer.on("the-end", function (event, exitCode) {
+            console.log("PRELOAD: Received:", exitCode);
+            func(exitCode);
+        });
     }
 
 });

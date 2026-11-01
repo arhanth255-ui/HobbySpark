@@ -11,8 +11,10 @@ const pty = require("node-pty");
 const { execFile } = require("node:child_process");
 const { promisify } = require("node:util");
 
-
 let win;
+
+const MARKER_PREFIX = "\x1b]777;HOBBYSPARK;FINISHED;";
+const MARKER_SUFFIX = "\x07";
 function createWindow() {
     win = new BrowserWindow({
         width: 1136,
@@ -104,7 +106,31 @@ function startTerminal() {
         }
     });
 
+    console.log("MAIN.JS: PTY INITIALIZED");
+
     terminalProcess.onData(function (data) {
+        console.log("MAIN.JS: PTY DATA:", JSON.stringify(data));
+
+        if (data.includes(MARKER_PREFIX)) {
+            var markerIndex = data.indexOf(MARKER_PREFIX);
+
+            if (markerIndex !== -1) {
+                var start = markerIndex + MARKER_PREFIX.length;
+                var end = data.indexOf(MARKER_SUFFIX, start);
+
+                if (end !== -1) {
+                    var exitCode = Number(data.slice(start, end));
+
+                    console.log("COMMAND FINISHED:", exitCode);
+
+                    if (win && !win.isDestroyed() && win.webContents) {
+                        console.log("MAIN: Sending the-end:", exitCode);
+                        win.webContents.send("the-end", exitCode);
+                    }
+                }
+            }
+        }
+
         if (win && !win.isDestroyed()) {
             win.webContents.send("terminal:data", data);
         }
