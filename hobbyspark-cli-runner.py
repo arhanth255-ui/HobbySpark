@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import shutil
 
-from pager_maker import QApplication, MainWindow
+from pager_helper import QApplication, MainWindow
 
 # ── Terminal styling ──────────────────────────────────────────
 
