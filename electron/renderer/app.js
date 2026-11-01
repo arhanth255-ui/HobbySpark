@@ -46,6 +46,7 @@ async function add(folderPath, root = null) {
             await add(item.path, item.name);
         }
     }
+    
 }
 
 
