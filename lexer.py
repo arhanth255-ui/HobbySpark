@@ -1,4 +1,10 @@
 import string
+
+verbose = False
+def log(*args, **kwargs):
+    if verbose:
+        print(*args, **kwargs)
+
 #######################################################
 #Char errors
 #######################################################
@@ -199,7 +205,7 @@ class Lexer:
                 self.current_pos.line+=1
                 if self.paran_count>0 or self.did_a_backflip:
                     self.advance()
-                    print("ENETR")
+                    log("ENETR")
                     continue
 
                 self.tokens.append(Token(TT_NEWLINE,pos=self.current_pos.copy()))
@@ -532,7 +538,7 @@ class Lexer:
                 cur_str+=part
             else:
                 if cur_str:
-                    print("cur_str ",cur_str)
+                    log("cur_str ",cur_str)
                     textparts.append(
                             {
                                 "type":"string",
@@ -549,7 +555,7 @@ class Lexer:
                 "value":cur_str
                 })
         self.advance()
-        print("TEXTPARTS:", textparts)
+        log("TEXTPARTS:", textparts)
         return Token(TTFSTRINGP, textparts,pos=self.current_pos.copy())
 
 
@@ -592,7 +598,7 @@ class Lexer:
         if word=="not":
             if self.current_char is not None and self.current_char.isalpha() or self.current_char in ("_"," "):
                 next_word=self.peek(2)
-                print("word =", repr(next_word))
+                log("word =", repr(next_word))
                 if next_word is not None and next_word=="in":
                     self.advance()
                     self.handle_char()
