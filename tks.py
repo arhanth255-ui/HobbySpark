@@ -8,7 +8,10 @@ import sys
 import site
 import traceback
 from pathlib import Path
-
+verbose = False
+def log(*args, **kwargs):
+    if verbose:
+        print(*args, **kwargs) 
 
 def resource_path(relative):
     if hasattr(sys, "_MEIPASS"):
@@ -59,7 +62,7 @@ import json as data_handle
 WINDOWS_CREATION_FLAGS = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
 project_path = Path(user_config_dir("HobbySpark transpiler",appauthor=False, roaming=True))/"GUI"
-print(project_path)
+log(project_path)
 os.makedirs(project_path, exist_ok=True)
 path = Path(user_config_dir("HobbySpark", appauthor=False, roaming=True))
 
@@ -439,12 +442,12 @@ class Console:
         self.str.config(state="disabled")
 
 def askcom(root, out = None, console:Console = None):
-    print("OUT", out)
+    log("OUT", out)
     com = ""
     new = Toplevel(root)
     new.title("Select serial port")
     result = subprocess.run(["arduino-cli", "board", "list", "--format", "json"], capture_output=True, text=True,creationflags=WINDOWS_CREATION_FLAGS)
-    print(result.stdout)
+    log(result.stdout)
     data:dict = (data_handle.loads(result.stdout))["detected_ports"]
     real_data = []
     for w in data:
@@ -457,15 +460,15 @@ def askcom(root, out = None, console:Console = None):
         with_board = {
         b["com"]:{"com":b["com"], "match":b["match"]} for b in real_data
     }
-        print("OUT3", out)
+        log("OUT3", out)
 
     box = ttk.Combobox(new, values=[a["match"]+"-"+a["com"] for a in real_data], width=50)
     def use():
         try:
             nonlocal com
             com = (box.get()).split("-")[1]
-            print("H", with_board[com]["match"])
-            print("dao",out)
+            log("H", with_board[com]["match"])
+            log("dao",out)
             if with_board[com]["match"]=="Unknown":
                 console.write_warning(f"Could not find board name, {com}. ")
             # if with_board[com]["match"]!=out:
@@ -510,7 +513,7 @@ def askprompt(root):
             if not install_core(new, box.get()): return
 
             board = box.get()
-            print("SELECTED", board)
+            log("SELECTED", board)
             new.destroy()
         except Exception as e:
             a = mb.askyesno("Unexpected error", "Please do not press use board button without selecting any board. If you haven't done so, then click yes on this question. If you have done so, then press no.", default="no", icon=mb.ERROR)
@@ -551,21 +554,21 @@ class AST_visualizer:
         self.tree.pack(fill=BOTH, expand=True)
 
     def visualize(self, node, parent):
-        print("VISITING", type(node).__name__)
+        log("VISITING", type(node).__name__)
         current = self.tree.insert(parent, "end", text=type(node).__name__)
-        print(type(node).__name__)
-        print(vars(node))
+        log(type(node).__name__)
+        log(vars(node))
         for name, value in vars(node).items():
-            print(type(value), isinstance(value, Node))
+            log(type(value), isinstance(value, Node))
             if isinstance(value, Node):
                 field = self.tree.insert(current, END, text=name)
                 self.visualize(value, field)
             elif isinstance(value, list):
                 lst = self.tree.insert(current, "end", text=name)
-                print("LIST:", name)
+                log("LIST:", name)
 
                 for item in value:
-                    print(type(item), isinstance(item, Node))
+                    log(type(item), isinstance(item, Node))
                     if isinstance(item, Node):
                         self.visualize(item, lst)
                     else:
@@ -660,7 +663,7 @@ class Tab:
 
     def check2(self, a):
         self.modified=False
-        print("GUASGHFWEGYUCTEYRTQYURCT4YTRW3F", "CAHNGED")
+        log("GUASGHFWEGYUCTEYRTQYURCT4YTRW3F", "CAHNGED")
 
     def __repr__(self) -> str:
         return f"Tab at {self.name}"
@@ -700,8 +703,8 @@ class TabManager:
         if was_current:
             index = min(index, len(self.tabs)-1)
             self.change(self.tabs[index])
-        print("Current after:", self.current)
-        print("Tabs after:", [t.name for t in self.tabs])
+        log("Current after:", self.current)
+        log("Tabs after:", [t.name for t in self.tabs])
 
     def change(self, tab:Tab):
         if self.current: self.current.frame.pack_forget()
@@ -882,7 +885,7 @@ class GUI:
         self.run.grid(row=0, column=2, sticky="nsew")
         self.extra.grid(row=0, column=3, sticky="nsew")
         self.had_last = None
-        print("HELLO:", dt.date.today().strftime("%d|%m"))
+        log("HELLO:", dt.date.today().strftime("%d|%m"))
 
         if dt.date.today().strftime("%d|%m") == self.birthday and dt.date.today().year!=self.fin:
             mb.showinfo("Happy birthday!!!!!", f"HAPPY BIRTHDAY, {self.name}. Our best wishes from the HobbySpark team. You're finally {self.age+1} years old!")
@@ -947,7 +950,7 @@ class GUI:
             elif ans is None:
                 return
         self.console.write("Goodbye!")
-        print("DIAGNOSTIC PRINT", any_modified, modified)
+        log("DIAGNOSTIC PRINT", any_modified, modified)
         self.root.destroy()
 
 
@@ -1013,7 +1016,7 @@ class GUI:
         if not self.path:
             return
         self.check_if_open()
-        print("PATH", self.path)
+        log("PATH", self.path)
         try:
             self.dir.delete(*self.dir.get_children())
             self.build_tree("",self.path)
@@ -1022,7 +1025,7 @@ class GUI:
 
     def change_pr(self):
         def f():
-            print("BIRTH", int(self.birthday.split("|")[0]))
+            log("BIRTH", int(self.birthday.split("|")[0]))
             try:
                 ab = {
                     "name":name.get() if name.get()!="" else self.name,
@@ -1174,8 +1177,8 @@ set_board(BoardName(), debug_mode=True)
             if root in self.opened:
                 self.dir.item(parent, open=True)
 
-        print("ROOT =", repr(root))
-        print("PATH =", repr(self.path))
+        log("ROOT =", repr(root))
+        log("PATH =", repr(self.path))
 
         for a in os.listdir(root):
 
@@ -1316,7 +1319,7 @@ set_board(BoardName(), debug_mode=True)
             return
         self.console.write("Compiled sucessfully")
         self.console.write("Uploading...")
-        print("A",fqbn[1])
+        log("A",fqbn[1])
         if os.path.exists(os.path.join(self.path, "settings.json")):
             with open(os.path.join(self.path, "settings.json")) as f:
                 loaded=data_handle.load(f)["def_port"]
@@ -1389,7 +1392,7 @@ set_board(BoardName(), debug_mode=True)
                     if loaded is not None: fqbn = ALL_BOARDS[loaded]
                     else: fqbn = askprompt(self.root)[0]
             else: fqbn = askprompt(self.root)[0]
-            print("FQBN", fqbn)
+            log("FQBN", fqbn)
 
             result = subprocess.run(
                 [
@@ -1448,7 +1451,7 @@ set_board(BoardName(), debug_mode=True)
         self.save()
         self.console.write("Running")
         result = subprocess.Popen([self.python, self.editor.current.path], text=True,creationflags=WINDOWS_CREATION_FLAGS, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(result.stderr)
+        log(result.stderr)
         result.wait()
         if result.returncode!=0:
             self.console.write_error(f"Could not run: {result.stderr.read()}")
