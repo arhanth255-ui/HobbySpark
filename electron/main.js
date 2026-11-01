@@ -1,6 +1,6 @@
 const { spawn } = require("node:child_process");
 const fs = require("fs");
-const { app, BrowserWindow, dialog, ipcMain } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain, Menu } = require("electron");
 const path = require("path");
 const {
     startLanguageServer,
@@ -85,6 +85,10 @@ ipcMain.handle("project:get-com-ports", async function (event) {
 
     return JSON.parse(result.stdout);
 });
+
+
+
+// Menus
 
 
 
@@ -197,6 +201,8 @@ app.whenReady().then(() => {
     startLanguageServer();
     startTerminal();
     createWindow();
+
+    Menu.setApplicationMenu(null)
 
     app.on("activate", () => {
         if (BrowserWindow.getAllWindows().length === 0) {

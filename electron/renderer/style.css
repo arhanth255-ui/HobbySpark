@@ -860,3 +860,177 @@ h4 {
 .toast.info {
     border-left: 3px solid #60a5fa;
 }
+
+/* Running state: button becomes red */
+.toolbar-button.stop-button img {
+    filter: brightness(0) saturate(100%)
+            invert(19%) sepia(95%) saturate(5500%)
+            hue-rotate(355deg) brightness(95%);
+}
+
+/* =========================
+   HOBBYSPARK MENU BAR
+========================= */
+
+#menubar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.menu-items {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-left: 0;
+    padding-left: 0;
+    gap: 12px;
+}
+
+.app-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.menu-items {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 3px;
+}
+
+/* =========================
+   TOP-LEVEL MENU BUTTONS
+========================= */
+
+.menu-container {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.menu-item {
+    border: none;
+    background: transparent;
+    color: #cccccc;
+
+    font-size: 13px;
+    padding: 6px 9px;
+    border-radius: 4px;
+
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.menu-item:hover,
+.menu-container:hover > .menu-item {
+    background: #383838;
+    color: white;
+}
+
+/* =========================
+   DROPDOWN
+========================= */
+
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+
+    min-width: 230px;
+    padding: 5px 0;
+
+    background: #252526;
+    border: 1px solid #454545;
+    border-radius: 5px;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+
+    z-index: 2000;
+}
+
+.menu-container:hover > .dropdown {
+    display: block;
+}
+
+/* =========================
+   DROPDOWN ITEMS
+========================= */
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+    padding: 7px 12px;
+
+    border: none;
+    background: transparent;
+
+    color: #cccccc;
+    font-size: 13px;
+    text-align: left;
+    font-family: inherit;
+
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.dropdown-item:hover {
+    background: #094771;
+    color: white;
+}
+
+.dropdown-item span {
+    color: #999999;
+    font-size: 11px;
+    margin-left: 25px;
+}
+
+/* =========================
+   SEPARATORS
+========================= */
+
+.menu-separator {
+    height: 1px;
+    background: #454545;
+    margin: 5px 8px;
+}
+
+/* =========================
+   NESTED SUBMENUS
+========================= */
+
+.submenu-container {
+    position: relative;
+}
+
+.submenu {
+    display: none;
+    position: absolute;
+
+    top: -5px;
+    left: 100%;
+
+    min-width: 210px;
+    padding: 5px 0;
+
+    background: #252526;
+    border: 1px solid #454545;
+    border-radius: 5px;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+
+    z-index: 2001;
+}
+
+.submenu-container:hover > .submenu {
+    display: block;
+}

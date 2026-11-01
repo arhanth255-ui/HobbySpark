@@ -9,10 +9,81 @@
 </head>
 
 <body>
-    <header>
-        <h1>⚡ HobbySpark</h1>
-        <h3 id="folder-name">Untitled</h3>
-        <span>Arduino Transpiler</span>
+    <header id="menubar">
+
+        <h1 class="app-title">⚡ HobbySpark</h1>
+
+        <nav class="menu-items">
+
+            <div class="menu-container">
+                <button class="menu-item">File</button>
+                <div class="dropdown">
+                    <button class="dropdown-item">Open Folder <span>Ctrl+O</span></button>
+                    <button class="dropdown-item">New File <span>Ctrl+N</span></button>
+
+                    <div class="submenu-container">
+                        <button class="dropdown-item submenu-trigger">
+                            Open Recent Folder
+                            <span>▶</span>
+                        </button>
+
+                        <div class="submenu">
+                            <button class="dropdown-item">No recent folders</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-container">
+                <button class="menu-item">Edit</button>
+                <div class="dropdown">
+                    <button class="dropdown-item">Undo <span>Ctrl+Z</span></button>
+                    <button class="dropdown-item">Redo <span>Ctrl+Y</span></button>
+                    <div class="menu-separator"></div>
+                    <button class="dropdown-item">Cut <span>Ctrl+X</span></button>
+                    <button class="dropdown-item">Copy <span>Ctrl+C</span></button>
+                    <button class="dropdown-item">Paste <span>Ctrl+V</span></button>
+                </div>
+            </div>
+
+            <div class="menu-container">
+                <button class="menu-item">Run</button>
+                <div class="dropdown">
+                    <button class="dropdown-item">Transpile Test</button>
+                    <div class="menu-separator"></div>
+                    <button class="dropdown-item">Lex</button>
+                    <button class="dropdown-item">Visualize AST</button>
+                    <button class="dropdown-item">Show Transpiled Output</button>
+                </div>
+            </div>
+
+            <div class="menu-container">
+                <button class="menu-item">Advanced tools</button>
+                <div class="dropdown">
+                    <button class="dropdown-item">Reload</button>
+                    <button class="dropdown-item">Toggle DevTools</button>
+                    <button class="dropdown-item">Toggle Fullscreen</button>
+                </div>
+            </div>
+
+            <div class="menu-container">
+                <button class="menu-item">Preferences</button>
+                <div class="dropdown">
+                    <button class="dropdown-item">Change User Settings</button>
+                    <button class="dropdown-item">Change Theme</button>
+                </div>
+            </div>
+
+            <div class="menu-container">
+                <button class="menu-item">Help</button>
+                <div class="dropdown">
+                    <button class="dropdown-item">Documentation</button>
+                    <button class="dropdown-item">License</button>
+                    <button class="dropdown-item">About</button>
+                </div>
+            </div>
+
+        </nav>
     </header>
 
 
@@ -124,7 +195,7 @@
                         <img src="./assets/icons/cloud-upload.svg" alt="">
                     </button>
 
-                    
+
 
                 </div>
 
