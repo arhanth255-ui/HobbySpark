@@ -19,8 +19,8 @@ var monacoEditor;
 monaco.editor.defineTheme("hobbySpark-dark", {
     base: "vs-dark",
     inherit: true,
-    
-    
+
+
     rules: [
         { token: "comment", foreground: "777D8A", fontStyle: "italic" },
 
@@ -122,6 +122,8 @@ monacoEditor.addCommand(
         await editorTabs.saveCurrentFile()
     }
 );
+
+
 
 
 function collectDeclaredClasses(node, classNames) {
