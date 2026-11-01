@@ -80,15 +80,7 @@ ipcMain.handle("project:get-com-ports", async function (event) {
 
     return JSON.parse(result.stdout);
 });
-let callback;
 
-// ipcMain.handle("project:change-callback", function (event, callbackForHobbySpark){
-//     callback = callbackForHobbySpark;
-// })
-
-// ipcMain.handle("project:run-command-hobbyspark", function(ev, command){
-//     return callback(command);
-// })
 
 
 
@@ -125,13 +117,26 @@ function startTerminal() {
             win.webContents.send("terminal:exit", event.exitCode);
         }
     });
-    // terminalProcess.write("source ~/.bashrc\n");
+
+    const runnerPath = path.resolve(
+        __dirname,
+        "../hobbyspark-cli-runner.py"
+    );
+
+    terminalProcess.write(
+        `function hobbyspark() { python3 "${runnerPath}" "$@"; }\n`
+    );
 }
 
 
 
-ipcMain.on("terminal:write", function (event, data) {
+ipcMain.on("terminal:write", function (event, data, root = false) {
+    if (root) {
+        terminal.write(data)
+    }
+    console.log("Giving out data, ", data)
     terminalProcess.write(data);
+
 });
 
 ipcMain.on("terminal:resize", function (event, size) {
