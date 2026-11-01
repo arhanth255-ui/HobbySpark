@@ -10,7 +10,7 @@ from types import ModuleType,FunctionType
 from pathlib import Path
 import stub.Boards as currentboard_helper
 
-VERSION="1.0.0"
+VERSION="1.0.1"
 NAME="HobbySpark Transpiler"
 LOCAL=(
     "currentframe",
