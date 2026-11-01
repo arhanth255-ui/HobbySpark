@@ -1,7 +1,10 @@
 from lexer import *
 from nodes import *
 
-
+verbose = False
+def log(*args, **kwargs):
+    if verbose:
+        print(*args, **kwargs)
 #######################################################
 #Errors
 #######################################################
@@ -56,7 +59,7 @@ class Parser:
         return ProgramNode(body)
     
     def parse_statement(self):
-        print("STATEMENT:", self.current_token)
+        log("STATEMENT:", self.current_token)
         if self.current_token is None:
             return None
         elif self.current_token.type==TT_KEYWORDS["if"]:
@@ -145,7 +148,7 @@ class Parser:
                 return self.parse_async_def()
 
             elif front==TT_KEYWORDS["for"]:
-                print("enter for")
+                log("enter for")
                 self.advance()
                 forloop=self.parse_for()
                 actualnode=AsyncForLoopNode(forloop.iterable,forloop.body,forloop.var)
@@ -193,7 +196,7 @@ class Parser:
         else:
             name=self.current_token.value
         self.advance()
-        print("name:",name)
+        log("name:",name)
         return name
     
     def parse_lambda(self):
@@ -524,7 +527,7 @@ class Parser:
         self.advance()
         decs=[self.parse_expression(end=(TT_MATRIX_MUL,))]
         while self.current_token is not None and self.current_token.type not in (TT_KEYWORDS["def"],TT_KEYWORDS["async"],TT_KEYWORDS["class"]):
-            print("DEC TOKEN:", self.current_token)
+            log("DEC TOKEN:", self.current_token)
             if self.current_token.type==TT_MATRIX_MUL:
                 self.advance()
                 continue
@@ -542,7 +545,7 @@ class Parser:
         elif self.current_token.type==TT_KEYWORDS["async"]:
             front=self.peek().type
             if front==TT_KEYWORDS["def"]:
-                print(self.current_token)
+                log(self.current_token)
                 return self.parse_async_def(decs)
                 
             elif front==TT_KEYWORDS["for"]:
@@ -572,7 +575,7 @@ class Parser:
         a=1
         while self.current_token.type!=TT_RPAREN:
             a+=1
-            print("number=",a)
+            log("number=",a)
             if self.current_token.type==TT_COMMA:
                 self.advance()
                 continue
@@ -595,7 +598,7 @@ class Parser:
                     argtype="Class_"
                 else:
                     argtype="int"
-            print("token",self.current_token)
+            log("token",self.current_token)
 
             if self.current_token.type==TT_COLON:
                 self.advance()
@@ -722,7 +725,7 @@ class Parser:
                 continue
             node = self.parse_statement()
             block.append(node)
-            print("STUCK ON TOKEN:", self.current_token)
+            log("STUCK ON TOKEN:", self.current_token)
             if isinstance(node,ReturnNode) and infer:
                 inferred=node.type_
                 continue
@@ -791,9 +794,9 @@ class Parser:
         left=self.parse_expression(end=(TT_ASSIGN,TT_ADD_COMPOUND, TT_MIN_COMPOUND, TT_MULTIPLY_COMPOUND, TT_DIV_COMPOUND, TT_POWER_COMPOUND, TT_FLOOR_DIV_COMPOUND))
         if not isinstance(left,(VariableNameNode, SliceNode, GetItemNode, AttributeAccessNode, ImplicitTupleNode)):
             raise InvalidSyntaxError(self.current_token,f"Token {self.current_token} is not a valid variable name.")
-        print("self",self.current_token)
+        log("self",self.current_token)
         while self.current_token is not None and self.current_token.type in (TT_ASSIGN,TT_ADD_COMPOUND, TT_MIN_COMPOUND, TT_MULTIPLY_COMPOUND, TT_DIV_COMPOUND, TT_POWER_COMPOUND, TT_FLOOR_DIV_COMPOUND) and self.current_token.type not in end:
-            print("left",left)
+            log("left",left)
             op=self.current_token.type
 
             self.advance()
@@ -811,7 +814,7 @@ class Parser:
                 left=VariableCompAssignNode(left,value,op)
 
             if isinstance(left, GetItemNode):
-                print("hello")
+                log("hello")
                 left=SetItemNode(left, value)
 
             else:
@@ -822,8 +825,8 @@ class Parser:
     
     def parse_expression(self,end=(TT_COLON, TT_NEWLINE, TT_DEDENT)):
         base=self.parse_comprehension(end)
-        print(type(base))
-        print(self.current_token)
+        log(type(base))
+        log(self.current_token)
         return base
 
     def parse_expression_no_comprehension(self,end=(TT_COLON, TT_NEWLINE, TT_DEDENT)):
@@ -978,11 +981,11 @@ class Parser:
                         value=self.parse_expression((TT_COMMA,))
                         kwargs[arg]=value
                         continue
-                        print("CURRENT TOKEN: ", self.current_token)
+                        log("CURRENT TOKEN: ", self.current_token)
                     else:
-                        print("BEFORE:", self.current_token)
+                        log("BEFORE:", self.current_token)
                         args.append(self.parse_expression((TT_COMMA,)))
-                        print("AFTER:", self.current_token)
+                        log("AFTER:", self.current_token)
                 base=CallNode(base,args,kwargs)
                 self.advance()
             
@@ -1067,7 +1070,7 @@ class Parser:
     
     def parse_atom(self,end=(TT_COLON, TT_NEWLINE, TT_DEDENT)):
         base=None
-        print("ENTER parse_atom:", self.current_token)
+        log("ENTER parse_atom:", self.current_token)
         if self.current_token.type in (TT_NUMBER, TT_STRING,TTFSTRINGP,TT_KEYWORDS["None"]):
             if self.current_token.type==TT_NUMBER:
                 val = NumberNode(self.current_token.value)
@@ -1131,7 +1134,7 @@ class Parser:
                     continue
                 vals.append(self.parse_expression((TT_RBRACKET,TT_COMMA)))
             self.advance()
-            print("self.current_token",self.current_token)
+            log("self.current_token",self.current_token)
             base=ListNode(vals)
 
         elif self.current_token.type==TT_LBRACE:
