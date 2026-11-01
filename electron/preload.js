@@ -14,13 +14,13 @@ contextBridge.exposeInMainWorld("hobbySpark", {
     writeFile: function (filePath, contents) {
         return ipcRenderer.invoke("file:write", filePath, contents);
     },
-    
+
     startTerminal: function () {
         ipcRenderer.send("terminal:start");
     },
 
-    writeTerminal: function (data) {
-        ipcRenderer.send("terminal:write", data);
+    writeTerminal: function (data, root = false) {
+        ipcRenderer.send("terminal:write", data, root);
     },
 
     resizeTerminal: function (size) {

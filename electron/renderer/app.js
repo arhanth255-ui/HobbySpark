@@ -78,9 +78,8 @@ async function loadPorts() {
 }
 loadPorts()
 
-export function runHobbySparkCommand(command){
-    console.log("Got command, ", command)
-}
+
+
 
 
 

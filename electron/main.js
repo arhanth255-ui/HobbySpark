@@ -58,7 +58,7 @@ ipcMain.handle("project:read-folder", async function (event, folderPath) {
         };
     });
 
-    return files;   
+    return files;
 })
 
 
@@ -180,6 +180,8 @@ ipcMain.on("terminal:resize", function (event, size) {
 ipcMain.on("terminal:start", function () {
     startTerminal();
 });
+
+
 
 function stopTerminal() {
     if (terminalProcess) {
