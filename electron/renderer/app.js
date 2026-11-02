@@ -1,9 +1,9 @@
 import { EditorTabs } from "./tabmanager.js";
 import { Tree } from "./tree.js";
-var filesAndFolders;
-var folderPath;
+let filesAndFolders;
+let folderPath;
 export const editorTabs = new EditorTabs("#editor-tabs");
-let projectTree;
+export let projectTree;
 
 
 
