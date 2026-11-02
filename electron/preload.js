@@ -74,6 +74,17 @@ contextBridge.exposeInMainWorld("hobbySpark", {
         ipcRenderer.on("menu:new-file-warning", (event, message) => {
             callback(message);
         });
+    },
+
+    getConfigDir: function () {
+        ipcRenderer.invoke("app:get-config")
+    },
+
+    writeJSONToConfigFile: function (){
+        ipcRenderer.invoke("app:write-data")
+    },
+    getJSObjectFromConfigFile: function(){
+        ipcRenderer.invoke("app:read-file")
     }
 
 });

@@ -270,6 +270,58 @@ ipcMain.handle("menu:new-file", async (event, startPath) => {
     }
 });
 
+const hobbySparkDir = path.join(os.homedir(), ".hobbyspark");
+
+fs.mkdirSync(hobbySparkDir, { recursive: true });
+
+console.log(hobbySparkDir);
+
+const configDir = path.join(hobbySparkDir, "config");
+const stateDir = path.join(hobbySparkDir, "state");
+
+// Create directories
+fs.mkdirSync(configDir, { recursive: true });
+fs.mkdirSync(stateDir, { recursive: true });
+
+// Create default configuration files if they don't exist
+const files = {
+    "config/settings.json": {},
+
+    "config/keybindings.json": {},
+
+    "state/recent.json": [],
+
+    "state/session.json": {}
+};
+
+for (const [relativePath, contents] of Object.entries(files)) {
+    const filePath = path.join(hobbySparkDir, relativePath);
+
+    if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(
+            filePath,
+            JSON.stringify(contents, null, 4),
+            "utf8"
+        );
+    }
+}
+
+console.log("HobbySpark user directory initialized:", hobbySparkDir);
+
+Menu.setApplicationMenu(null)
+
+ipcMain.handle("app:get-config", function () {
+    return hobbySparkDir
+})
+
+ipcMain.handle("app:write-data", function (extra, jsonData) {
+    fs.writeFileSync(path.join(hobbySparkDir, extra), JSON.stringify(jsonData, null, 4))
+})  
+
+ipcMain.handle("app:read-file", function (extra){
+    return JSON.parse(fs.readFileSync(path.join(hobbySparkDir, extra)))
+})
+
 app.whenReady().then(() => {
     startLanguageServer();
     startTerminal();
@@ -277,7 +329,7 @@ app.whenReady().then(() => {
 
     win.webContents.openDevTools();
 
-    Menu.setApplicationMenu(null)
+
 
     app.on("activate", () => {
         if (BrowserWindow.getAllWindows().length === 0) {
