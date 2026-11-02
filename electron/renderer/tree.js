@@ -230,5 +230,10 @@ export class Tree {
         }
     }
 
+    clear() {
+        this.element.replaceChildren();
+        this.tabsAndPaths = {};
+    }
+
 
 }

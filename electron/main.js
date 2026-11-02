@@ -203,6 +203,8 @@ app.whenReady().then(() => {
     startTerminal();
     createWindow();
 
+    win.webContents.openDevTools();
+
     Menu.setApplicationMenu(null)
 
     app.on("activate", () => {

@@ -18,7 +18,7 @@
             <div class="menu-container">
                 <button class="menu-item">File</button>
                 <div class="dropdown">
-                    <button class="dropdown-item">Open Folder <span>Ctrl+O</span></button>
+                    <button class="dropdown-item" id="open-folder">Open Folder <span>Ctrl+O</span></button>
                     <button class="dropdown-item">New File <span>Ctrl+N</span></button>
 
                     <div class="submenu-container">
@@ -219,6 +219,9 @@
     </section>
     <div id="toast-container"></div>
 
+
+    <script type="module" src="./menu-actions.js"></script>
+    <script type="module" src="./menu.js"></script>
     <script type="module" src="./toasts.js"></script>
     <script type="module" src="./toolbar-buttons.js"></script>
     <script type="module" src="./tooltips.js"></script>
