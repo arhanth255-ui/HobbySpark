@@ -1,7 +1,7 @@
 import { EditorTabs } from "./tabmanager.js";
 import { Tree } from "./tree.js";
 let filesAndFolders;
-let folderPath;
+export let folderPath;
 export const editorTabs = new EditorTabs("#editor-tabs");
 export let projectTree;
 
@@ -22,7 +22,7 @@ async function startApp() {
     console.log("Type:", typeof filesAndFolders);
     console.log("Is array:", Array.isArray(filesAndFolders));
 }
-function getPathName(path) {
+export function getPathName(path) {
     if (typeof path !== "string" || path.length === 0) {
         return "";
     }

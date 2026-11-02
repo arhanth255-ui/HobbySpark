@@ -67,6 +67,13 @@ contextBridge.exposeInMainWorld("hobbySpark", {
             console.log("PRELOAD: Received:", exitCode);
             func(exitCode);
         });
+    },
+    newFile: (startPath) => ipcRenderer.invoke("menu:new-file", startPath),
+
+    onNewFileWarning: (callback) => {
+        ipcRenderer.on("menu:new-file-warning", (event, message) => {
+            callback(message);
+        });
     }
 
 });

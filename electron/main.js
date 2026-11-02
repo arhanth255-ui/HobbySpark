@@ -197,6 +197,78 @@ function stopTerminal() {
     }
 }
 
+ipcMain.handle("menu:new-file", async (event, startPath) => {
+    try {
+        if (typeof startPath !== "string" || !path.isAbsolute(startPath)) {
+            throw new Error("Invalid starting directory.");
+        }
+
+        const root = await fs.promises.realpath(startPath);
+
+        const isInside = (base, target) => {
+            const relative = path.relative(base, target);
+
+            return (
+                relative === "" ||
+                (
+                    relative !== ".." &&
+                    !relative.startsWith(`..${path.sep}`) &&
+                    !path.isAbsolute(relative)
+                )
+            );
+        };
+
+        while (true) {
+            const result = await dialog.showSaveDialog(win, {
+                title: "Create New File",
+                buttonLabel: "Create",
+                defaultPath: path.join(root, "untitled.py")
+            });
+
+            if (result.canceled || !result.filePath) {
+                return { canceled: true };
+            }
+
+            const filePath = path.resolve(result.filePath);
+
+            if (!isInside(root, filePath)) {
+                win.webContents.send(
+                    "menu:new-file-warning",
+                    "You cannot create files outside the project directory!"
+                );
+
+                continue;
+            }
+
+            const realParent = await fs.promises.realpath(
+                path.dirname(filePath)
+            );
+
+            if (!isInside(root, realParent)) {
+                win.webContents.send(
+                    "menu:new-file-warning",
+                    "The selected location is outside the project directory!"
+                );
+
+                continue;
+            }
+
+            await fs.promises.writeFile(filePath, "", { flag: "w" });
+
+            return {
+                canceled: false,
+                filePath
+            };
+        }
+    } catch (error) {
+        console.error("New file error:", error);
+
+        return {
+            canceled: false,
+            error: error.message
+        };
+    }
+});
 
 app.whenReady().then(() => {
     startLanguageServer();

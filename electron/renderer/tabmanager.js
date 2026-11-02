@@ -1,5 +1,7 @@
 
+import { folderPath } from "./app.js";
 import { clearEditor, saveFile, writeData } from "./editor.js";
+import { notify, notifyError, notifySuccess } from "./toasts.js";
 
 export class EditorTabs {
     constructor(element) {
@@ -17,6 +19,7 @@ export class EditorTabs {
         this.historyOfActive = [];
         this.fileContents = {};
         this.savedContents = {};
+        this.untitledFileCounter = 0;
     }
 
     async add(name, path) {
@@ -32,10 +35,19 @@ export class EditorTabs {
         }
 
         // Load the file into memory only once.
-        const content = await window.hobbySpark.readFile(path);
+        if (path !== "Unknown") {
+            const content = await window.hobbySpark.readFile(path);
 
-        this.fileContents[name] = content;
-        this.savedContents[name] = content;
+            this.fileContents[name] = content;
+            this.savedContents[name] = content;
+        }
+        else {
+            this.untitledFileCounter++;
+            name = "Untitled-" + this.untitledFileCounter;
+
+            this.fileContents[name] = "";
+            this.savedContents[name] = "";
+        }
         this.openFilesAndPaths[name] = path;
 
         const tab = document.createElement("button");
@@ -140,12 +152,32 @@ export class EditorTabs {
     async saveCurrentFile() {
         if (!this.active) return null;
 
-        const path = this.openFilesAndPaths[this.active];
-        const content = this.fileContents[this.active];
+        let path = this.openFilesAndPaths[this.active];
 
+        if (path === "Unknown") {
+            const output = await window.hobbySpark.newFile(folderPath);
+
+            if (output.error) {
+                notifyError("An error happened: " + output.error);
+                return;
+            }
+
+            if (output.canceled) {
+                notify("You cancelled saving the file.");
+                return;
+            }
+
+            path = output.filePath;
+
+            const newName = path.split(/[\\/]/).pop();
+
+            this.renameTab(this.active, newName, path);
+        }
+        const content = this.fileContents[this.active];
         await saveFile(path, content);
 
         this.savedContents[this.active] = content;
+        notifySuccess(`Saving of the file, ${this.active} successful`)
 
         return path;
     }
@@ -158,5 +190,41 @@ export class EditorTabs {
 
     hasUnsavedChanges(name) {
         return this.fileContents[name] !== this.savedContents[name];
+    }
+
+    renameTab(oldName, newName, newPath) {
+        const tab = Array.from(this.element.querySelectorAll(".editor-tab"))
+            .find(tab => tab.querySelector(".tab-name").textContent === oldName);
+
+        if (!tab) {
+            throw new Error(`Tab "${oldName}" not found`);
+        }
+
+        // Update the tab's visible name.
+        tab.querySelector(".tab-name").textContent = newName;
+
+        // Update the filename in the open files list.
+        const index = this.openFiles.indexOf(oldName);
+        this.openFiles[index] = newName;
+
+        // Update the path.
+        delete this.openFilesAndPaths[oldName];
+        this.openFilesAndPaths[newName] = newPath;
+
+        // Preserve the editor contents.
+        this.fileContents[newName] = this.fileContents[oldName];
+        this.savedContents[newName] = this.fileContents[oldName];
+
+        delete this.fileContents[oldName];
+        delete this.savedContents[oldName];
+
+        // Update active tab and history.
+        this.historyOfActive = this.historyOfActive.map(
+            name => name === oldName ? newName : name
+        );
+
+        if (this.active === oldName) {
+            this.active = newName;
+        }
     }
 }
