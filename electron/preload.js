@@ -80,11 +80,30 @@ contextBridge.exposeInMainWorld("hobbySpark", {
         ipcRenderer.invoke("app:get-config")
     },
 
-    writeJSONToConfigFile: function (){
-        ipcRenderer.invoke("app:write-data")
+    writeJSONToConfigFile: function (extra, dat) {
+        ipcRenderer.invoke("app:write-data", extra, dat)
     },
-    getJSObjectFromConfigFile: function(){
-        ipcRenderer.invoke("app:read-file")
-    }
+    getJSObjectFromConfigFile: async function (extra) {
+        console.log("Path preload.js", extra)
+        const output = await ipcRenderer.invoke("app:read-file", extra)
+        console.log("Output is from preload, ", output)
+        return output
+    },
+    onSessionRequest: (callback) => {
+        ipcRenderer.on("session:get", async (event, id) => {
+            try {
+                const session = await callback();
+
+                console.log("Got session, ", session)
+                ipcRenderer.send("session:response", id, session);
+            } catch (error) {
+                ipcRenderer.send("session:response", id, {
+                    error: error.message
+                });
+            }
+        });
+    },
+    getRecent: () => { return ipcRenderer.invoke("app:recent") },
+    debugPrint: (message) => { ipcRenderer.invoke("debug:log", message) }
 
 });

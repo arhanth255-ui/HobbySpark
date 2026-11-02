@@ -1,4 +1,6 @@
+import { debugPrint, readFile, recent, writeData } from "./run-before-all.js";
 import { EditorTabs } from "./tabmanager.js";
+import { notify } from "./toasts.js";
 import { Tree } from "./tree.js";
 let filesAndFolders;
 export let folderPath;
@@ -16,7 +18,7 @@ async function startApp() {
     }
 
     console.log("Selected project:", folderPath);
-    
+
     filesAndFolders = await window.hobbySpark.listFilesAndFolders(folderPath);
     console.log("Received:", filesAndFolders);
     console.log("Type:", typeof filesAndFolders);
@@ -32,9 +34,9 @@ export function getPathName(path) {
 
 async function add(folderPath, root = null) {
     var items = await window.hobbySpark.listFilesAndFolders(folderPath);
-    items.sort(function (a, b){
-        if (a.isDirectory && !b.isDirectory){return -1}
-        if (!a.isDirectory && b.isDirectory){return 1}
+    items.sort(function (a, b) {
+        if (a.isDirectory && !b.isDirectory) { return -1 }
+        if (!a.isDirectory && b.isDirectory) { return 1 }
         return a.name.localeCompare(b.name)
     });
 
@@ -46,16 +48,29 @@ async function add(folderPath, root = null) {
             await add(item.path, item.name);
         }
     }
-    
+
 }
 
 export async function startup() {
     await startApp();
     projectTree = new Tree("#project-tree", editorTabs, getPathName(folderPath));
     console.log(folderPath)
-    if (folderPath!==null){window.hobbySpark.writeTerminal("cd \""+folderPath+"\"\n")}
+    if (folderPath !== null) { window.hobbySpark.writeTerminal("cd \"" + folderPath + "\"\n") }
     await add(folderPath, projectTree.root_name);
     projectTree.closeAllFolders()
+    window.hobbySpark.onSessionRequest(async function () {
+        debugPrint("Closing");
+
+        let now = await readFile(recent);
+        console.log("Now is ", now)
+
+
+        now.folders.push(folderPath);
+
+        writeData(recent, now);
+
+        return { debug: true }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", startup);
@@ -81,6 +96,10 @@ async function loadPorts() {
     }
 }
 loadPorts()
+
+debugPrint("Started here")
+
+
 
 
 

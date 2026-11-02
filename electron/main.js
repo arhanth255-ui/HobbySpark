@@ -31,7 +31,32 @@ function createWindow() {
     win.setMenu(null);
 
     win.loadURL("http://127.0.0.1:5173");
+
+    let isClosing = false;
+
+    win.on("close", async (event) => {
+        if (isClosing) return;
+
+        event.preventDefault();
+
+        try {
+            const session = await getSession();
+            console.log(session)
+            console.log("Session received:", session);
+
+            const existing = readFile(sessions);
+            existing.push(session);
+
+            writeData(sessions, existing);
+        } catch (error) {
+            console.error("Session saving failed:", error);
+        }
+
+        isClosing = true;
+        win.close();
+    });
 }
+
 
 ipcMain.handle("project:open-folder", async function () {
     // var result = await dialog.showOpenDialog({
@@ -270,6 +295,40 @@ ipcMain.handle("menu:new-file", async (event, startPath) => {
     }
 });
 
+let requestId = 0;
+const pendingRequests = new Map();
+
+ipcMain.on("session:response", (event, id, session) => {
+    const resolve = pendingRequests.get(id);
+
+    if (!resolve) return;
+
+    pendingRequests.delete(id);
+    console.log("Session, ", session)
+    if (session.error) {
+        console.error("Session error:", session.error);
+        return;
+    }
+
+    resolve(session);
+});
+
+function getSession() {
+    return new Promise((resolve, reject) => {
+        if (!win || win.isDestroyed() || win.webContents.isDestroyed()) {
+            reject(new Error("Window is unavailable"));
+            return;
+        }
+
+        const id = ++requestId;
+
+        pendingRequests.set(id, resolve);
+
+        win.webContents.send("session:get", id);
+    });
+}
+
+
 const hobbySparkDir = path.join(os.homedir(), ".hobbyspark");
 
 fs.mkdirSync(hobbySparkDir, { recursive: true });
@@ -283,15 +342,23 @@ const stateDir = path.join(hobbySparkDir, "state");
 fs.mkdirSync(configDir, { recursive: true });
 fs.mkdirSync(stateDir, { recursive: true });
 
+const settings = path.join("config", "settings.json");
+const keybindings = path.join("config", "keybindings.json");
+const recent = path.join("state", "recent.json");
+const sessions = path.join("state", "sessions.json");
+
+ipcMain.handle("app:recent", function () { return recent; })
+
+ipcMain.handle("debug:log", function (event, message) {
+    console.log(message)
+})
+
 // Create default configuration files if they don't exist
 const files = {
-    "config/settings.json": {},
-
-    "config/keybindings.json": {},
-
-    "state/recent.json": [],
-
-    "state/session.json": {}
+    [settings]: {},
+    [keybindings]: {},
+    [recent]: { folders: [] },
+    [sessions]: []
 };
 
 for (const [relativePath, contents] of Object.entries(files)) {
@@ -304,6 +371,7 @@ for (const [relativePath, contents] of Object.entries(files)) {
             "utf8"
         );
     }
+    console.log(`Writing ${contents} to ${filePath}, with json ${JSON.parse(JSON.stringify(contents, null, 4))}`)
 }
 
 console.log("HobbySpark user directory initialized:", hobbySparkDir);
@@ -313,14 +381,24 @@ Menu.setApplicationMenu(null)
 ipcMain.handle("app:get-config", function () {
     return hobbySparkDir
 })
-
-ipcMain.handle("app:write-data", function (extra, jsonData) {
+function writeData(extra, jsonData) {
     fs.writeFileSync(path.join(hobbySparkDir, extra), JSON.stringify(jsonData, null, 4))
-})  
+}
 
-ipcMain.handle("app:read-file", function (extra){
-    return JSON.parse(fs.readFileSync(path.join(hobbySparkDir, extra)))
-})
+async function readFile(extra) {
+    console.log("Path main.js", extra)
+    const contents = fs.readFileSync(path.join(hobbySparkDir, extra), { encoding: "utf-8" })
+    console.log("Contents, ", contents)
+
+    return JSON.parse(contents)
+}
+ipcMain.handle("app:write-data", (event, extra, jsonData) => {
+    return writeData(extra, jsonData);
+});
+
+ipcMain.handle("app:read-file", async (event, extra) => {
+    return await readFile(extra);
+});
 
 app.whenReady().then(() => {
     startLanguageServer();
@@ -341,6 +419,7 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
     stopLanguageServer();
     stopTerminal();
+
     if (process.platform !== "darwin") {
         app.quit();
     }
