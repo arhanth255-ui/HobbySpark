@@ -73,22 +73,25 @@ ipcMain.handle("project:open-folder", async function () {
     console.log("PLEASE REMOVE THESE COMMENTS LATER")
     return "/home/arhanth/Documents/Tests/HobbySpark"
 });
+win.
+    ipcMain.handle("project:read-folder", async function (event, folderPath) {
+        console.log("Error did not happen")
+        console.log("Got ", folderPath)
+        var entries = await fs.promises.readdir(folderPath, {
+            withFileTypes: true
+        });
+        console.log("Error did not happen")
 
-ipcMain.handle("project:read-folder", async function (event, folderPath) {
-    var entries = await fs.promises.readdir(folderPath, {
-        withFileTypes: true
-    });
+        var files = entries.map(function (entry) {
+            return {
+                name: entry.name,
+                path: path.join(folderPath, entry.name),
+                isDirectory: entry.isDirectory()
+            };
+        });
 
-    var files = entries.map(function (entry) {
-        return {
-            name: entry.name,
-            path: path.join(folderPath, entry.name),
-            isDirectory: entry.isDirectory()
-        };
-    });
-
-    return files;
-})
+        return files;
+    })
 
 
 ipcMain.handle("file:read", async function (event, filePath) {
@@ -399,6 +402,34 @@ ipcMain.handle("app:write-data", (event, extra, jsonData) => {
 ipcMain.handle("app:read-file", async (event, extra) => {
     return await readFile(extra);
 });
+
+ipcMain.handle("app:do-func", function (ev, string) {
+    switch (string) {
+        case "undo":
+            win.webContents.undo()
+            break;
+
+        case "redo":
+            win.webContents.redo()
+            break;
+
+        case "copy":
+            win.webContents.copy()
+            break;
+
+        case "cut":
+            win.webContents.cut()
+            break;
+
+        case "paste":
+            win.webContents.paste()
+            break;
+
+        default:
+            throw new Error("Unrecognized sequence: " + string)
+            break;
+    }
+})
 
 app.whenReady().then(() => {
     startLanguageServer();

@@ -82,6 +82,19 @@ function onStop() {
     resetButton();
 }
 
+export function onTranspileTest() {
+    const file = editorTabs.active
+    if (!file) {
+        notifyError("Please open a tab before transpile-testing the file.");
+        return;
+    }
+    window.hobbySpark.writeTerminal(
+        `hobbyspark transpile-test "${file}" \n`
+    );
+    command = "transpile-testing"
+    notify("Tranpile-test started");
+}
+
 function onRun() {
     if (commandRunning) {
         if (activeButton === run) {
@@ -201,7 +214,7 @@ console.log("RENDERER: Registering completion listener");
 window.hobbySpark.assignHobbySparkCommand(function (exitCode) {
     console.log("RENDERER: CALLBACK RECEIVED:", exitCode);
 
-    resetButton();
+    if (command !== "transpile-testing") { resetButton(); }
 
     if (exitCode === 0) {
         notify(`Successfully finished ${command}!`);

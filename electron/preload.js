@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld("hobbySpark", {
         return ipcRenderer.invoke("project:open-folder");
     },
     listFilesAndFolders: function (f) {
+        console.log("Got ", f)
         return ipcRenderer.invoke("project:read-folder", f)
     },
     readFile: function (filePath) {
@@ -104,6 +105,7 @@ contextBridge.exposeInMainWorld("hobbySpark", {
         });
     },
     getRecent: () => { return ipcRenderer.invoke("app:recent") },
-    debugPrint: (message) => { ipcRenderer.invoke("debug:log", message) }
+    debugPrint: (message) => { ipcRenderer.invoke("debug:log", message) },
+    doFunc: (string) => { return ipcRenderer.invoke("app:do-func") }
 
 });

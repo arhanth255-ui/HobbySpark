@@ -2,7 +2,6 @@ import { debugPrint, readFile, recent, writeData } from "./run-before-all.js";
 import { EditorTabs } from "./tabmanager.js";
 import { notify } from "./toasts.js";
 import { Tree } from "./tree.js";
-let filesAndFolders;
 export let folderPath;
 export const editorTabs = new EditorTabs("#editor-tabs");
 export let projectTree;
@@ -18,12 +17,10 @@ async function startApp() {
     }
 
     console.log("Selected project:", folderPath);
-
-    filesAndFolders = await window.hobbySpark.listFilesAndFolders(folderPath);
-    console.log("Received:", filesAndFolders);
-    console.log("Type:", typeof filesAndFolders);
-    console.log("Is array:", Array.isArray(filesAndFolders));
 }
+
+
+
 export function getPathName(path) {
     if (typeof path !== "string" || path.length === 0) {
         return "";
@@ -32,8 +29,9 @@ export function getPathName(path) {
     return path.split("/").pop();
 }
 
-async function add(folderPath, root = null) {
-    var items = await window.hobbySpark.listFilesAndFolders(folderPath);
+async function add(path, root = null) {
+    console.log("Folder is ", path)
+    var items = await window.hobbySpark.listFilesAndFolders(await path);
     items.sort(function (a, b) {
         if (a.isDirectory && !b.isDirectory) { return -1 }
         if (!a.isDirectory && b.isDirectory) { return 1 }
@@ -51,10 +49,15 @@ async function add(folderPath, root = null) {
 
 }
 
-export async function startup() {
-    await startApp();
+export async function startup(ev, folder = null) {
+    console.log("G")
+    if (folder === null) { console.log("G"); await startApp(); }
+    else {
+        folderPath = folder;
+        console.log("Folder is, ", folderPath);
+    }
     projectTree = new Tree("#project-tree", editorTabs, getPathName(folderPath));
-    console.log(folderPath)
+    console.log("Folder is from start, ", folderPath)
     if (folderPath !== null) { window.hobbySpark.writeTerminal("cd \"" + folderPath + "\"\n") }
     await add(folderPath, projectTree.root_name);
     projectTree.closeAllFolders()
