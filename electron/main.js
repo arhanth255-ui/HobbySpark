@@ -73,25 +73,24 @@ ipcMain.handle("project:open-folder", async function () {
     console.log("PLEASE REMOVE THESE COMMENTS LATER")
     return "/home/arhanth/Documents/Tests/HobbySpark"
 });
-win.
-    ipcMain.handle("project:read-folder", async function (event, folderPath) {
-        console.log("Error did not happen")
-        console.log("Got ", folderPath)
-        var entries = await fs.promises.readdir(folderPath, {
-            withFileTypes: true
-        });
-        console.log("Error did not happen")
+ipcMain.handle("project:read-folder", async function (event, folderPath) {
+    console.log("Error did not happen")
+    console.log("Got ", folderPath)
+    var entries = await fs.promises.readdir(folderPath, {
+        withFileTypes: true
+    });
+    console.log("Error did not happen")
 
-        var files = entries.map(function (entry) {
-            return {
-                name: entry.name,
-                path: path.join(folderPath, entry.name),
-                isDirectory: entry.isDirectory()
-            };
-        });
+    var files = entries.map(function (entry) {
+        return {
+            name: entry.name,
+            path: path.join(folderPath, entry.name),
+            isDirectory: entry.isDirectory()
+        };
+    });
 
-        return files;
-    })
+    return files;
+})
 
 
 ipcMain.handle("file:read", async function (event, filePath) {
@@ -427,7 +426,6 @@ ipcMain.handle("app:do-func", function (ev, string) {
 
         default:
             throw new Error("Unrecognized sequence: " + string)
-            break;
     }
 })
 

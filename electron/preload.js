@@ -106,6 +106,6 @@ contextBridge.exposeInMainWorld("hobbySpark", {
     },
     getRecent: () => { return ipcRenderer.invoke("app:recent") },
     debugPrint: (message) => { ipcRenderer.invoke("debug:log", message) },
-    doFunc: (string) => { return ipcRenderer.invoke("app:do-func") }
+    doFunc: (string) => { return ipcRenderer.invoke("app:do-func", string) }
 
 });

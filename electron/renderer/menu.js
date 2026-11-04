@@ -7,10 +7,22 @@ const openFolder = document.getElementById("open-folder")
 const newFile = document.getElementById("new-file")
 const openRecentFolder = document.getElementById("recent-folders")
 
+const undo = document.getElementById("undo")
+const redo = document.getElementById("redo")
+const cut = document.getElementById("cut")
+const copy = document.getElementById("copy")
+const paste = document.getElementById("paste")
+
 const transpileTest = document.getElementById("transpile-test")
 
 openFolder.addEventListener("click", onClickOfOpenFolder)
 newFile.addEventListener("click", onClickOfNewFile)
+
+paste.addEventListener("click", function (ev) { window.hobbySpark.doFunc("paste") })
+cut.addEventListener("click", function (ev) { window.hobbySpark.doFunc("cut") })
+copy.addEventListener("click", function (ev) { window.hobbySpark.doFunc("copy") })
+redo.addEventListener("click", function (ev) { window.hobbySpark.doFunc("redo") })
+undo.addEventListener("click", function (ev) { window.hobbySpark.doFunc("undo") })
 
 transpileTest.addEventListener("click", onTranspileTest)
 
