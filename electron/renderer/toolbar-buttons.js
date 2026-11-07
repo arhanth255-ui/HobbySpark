@@ -108,6 +108,19 @@ export function onLex() {
     notify("Lexing started");
 }
 
+export function onParse() {
+    const file = editorTabs.active
+    if (!file) {
+        notifyError("Please open a tab before parsing the file.");
+        return;
+    }
+    window.hobbySpark.writeTerminal(
+        `hobbyspark parse "${file}" \n`
+    );
+    command = "Parsing"
+    notify("Parsing started");
+}
+
 function onRun() {
     if (commandRunning) {
         if (activeButton === run) {
