@@ -95,6 +95,19 @@ export function onTranspileTest() {
     notify("Tranpile-test started");
 }
 
+export function onLex() {
+    const file = editorTabs.active
+    if (!file) {
+        notifyError("Please open a tab before lexing the file.");
+        return;
+    }
+    window.hobbySpark.writeTerminal(
+        `hobbyspark lex "${file}" \n`
+    );
+    command = "lexing"
+    notify("Lexing started");
+}
+
 function onRun() {
     if (commandRunning) {
         if (activeButton === run) {
