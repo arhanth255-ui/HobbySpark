@@ -48,6 +48,13 @@ async function add(path, root = null) {
     }
 
 }
+function quoteShellPath(folderPath) {
+    if (window.systemInfo.platform === "win32") {
+        return "'" + folderPath.replace(/'/g, "''") + "'";
+    }
+
+    return "'" + folderPath.replace(/'/g, "'\\''") + "'";
+}
 
 export async function startup(ev, folder = null) {
     console.log("G")
@@ -58,7 +65,11 @@ export async function startup(ev, folder = null) {
     }
     projectTree = new Tree("#project-tree", editorTabs, getPathName(folderPath));
     console.log("Folder is from start, ", folderPath)
-    if (folderPath !== null) { window.hobbySpark.writeTerminal("cd \"" + folderPath + "\"\n") }
+    if (folderPath !== null) {
+        window.hobbySpark.writeTerminal(
+            `cd ${quoteShellPath(folderPath)}\n`
+        );
+    }
     await add(folderPath, projectTree.root_name);
     projectTree.closeAllFolders()
     window.hobbySpark.onSessionRequest(async function () {
