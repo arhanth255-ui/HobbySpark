@@ -1,5 +1,10 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
+contextBridge.exposeInMainWorld("systemInfo", {
+    platform: process.platform,
+    architecture: process.arch
+});
+
 contextBridge.exposeInMainWorld("hobbySpark", {
     openProjectFolder: function () {
         return ipcRenderer.invoke("project:open-folder");
