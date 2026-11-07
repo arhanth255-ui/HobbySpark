@@ -20,7 +20,7 @@ class InvalidCharacterError(Exception):
 TT_IDENTIFIER="IDENTIFIER"
 TT_NUMBER="NUMBER"
 TT_STRING="STRING"
-TTFSTRINGP="FSTRING (GUARENTEED PTSD FOR LEXER)"
+TT_FSTRINGP="FSTRING"
 
 TT_ASSIGN="ASSIGN"
 
@@ -106,7 +106,7 @@ TT_KEYWORDS={
     "from":"FROM",
     "True":"TRUE",
     "False":"FALSE",
-    "None":"NOTHING well er.... sort of. ",
+    "None":"NOTHING",
     "pass":"PASS",
     "and":"AND",
     "or":"OR",
@@ -134,7 +134,7 @@ TT_KEYWORDS={
     "async":"ASYNC",
     "await":"AWAIT",
     "match":"MATCH",
-    "case":"CASE (It is the last feature. OHHHHH no!!!!!)"
+    "case":"CASE"
 }
 
 #######################################################
@@ -556,7 +556,7 @@ class Lexer:
                 })
         self.advance()
         log("TEXTPARTS:", textparts)
-        return Token(TTFSTRINGP, textparts,pos=self.current_pos.copy())
+        return Token(TT_FSTRINGP, textparts,pos=self.current_pos.copy())
 
 
 

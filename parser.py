@@ -1071,14 +1071,14 @@ class Parser:
     def parse_atom(self,end=(TT_COLON, TT_NEWLINE, TT_DEDENT)):
         base=None
         log("ENTER parse_atom:", self.current_token)
-        if self.current_token.type in (TT_NUMBER, TT_STRING,TTFSTRINGP,TT_KEYWORDS["None"]):
+        if self.current_token.type in (TT_NUMBER, TT_STRING,TT_FSTRINGP,TT_KEYWORDS["None"]):
             if self.current_token.type==TT_NUMBER:
                 val = NumberNode(self.current_token.value)
 
             elif self.current_token.type==TT_STRING:
                 val = StringNode(self.current_token.value)
 
-            elif self.current_token.type==TTFSTRINGP:
+            elif self.current_token.type==TT_FSTRINGP:
                 val=self.parse_fstring()
 
             elif self.current_token.type==TT_KEYWORDS["None"]:
