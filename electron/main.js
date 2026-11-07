@@ -57,6 +57,8 @@ function createWindow() {
     });
 }
 
+const platform = process.platform;
+
 
 ipcMain.handle("project:open-folder", async function () {
     // var result = await dialog.showOpenDialog({
@@ -120,7 +122,69 @@ ipcMain.handle("project:get-com-ports", async function (event) {
 
 
 
+function getTerminalConfig() {
+    const platform = process.platform;
 
+    let shell;
+    let args = [];
+
+    switch (platform) {
+        case "win32":
+            // Windows PowerShell
+            shell = process.env.HOBBYSPARK_SHELL || "powershell.exe";
+            args = ["-NoLogo"];
+            break;
+
+        case "darwin":
+            // macOS: use the user's configured login shell.
+            shell = process.env.SHELL || "/bin/zsh";
+            args = ["-i"];
+            break;
+
+        case "linux":
+            // Linux: use the user's configured shell.
+            shell = process.env.SHELL || "/bin/bash";
+            args = ["-i"];
+            break;
+
+        default:
+            throw new Error(`Unsupported operating system: ${platform}`);
+    }
+
+    return { shell, args };
+}
+
+function initializeHobbySparkCommand(terminalProcess, runnerPath) {
+
+    // Quote paths safely for each shell.
+    const quotePowerShell = (value) =>
+        `'${value.replace(/'/g, "''")}'`;
+
+    const quotePosix = (value) =>
+        `'${value.replace(/'/g, "'\\''")}'`;
+
+    let command;
+
+    switch (platform) {
+        case "win32":
+            command =
+                `function hobbyspark { ` +
+                `python ${quotePowerShell(runnerPath)} @args ` +
+                `}\r\n`;
+            break;
+
+        case "darwin":
+        case "linux":
+            command =
+                `hobbyspark() { python3 ${quotePosix(runnerPath)} "$@"; }\n`;
+            break;
+
+        default:
+            throw new Error(`Unsupported platform: ${platform}`);
+    }
+
+    terminalProcess.write(command);
+}
 
 let terminalProcess = null;
 
@@ -129,7 +193,9 @@ function startTerminal() {
         return;
     }
 
-    terminalProcess = pty.spawn("/bin/bash", ["-i"], {
+
+    const terminal = getTerminalConfig();
+    terminalProcess = pty.spawn(terminal.shell, terminal.args, ["-i"], {
         name: "xterm-256color",
         cols: 100,
         rows: 30,
@@ -137,7 +203,7 @@ function startTerminal() {
         env: {
             ...process.env,
             TERM: "xterm-256color",
-            PS1: "\\[\\e[1;32m\\]\\u\\[\\e[0m\\]@\\[\\e[1;36m\\]\\h\\[\\e[0m\\]:\\[\\e[1;34m\\]\\w\\[\\e[0m\\]\\[\\e[1;33m\\]\\$\\[\\e[0m\\] "
+            // PS1: "\\[\\e[1;32m\\]\\u\\[\\e[0m\\]@\\[\\e[1;36m\\]\\h\\[\\e[0m\\]:\\[\\e[1;34m\\]\\w\\[\\e[0m\\]\\[\\e[1;33m\\]\\$\\[\\e[0m\\] "
         }
     });
 
@@ -183,9 +249,7 @@ function startTerminal() {
 
     const runnerPath = path.resolve(__dirname, "../hobbyspark-cli-runner.py");
 
-    terminalProcess.write(
-        `function hobbyspark() { python3 "${runnerPath}" "$@"; }\n`
-    );
+    initializeHobbySparkCommand(terminalProcess, runnerPath)
 }
 
 
