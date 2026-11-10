@@ -1,17 +1,22 @@
-import shutil
-from shutil import rmtree
 import datetime as dt
-from pygame import mixer
-import serial
 import os
-import sys
+import shutil
 import site
+import sys
 import traceback
 from pathlib import Path
+from shutil import rmtree
+
+import serial
+from pygame import mixer
+
 verbose = False
+
+
 def log(*args, **kwargs):
     if verbose:
-        print(*args, **kwargs) 
+        print(*args, **kwargs)
+
 
 def resource_path(relative):
     if hasattr(sys, "_MEIPASS"):
@@ -22,14 +27,12 @@ def resource_path(relative):
     return str(base / relative)
 
 
-    
-
 site_packages = site.getusersitepackages()
 
 src = resource_path("s_s")
 if not os.path.isdir(src):
     src = "stub"
-    
+
 if not os.path.isdir(src):
     raise FileNotFoundError(f"File not found {src}")
 dst = os.path.join(site_packages, "stub")
@@ -39,29 +42,27 @@ if os.path.exists(dst):
 
 shutil.copytree(src, dst)
 
-from tkinter.simpledialog import askinteger, askstring
+import json as data_handle
+import os
+import re
+import subprocess
+import sys
+import threading
 from tkinter import *
-from tkinter import ttk
+from tkinter import colorchooser, ttk
 from tkinter import filedialog as fd
 from tkinter import messagebox as mb
-from tkinter import colorchooser
 from tkinter.colorchooser import askcolor
-
+from tkinter.simpledialog import askinteger, askstring
 
 from platformdirs import user_config_dir
 
-
-import threading
-import re
-import os
-import sys
-import subprocess
-import json as data_handle
-
-
 WINDOWS_CREATION_FLAGS = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
 
-project_path = Path(user_config_dir("HobbySpark transpiler",appauthor=False, roaming=True))/"GUI"
+project_path = (
+    Path(user_config_dir("HobbySpark transpiler", appauthor=False, roaming=True))
+    / "GUI"
+)
 log(project_path)
 os.makedirs(project_path, exist_ok=True)
 path = Path(user_config_dir("HobbySpark", appauthor=False, roaming=True))
@@ -74,11 +75,10 @@ try:
 except FileExistsError:
     pass
 
-from nodes.General import ProgramNode
 from lexer import Lexer
+from nodes.General import ProgramNode
 from parser import *
 from transpiler import Transpiler
-
 
 ALL_BOARDS = {
     # Arduino AVR
@@ -90,20 +90,15 @@ ALL_BOARDS = {
     "ArduinoMini": "arduino:avr:mini",
     "ArduinoProMini": "arduino:avr:pro",
     "ArduinoLilyPad": "arduino:avr:lilypad",
-
     # Arduino megaAVR
     "ArduinoNanoEvery": "arduino:megaavr:nona4809",
     "ArduinoUnoWiFiRev2": "arduino:megaavr:uno2018",
-
     # Arduino SAM
     "ArduinoDue": "arduino:sam:arduino_due_x",
-
     # Arduino SAMD
     "ArduinoZero": "arduino:samd:arduino_zero",
-
     # Arduino GIGA
     "ArduinoGigaR1": "arduino:mbed_giga:giga",
-
     # ESP32
     "ESP32DevKit": "esp32:esp32:esp32",
     "ESP32C3": "esp32:esp32:esp32c3",
@@ -112,26 +107,20 @@ ALL_BOARDS = {
     "ArduinoNanoESP32": "esp32:esp32:nano_nora",
     "AdafruitFeatherESP32S2": "esp32:esp32:adafruit_feather_esp32s2",
     "SeeeduinoXIAOESP32C3": "esp32:esp32:XIAO_ESP32C3",
-
     # ESP8266
     "ESP8266NodeMCU": "esp8266:esp8266:nodemcuv2",
     "ESP8266D1Mini": "esp8266:esp8266:d1_mini",
-
     # RP2040
     "RaspberryPiPico": "rp2040:rp2040:rpipico",
     "RaspberryPiPicoW": "rp2040:rp2040:rpipicow",
-
     # STM32
     "STM32BluePill": "STMicroelectronics:stm32:GenF1",
     "STM32BlackPill": "STMicroelectronics:stm32:GenF4",
-
     # Teensy
     "Teensy40": "teensy:avr:teensy40",
     "Teensy41": "teensy:avr:teensy41",
-
     # Adafruit SAMD
     "AdafruitFeatherM0": "adafruit:samd:adafruit_feather_m0",
-
     # Seeed SAMD
     "SeeeduinoXIAO": "Seeeduino:samd:seeed_XIAO_m0",
 }
@@ -146,20 +135,15 @@ CORE_MAP = {
     "ArduinoMini": "arduino:avr",
     "ArduinoProMini": "arduino:avr",
     "ArduinoLilyPad": "arduino:avr",
-
     # Arduino megaAVR
     "ArduinoNanoEvery": "arduino:megaavr",
     "ArduinoUnoWiFiRev2": "arduino:megaavr",
-
     # Arduino SAM
     "ArduinoDue": "arduino:sam",
-
     # Arduino SAMD
     "ArduinoZero": "arduino:samd",
-
     # Arduino GIGA
     "ArduinoGigaR1": "arduino:mbed_giga",
-
     # ESP32
     "ESP32DevKit": "esp32:esp32",
     "ESP32C3": "esp32:esp32",
@@ -168,26 +152,20 @@ CORE_MAP = {
     "ArduinoNanoESP32": "esp32:esp32",
     "AdafruitFeatherESP32S2": "esp32:esp32",
     "SeeeduinoXIAOESP32C3": "esp32:esp32",
-
     # ESP8266
     "ESP8266NodeMCU": "esp8266:esp8266",
     "ESP8266D1Mini": "esp8266:esp8266",
-
     # RP2040
     "RaspberryPiPico": "rp2040:rp2040",
     "RaspberryPiPicoW": "rp2040:rp2040",
-
     # STM32
     "STM32BluePill": "STMicroelectronics:stm32",
     "STM32BlackPill": "STMicroelectronics:stm32",
-
     # Teensy
     "Teensy40": "teensy:avr",
     "Teensy41": "teensy:avr",
-
     # Adafruit SAMD
     "AdafruitFeatherM0": "adafruit:samd",
-
     # Seeed SAMD
     "SeeeduinoXIAO": "Seeeduino:samd",
 }
@@ -199,7 +177,8 @@ def get_installed_cores() -> str:
             ["arduino-cli", "core", "list"],
             capture_output=True,
             text=True,
-            check=True,creationflags=WINDOWS_CREATION_FLAGS
+            check=True,
+            creationflags=WINDOWS_CREATION_FLAGS,
         )
         return result.stdout
     except (subprocess.CalledProcessError, FileNotFoundError):
@@ -224,7 +203,7 @@ def install_core(root: Tk, board_name: str) -> bool:
         mb.showerror(
             "HobbySpark",
             f"No Arduino core is configured for:\n{board_name}",
-            parent=root
+            parent=root,
         )
         return False
 
@@ -239,48 +218,29 @@ def install_core(root: Tk, board_name: str) -> bool:
     window.grab_set()
 
     title = ttk.Label(
-        window,
-        text="Installing Arduino Core",
-        font=("TkDefaultFont", 14, "bold")
+        window, text="Installing Arduino Core", font=("TkDefaultFont", 14, "bold")
     )
     title.pack(pady=(20, 5))
 
-    status = ttk.Label(
-        window,
-        text=f"I am installing {core}..."
-    )
+    status = ttk.Label(window, text=f"I am installing {core}...")
     status.pack(pady=5)
 
-    progress = ttk.Progressbar(
-        window,
-        mode="indeterminate",
-        length=420
-    )
+    progress = ttk.Progressbar(window, mode="indeterminate", length=420)
     progress.pack(pady=15)
 
     progress.start(10)
 
-    result_holder = {
-        "success": False,
-        "error": ""
-    }
+    result_holder = {"success": False, "error": ""}
 
     def worker():
         try:
             process = subprocess.Popen(
-                [
-                    "arduino-cli",
-                    "core",
-                    "install",
-                    core,
-                    "--log-level",
-                    "info"
-                ],
+                ["arduino-cli", "core", "install", core, "--log-level", "info"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
-                creationflags=WINDOWS_CREATION_FLAGS
+                creationflags=WINDOWS_CREATION_FLAGS,
             )
 
             for line in process.stdout:
@@ -291,7 +251,7 @@ def install_core(root: Tk, board_name: str) -> bool:
                     0,
                     lambda text=line: status.config(
                         text=text if text else f"I am installing {core}..."
-                    )
+                    ),
                 )
 
                 # If the CLI happens to expose a percentage,
@@ -306,11 +266,9 @@ def install_core(root: Tk, board_name: str) -> bool:
                         lambda value=percent: (
                             progress.stop(),
                             progress.configure(
-                                mode="determinate",
-                                value=value,
-                                maximum=100
-                            )
-                        )
+                                mode="determinate", value=value, maximum=100
+                            ),
+                        ),
                     )
 
             return_code = process.wait()
@@ -318,14 +276,10 @@ def install_core(root: Tk, board_name: str) -> bool:
             if return_code == 0:
                 result_holder["success"] = True
             else:
-                result_holder["error"] = (
-                    f"arduino-cli exited with code {return_code}"
-                )
+                result_holder["error"] = f"arduino-cli exited with code {return_code}"
 
         except FileNotFoundError:
-            result_holder["error"] = (
-                "arduino-cli was not found on PATH."
-            )
+            result_holder["error"] = "arduino-cli was not found on PATH."
 
         except Exception as exc:
             result_holder["error"] = str(exc)
@@ -344,9 +298,7 @@ def install_core(root: Tk, board_name: str) -> bool:
 
         if not result_holder["success"]:
             mb.showerror(
-                "Arduino installation failed",
-                result_holder["error"],
-                parent=root
+                "Arduino installation failed", result_holder["error"], parent=root
             )
 
     threading.Thread(target=worker, daemon=True).start()
@@ -356,14 +308,8 @@ def install_core(root: Tk, board_name: str) -> bool:
     return result_holder["success"]
 
 
-
-
-
-
-
-
 class Welcome:
-    def __init__(self, root:Tk) -> None:
+    def __init__(self, root: Tk) -> None:
         self.root = Toplevel(root)
         self.root.title("HobbySpark Welcome")
         self.first = Frame(self.root)
@@ -373,18 +319,18 @@ class Welcome:
         self.text1.pack()
         Button(self.first, text="OK", command=self.but1, anchor="s").pack()
 
-        self.second =Frame(self.root)
+        self.second = Frame(self.root)
         Label(self.second, text="Enter your current age: ", anchor="w").pack()
         self.text2 = Entry(self.second)
         self.text2.pack()
         Button(self.second, text="OK", command=self.but2, anchor="s").pack()
 
-        self.third =Frame(self.root)
+        self.third = Frame(self.root)
         Label(self.third, text="Enter your birthday (M-D): ", anchor="w").pack()
         self.text3 = Entry(self.third)
         self.text3.pack()
         Button(self.third, text="OK", command=self.but3, anchor="s").pack()
-        
+
         self.name = ""
         self.age = 0
         self.birthday = None
@@ -393,30 +339,37 @@ class Welcome:
     def start_animation(self):
         self.first.pack()
 
-
     def but1(self):
         self.name = self.text1.get()
         self.first.pack_forget()
         self.second.pack()
 
     def but2(self):
-        try:self.age = int(self.text2.get())
-        except Exception: 
+        try:
+            self.age = int(self.text2.get())
+        except Exception:
             mb.showerror("Error", "Please enter a valid age")
             return
         self.second.pack_forget()
         self.third.pack()
 
     def but3(self):
-        try:self.birthday = dt.date(dt.date.today().year,*map(int,self.text3.get().split("-")))
-        except Exception as f: 
-            mb.showerror("Error", "Please enter a valid date of birth. Remember the format is M-D")
+        try:
+            self.birthday = dt.date(
+                dt.date.today().year, *map(int, self.text3.get().split("-"))
+            )
+        except Exception as f:
+            mb.showerror(
+                "Error",
+                "Please enter a valid date of birth. Remember the format is M-D",
+            )
             return
         self.third.pack_forget()
         self.root.destroy()
 
+
 class Console:
-    def __init__(self, root ,text="Console") -> None:
+    def __init__(self, root, text="Console") -> None:
         self.frame = LabelFrame(root, text=text)
         self.str = Text(self.frame, fg="green", bg="black")
         self.str.config(state="disabled")
@@ -426,63 +379,82 @@ class Console:
 
     def write(self, *text):
         self.str.config(state="normal")
-        self.str.insert("end", "\n".join(text)+"\n", "n")
+        self.str.insert("end", "\n".join(text) + "\n", "n")
         self.str.config(state="disabled")
+
     def write_error(self, *text):
         self.str.config(state="normal")
-        self.str.insert("end", "\n".join(text)+"\n", "e")
+        self.str.insert("end", "\n".join(text) + "\n", "e")
         self.str.config(state="disabled")
+
     def write_warning(self, *text):
         self.str.config(state="normal")
-        self.str.insert("end", "\n".join(text)+"\n", "w")
+        self.str.insert("end", "\n".join(text) + "\n", "w")
         self.str.config(state="disabled")
+
     def clear(self):
         self.str.config(state="normal")
         self.str.delete("1.0", END)
         self.str.config(state="disabled")
 
-def askcom(root, out = None, console:Console = None):
+
+def askcom(root, out=None, console: Console = None):
     log("OUT", out)
     com = ""
     new = Toplevel(root)
     new.title("Select serial port")
-    result = subprocess.run(["arduino-cli", "board", "list", "--format", "json"], capture_output=True, text=True,creationflags=WINDOWS_CREATION_FLAGS)
+    result = subprocess.run(
+        ["arduino-cli", "board", "list", "--format", "json"],
+        capture_output=True,
+        text=True,
+        creationflags=WINDOWS_CREATION_FLAGS,
+    )
     log(result.stdout)
-    data:dict = (data_handle.loads(result.stdout))["detected_ports"]
+    data: dict = (data_handle.loads(result.stdout))["detected_ports"]
     real_data = []
     for w in data:
         dat = {
-            "match":w["matching_boards"][0]["name"] if "matching_boards" in w else "Unknown",
-            "com":w["port"]["address"],
-            "serial":w["port"]["properties"]["serialNumber"]
-            }
+            "match": w["matching_boards"][0]["name"]
+            if "matching_boards" in w
+            else "Unknown",
+            "com": w["port"]["address"],
+            "serial": w["port"]["properties"]["serialNumber"],
+        }
         real_data.append(dat)
         with_board = {
-        b["com"]:{"com":b["com"], "match":b["match"]} for b in real_data
-    }
+            b["com"]: {"com": b["com"], "match": b["match"]} for b in real_data
+        }
         log("OUT3", out)
 
-    box = ttk.Combobox(new, values=[a["match"]+"-"+a["com"] for a in real_data], width=50)
+    box = ttk.Combobox(
+        new, values=[a["match"] + "-" + a["com"] for a in real_data], width=50
+    )
+
     def use():
         try:
             nonlocal com
             com = (box.get()).split("-")[1]
             log("H", with_board[com]["match"])
-            log("dao",out)
-            if with_board[com]["match"]=="Unknown":
+            log("dao", out)
+            if with_board[com]["match"] == "Unknown":
                 console.write_warning(f"Could not find board name, {com}. ")
             # if with_board[com]["match"]!=out:
             #     a=mb.askokcancel("Board warning",f"Using another board than the {out}. This may cause an error", icon=mb.WARNING)
             #     if not a:
             #             new.destroy()
             #             console.write("Process stopped: User abort")
-                
+
             new.destroy()
         except Exception as e:
-            a = mb.askyesno("Unexpected error", "Please do not press use port button without selecting any port. If you haven't done so, then click yes on this question. If you have done so, then press no.", default="no", icon=mb.ERROR)
+            a = mb.askyesno(
+                "Unexpected error",
+                "Please do not press use port button without selecting any port. If you haven't done so, then click yes on this question. If you have done so, then press no.",
+                default="no",
+                icon=mb.ERROR,
+            )
             if a:
                 raise
-            
+
     button = Button(new, text="Use port", command=use)
     new.columnconfigure(0, weight=1)
     new.columnconfigure(1, weight=1)
@@ -491,11 +463,6 @@ def askcom(root, out = None, console:Console = None):
     button.grid(column=1, row=1, sticky="nsew")
     new.wait_window()
     return com
-    
-
-
-
-
 
 
 def askprompt(root):
@@ -504,22 +471,27 @@ def askprompt(root):
     new = Toplevel(root)
     new.title("Select board")
     box = ttk.Combobox(new, values=list(ALL_BOARDS.keys()), width=50)
-    
+
     def use():
         try:
             nonlocal board
             nonlocal fqbn
             fqbn = ALL_BOARDS[box.get()]
-            if not install_core(new, box.get()): return
+            if not install_core(new, box.get()):
+                return
 
             board = box.get()
             log("SELECTED", board)
             new.destroy()
         except Exception as e:
-            a = mb.askyesno("Unexpected error", "Please do not press use board button without selecting any board. If you haven't done so, then click yes on this question. If you have done so, then press no.", default="no", icon=mb.ERROR)
+            a = mb.askyesno(
+                "Unexpected error",
+                "Please do not press use board button without selecting any board. If you haven't done so, then click yes on this question. If you have done so, then press no.",
+                default="no",
+                icon=mb.ERROR,
+            )
             if a:
-                raise #Exception(F"An unexpected error occurred in askprompt function - {e}. Traceback--{traceback.format_exc()}")
-            
+                raise  # Exception(F"An unexpected error occurred in askprompt function - {e}. Traceback--{traceback.format_exc()}")
 
     button = Button(new, text="Use", command=use)
     new.columnconfigure(0, weight=1)
@@ -532,7 +504,7 @@ def askprompt(root):
 
 
 class AST_visualizer:
-    def __init__(self, r, console:Console, parsed:ProgramNode) -> None:
+    def __init__(self, r, console: Console, parsed: ProgramNode) -> None:
         root = Toplevel(r)
         root.title("AST visualizer")
         frame = ttk.Frame(root)
@@ -577,7 +549,6 @@ class AST_visualizer:
                 self.tree.insert(current, END, text=f"{name} = {value!r}")
 
 
-
 class WritingArea:
     def __init__(self, parent) -> None:
         self.f = Frame(parent)
@@ -597,10 +568,10 @@ class WritingArea:
         self.text.bind("<<Modified>>", self.update)
 
         self.inner.pack(expand=True, fill="both")
-        self.lines.pack(side=LEFT,fill=Y)
-        self.text.pack(side=LEFT,fill=BOTH, expand=True)
-        self.scroll.pack(side=RIGHT,fill=Y)
-        self.scroll2.pack(side=BOTTOM,fill=X)
+        self.lines.pack(side=LEFT, fill=Y)
+        self.text.pack(side=LEFT, fill=BOTH, expand=True)
+        self.scroll.pack(side=RIGHT, fill=Y)
+        self.scroll2.pack(side=BOTTOM, fill=X)
         self.f.config(width=500)
 
     def callback(self, *args):
@@ -626,30 +597,28 @@ class WritingArea:
 
         self.text.edit_modified(False)
 
-class Tab:
-    def __init__(self, tab_parent, editor_parent,manager,tk:Tk,path=None) -> None:
 
-        self.path=path
+class Tab:
+    def __init__(self, tab_parent, editor_parent, manager, tk: Tk, path=None) -> None:
+
+        self.path = path
         if path:
-            self.name= os.path.basename(path)
+            self.name = os.path.basename(path)
         else:
             self.name = "Untitled"
 
-        
         self.header = Frame(tab_parent, relief=RAISED, bd=1)
-        self.label1=Label(self.header,text=self.name)
-        self.label2=Label(self.header, text="X")
+        self.label1 = Label(self.header, text=self.name)
+        self.label2 = Label(self.header, text="X")
         self.label1.pack(side=LEFT)
         self.label2.pack(side=LEFT)
         self.header.pack(side=LEFT)
 
-        self.label1.bind("<Button-1>", lambda e:manager.change(self))
-        self.label2.bind("<Button-1>", lambda e:manager.delete(self))
+        self.label1.bind("<Button-1>", lambda e: manager.change(self))
+        self.label2.bind("<Button-1>", lambda e: manager.delete(self))
         tk.bind("<Control-s>", self.check2, add="+")
 
-
-
-        self.frame= Frame(editor_parent)
+        self.frame = Frame(editor_parent)
         self.editor = WritingArea(self.frame)
         self.editor.update(None)
         self.editor.f.pack(expand=True, fill="both")
@@ -662,37 +631,37 @@ class Tab:
             self.modified = True
 
     def check2(self, a):
-        self.modified=False
+        self.modified = False
         log("GUASGHFWEGYUCTEYRTQYURCT4YTRW3F", "CAHNGED")
 
     def __repr__(self) -> str:
         return f"Tab at {self.name}"
 
+
 class TabManager:
     def __init__(self, parent) -> None:
-        self.root=parent
+        self.root = parent
         self.mainframe = Frame(parent)
         self.tabframe = Frame(self.mainframe)
         self.tabframe.pack(side=TOP, anchor=W, fill=BOTH)
         self.current = None
         self.current_frame = Frame(self.mainframe)
-        self.tabs:list[Tab] = []
+        self.tabs: list[Tab] = []
         self.current_frame.pack(side=BOTTOM, expand=True, fill=BOTH)
         self.add_tab()
 
     def add_tab(self, path=None):
-        if self.current: 
+        if self.current:
             self.current.frame.pack_forget()
         current = Tab(self.tabframe, self.current_frame, self, self.root, path)
         self.tabs.append(current)
         self.change(current)
         self.current = current
         self.current.modified = False
-        
 
     def delete(self, tab):
         was_current = self.current is tab
-        index=self.tabs.index(tab)-1 if tab in self.tabs else -1
+        index = self.tabs.index(tab) - 1 if tab in self.tabs else -1
         self.tabs.remove(tab)
         tab.header.destroy()
         tab.frame.destroy()
@@ -701,118 +670,149 @@ class TabManager:
             self.current = None
             return
         if was_current:
-            index = min(index, len(self.tabs)-1)
+            index = min(index, len(self.tabs) - 1)
             self.change(self.tabs[index])
         log("Current after:", self.current)
         log("Tabs after:", [t.name for t in self.tabs])
 
-    def change(self, tab:Tab):
-        if self.current: self.current.frame.pack_forget()
+    def change(self, tab: Tab):
+        if self.current:
+            self.current.frame.pack_forget()
 
         self.current = tab
 
         self.current.frame.pack(side=BOTTOM, fill="both", expand=True)
 
 
-
-
-
 class GUI:
-    def __init__(self, root:Tk) -> None:
-        self.path=""
- 
-        if sys.platform.startswith("linux") and "dialout" not in subprocess.run(["groups"], capture_output=True, text=True, creationflags=WINDOWS_CREATION_FLAGS).stdout.split(" "):
-            mb.showinfo("Extra step before usage", "HobbySpark has detected that you are running linux. Due to permissions in linux, you will have to do an extra step before you use HobbySpark. Run the following command \"sudo usermod -aG dialout \"$USER\"\" and login and logout for the changes to apply. This will not affect you're system, it will only let HobbySpark access your ports to upload code to the microcontroller.")
+    def __init__(self, root: Tk) -> None:
+        self.path = ""
+
+        if sys.platform.startswith("linux") and "dialout" not in subprocess.run(
+            ["groups"],
+            capture_output=True,
+            text=True,
+            creationflags=WINDOWS_CREATION_FLAGS,
+        ).stdout.split(" "):
+            mb.showinfo(
+                "Extra step before usage",
+                'HobbySpark has detected that you are running linux. Due to permissions in linux, you will have to do an extra step before you use HobbySpark. Run the following command "sudo usermod -aG dialout "$USER"" and login and logout for the changes to apply. This will not affect you\'re system, it will only let HobbySpark access your ports to upload code to the microcontroller.',
+            )
             root.kill()
 
-        if shutil.which("python") is not None: self.python=shutil.which("python")    
-        elif shutil.which("python3") is not None: self.python=shutil.which("python3")
+        if shutil.which("python") is not None:
+            self.python = shutil.which("python")
+        elif shutil.which("python3") is not None:
+            self.python = shutil.which("python3")
         else:
-            mb.showerror("Python not found on PATH","Python was not found on your system. ")
-            a = mb.askokcancel("Install","Install python 3.13 automatically? ")
+            mb.showerror(
+                "Python not found on PATH", "Python was not found on your system. "
+            )
+            a = mb.askokcancel("Install", "Install python 3.13 automatically? ")
             if a:
-                subprocess.run([
-                    resource_path("installers/python313.exe"),
-                    "InstallAllUsers=1",
-                    "PrependPath=1",
-                    "Include_pip=1",
-                ])
-                mb.showinfo("Installed ","Python 3.13 was installed. HobbySpark will now restart. ")
+                subprocess.run(
+                    [
+                        resource_path("installers/python313.exe"),
+                        "InstallAllUsers=1",
+                        "PrependPath=1",
+                        "Include_pip=1",
+                    ]
+                )
+                mb.showinfo(
+                    "Installed ",
+                    "Python 3.13 was installed. HobbySpark will now restart. ",
+                )
                 os.execv(sys.executable, [sys.executable] + sys.argv)
             else:
                 root.destroy()
 
         if shutil.which("arduino-cli") is None:
-            mb.showwarning("arduino-cli not found on PATH", "arduino-cli was not found on your system. ")
+            mb.showwarning(
+                "arduino-cli not found on PATH",
+                "arduino-cli was not found on your system. ",
+            )
             a = mb.askokcancel("Install", "Install arduino-cli automatically? ")
             if a:
-                if sys.platform=="win32":
-                    subprocess.run([
-                        "msiexec",
-                        "/i",
-                        resource_path("installers/arduino-cli.msi")
-                    ])
-                elif sys.platform=="darwin":
+                if sys.platform == "win32":
                     subprocess.run(
-                    ["install", "-m", "755", "installers/arduino-cli",
-                    os.path.expanduser("~/bin/arduino-cli")],
-                    check=True
-                )
+                        ["msiexec", "/i", resource_path("installers/arduino-cli.msi")]
+                    )
+                elif sys.platform == "darwin":
+                    subprocess.run(
+                        [
+                            "install",
+                            "-m",
+                            "755",
+                            "installers/arduino-cli",
+                            os.path.expanduser("~/bin/arduino-cli"),
+                        ],
+                        check=True,
+                    )
 
                 elif sys.platform.startswith("linux"):
-                    mb.showinfo("Notice", "After this, a window will open up and ask your system password. Note that HobbySpark does not store passwords in any way.")
-                    subprocess.run([
-    "x-terminal-emulator",
-    "-e",
-    "sudo",
-    "apt",
-    "install",
-    "./installers/arduino-cli.deb"
-])
-                mb.showinfo("Installed ","arduino-cli was installed. HobbySpark will now restart. ")
+                    mb.showinfo(
+                        "Notice",
+                        "After this, a window will open up and ask your system password. Note that HobbySpark does not store passwords in any way.",
+                    )
+                    subprocess.run(
+                        [
+                            "x-terminal-emulator",
+                            "-e",
+                            "sudo",
+                            "apt",
+                            "install",
+                            "./installers/arduino-cli.deb",
+                        ]
+                    )
+                mb.showinfo(
+                    "Installed ",
+                    "arduino-cli was installed. HobbySpark will now restart. ",
+                )
                 os.execv(sys.executable, [sys.executable] + sys.argv)
             else:
                 root.destroy()
         libs = subprocess.check_output(
             ["arduino-cli", "lib", "list"],
             text=True,
-            creationflags=WINDOWS_CREATION_FLAGS
+            creationflags=WINDOWS_CREATION_FLAGS,
         )
 
         if "Servo" not in libs:
             subprocess.run(
-                ["arduino-cli", "lib", "install", "Servo"],creationflags=WINDOWS_CREATION_FLAGS
+                ["arduino-cli", "lib", "install", "Servo"],
+                creationflags=WINDOWS_CREATION_FLAGS,
             )
 
         if "LiquidCrystal_I2C" not in libs:
             subprocess.run(
-                ["arduino-cli", "lib", "install", "LiquidCrystal I2C"],creationflags=WINDOWS_CREATION_FLAGS
+                ["arduino-cli", "lib", "install", "LiquidCrystal I2C"],
+                creationflags=WINDOWS_CREATION_FLAGS,
             )
 
         if "ESP32Servo" not in libs:
             subprocess.run(
-                ["arduino-cli", "lib", "install", "ESP32Servo"],creationflags=WINDOWS_CREATION_FLAGS
+                ["arduino-cli", "lib", "install", "ESP32Servo"],
+                creationflags=WINDOWS_CREATION_FLAGS,
             )
         mixer.init()
         if sys.platform == "win32":
             root.iconbitmap(resource_path("installers/icon.ico"))
         else:
             icon = PhotoImage(file=resource_path("assets/icon.png"))
-            root.iconphoto(True, icon)  
+            root.iconphoto(True, icon)
         root.title("HobbySpark")
-        self.config_file = resource_path(project_path/"user_data.json")
+        self.config_file = resource_path(project_path / "user_data.json")
         os.makedirs(project_path, exist_ok=True)
         if not os.path.exists(str(self.config_file)):
             new = Welcome(root)
             root.wait_window(new.root)
             a = {
-                "name":new.name,
-                "birth":new.birthday.strftime("%d|%m"),
-                "age":new.age,
-                "fin":None
-
+                "name": new.name,
+                "birth": new.birthday.strftime("%d|%m"),
+                "age": new.age,
+                "fin": None,
             }
-            with open(self.config_file,"w") as f:
+            with open(self.config_file, "w") as f:
                 data_handle.dump(a, f)
 
         with open(self.config_file) as f:
@@ -836,8 +836,12 @@ class GUI:
         self.upload_ = Button(self.run, text="Upload", command=self.upload)
         self.test_ = Button(self.run, text="Test", command=self.test)
         self.run_ = Button(self.run, text="Run", command=self.run__)
-        self.transpile_check_ = Button(self.run, text="Transpile check", command=self.transpile_check)
-        self.clear = Button(self.run, text="Clear console", command=lambda:self.console.clear())
+        self.transpile_check_ = Button(
+            self.run, text="Transpile check", command=self.transpile_check
+        )
+        self.clear = Button(
+            self.run, text="Clear console", command=lambda: self.console.clear()
+        )
         self.serial_ = Button(self.run, text="Serial monitor", command=self.serial)
 
         self.extra = LabelFrame(root, text="Extra options", width=300)
@@ -850,24 +854,24 @@ class GUI:
         self.dir.bind("<Button-3>", self.on_right_click)
 
         root.columnconfigure(0, weight=1)
-        root.columnconfigure(1,weight=1)
+        root.columnconfigure(1, weight=1)
         root.columnconfigure(2, weight=1)
         root.columnconfigure(3, weight=1)
 
         root.rowconfigure(0, weight=1)
-        root.rowconfigure(1,weight=1)
+        root.rowconfigure(1, weight=1)
 
-        self.side.config(width = 250)
+        self.side.config(width=250)
         self.side.grid_propagate(False)
 
         self.console.str.config(height=10)
         self.console.str.grid_propagate(False)
-        
+
         self.dir.pack(fill=BOTH, expand=True)
         self.side.grid(column=0, row=0, sticky="nsew")
 
         self.console.str.pack(expand=True, fill=BOTH)
-        self.console.frame.grid(column=0,row=1, sticky = "nsew", columnspan=4)
+        self.console.frame.grid(column=0, row=1, sticky="nsew", columnspan=4)
 
         self.editor.mainframe.grid(column=1, row=0, sticky="nsew")
 
@@ -887,26 +891,31 @@ class GUI:
         self.had_last = None
         log("HELLO:", dt.date.today().strftime("%d|%m"))
 
-        if dt.date.today().strftime("%d|%m") == self.birthday and dt.date.today().year!=self.fin:
-            mb.showinfo("Happy birthday!!!!!", f"HAPPY BIRTHDAY, {self.name}. Our best wishes from the HobbySpark team. You're finally {self.age+1} years old!")
-            self.age+=1
+        if (
+            dt.date.today().strftime("%d|%m") == self.birthday
+            and dt.date.today().year != self.fin
+        ):
+            mb.showinfo(
+                "Happy birthday!!!!!",
+                f"HAPPY BIRTHDAY, {self.name}. Our best wishes from the HobbySpark team. You're finally {self.age + 1} years old!",
+            )
+            self.age += 1
             self.fin = dt.date.today().year
             a = {
-                "name":self.name,
-                "birth":self.birthday,
-                "age":self.age,
-                "fin":self.fin
-
+                "name": self.name,
+                "birth": self.birthday,
+                "age": self.age,
+                "fin": self.fin,
             }
 
-            with open(self.config_file,"w") as f:
+            with open(self.config_file, "w") as f:
                 data_handle.dump(a, f)
 
             mixer.music.load(resource_path(os.path.join("assets", "h.mp3")))
             mixer.music.play()
 
         ########################################################
-        #MENUS
+        # MENUS
         ########################################################
 
         main = Menu(root)
@@ -926,21 +935,27 @@ class GUI:
 
     def finish(self):
         any_modified = False
-        modified=[]
+        modified = []
         for tab in self.editor.tabs:
             if tab.modified:
-                any_modified=True
+                any_modified = True
                 modified.append((tab.name, tab.path, tab))
         if any_modified:
-            ans=mb.askyesnocancel("Modified", f"The follwoing file(s) are modified: \n{'\n'.join([a[0] for a in modified])}\n You may lose all your changes if you choose to exit without saving. Save all these file(s) automatically?",icon="warning")
+            ans = mb.askyesnocancel(
+                "Modified",
+                f"The follwoing file(s) are modified: \n{'\n'.join([a[0] for a in modified])}\n You may lose all your changes if you choose to exit without saving. Save all these file(s) automatically?",
+                icon="warning",
+            )
             if ans:
                 for path in [(a[1], a[2]) for a in modified]:
                     self.console.write(f"Saving... {os.path.basename(path[0])}")
 
-                    read = self.editor.tabs[self.editor.tabs.index(path[1])].editor.text.get("1.0", END)
+                    read = self.editor.tabs[
+                        self.editor.tabs.index(path[1])
+                    ].editor.text.get("1.0", END)
 
                     try:
-                        with open(path[0], 'w') as f:
+                        with open(path[0], "w") as f:
                             f.write(read)
                             self.console.write(f"Saved {os.path.basename(path[0])}")
                     except Exception as f:
@@ -953,39 +968,47 @@ class GUI:
         log("DIAGNOSTIC PRINT", any_modified, modified)
         self.root.destroy()
 
-
-
-
     def serial(self):
-        try:com = askcom(self.root,askprompt(self.root)[1], self.console)
-        except Exception: self.console.write_error("Don't dismiss the board asker"); return
-        try:baud = int(askinteger("Baudrate ", "Baud (must be int): "))
-        except Exception: self.console.write_error("Baud must be an int"); return
-        try:ser = serial.Serial(com, baud, timeout=0)
-        except Exception: self.console.write_error("Could not open serial monitor. Check if you have dismissed the COM port asker or the board asker."); return
+        try:
+            com = askcom(self.root, askprompt(self.root)[1], self.console)
+        except Exception:
+            self.console.write_error("Don't dismiss the board asker")
+            return
+        try:
+            baud = int(askinteger("Baudrate ", "Baud (must be int): "))
+        except Exception:
+            self.console.write_error("Baud must be an int")
+            return
+        try:
+            ser = serial.Serial(com, baud, timeout=0)
+        except Exception:
+            self.console.write_error(
+                "Could not open serial monitor. Check if you have dismissed the COM port asker or the board asker."
+            )
+            return
         new = Toplevel(self.root)
         mon = Console(new, "Serial monitor")
         errr = False
         place = Entry(new)
+
         def but():
             text = place.get()
             if not text:
                 return
             try:
-                ser.write((text+"\n").encode())
+                ser.write((text + "\n").encode())
                 place.delete(0, END)
             except Exception as e:
-                self.console.write_error("Error: ",str(e))
-        send = Button(new, text="Send", command=but)
+                self.console.write_error("Error: ", str(e))
 
-        
+        send = Button(new, text="Send", command=but)
 
         def see():
             nonlocal errr
             try:
                 while ser.in_waiting:
                     line = ser.readline().decode().strip()
-                    if line=="[@@@HOBBYSPARK ERROR 123@@@]":
+                    if line == "[@@@HOBBYSPARK ERROR 123@@@]":
                         errr = True
                         mon.write_error("ERROR!!!")
                         break
@@ -1003,14 +1026,13 @@ class GUI:
                 ser.close()
             new.destroy()
 
-
         new.after(100, see)
         new.protocol("WM_DELETE_WINDOW", finish)
 
         mon.str.pack(expand=True, fill=BOTH)
         mon.frame.pack(expand=True, fill=BOTH)
-        place.pack(expand=True, side="bottom",anchor='se')
-        send.pack(expand=True, side="bottom", anchor='sw')
+        place.pack(expand=True, side="bottom", anchor="se")
+        send.pack(expand=True, side="bottom", anchor="sw")
 
     def refresh(self, a):
         if not self.path:
@@ -1019,7 +1041,7 @@ class GUI:
         log("PATH", self.path)
         try:
             self.dir.delete(*self.dir.get_children())
-            self.build_tree("",self.path)
+            self.build_tree("", self.path)
         except PermissionError:
             return
 
@@ -1028,20 +1050,28 @@ class GUI:
             log("BIRTH", int(self.birthday.split("|")[0]))
             try:
                 ab = {
-                    "name":name.get() if name.get()!="" else self.name,
-                    "birth":dt.date(2026, int(birthm.get()) if birthm.get()!="" else int(self.birthday.split("|")[1]), int(birthd.get()) if birthd.get()!="" else int(self.birthday.split("|")[0])).strftime("%d|%m"),
-                    "age":int(age.get()) if age.get()!="" else self.age,
-                    "fin":self.fin
-
+                    "name": name.get() if name.get() != "" else self.name,
+                    "birth": dt.date(
+                        2026,
+                        int(birthm.get())
+                        if birthm.get() != ""
+                        else int(self.birthday.split("|")[1]),
+                        int(birthd.get())
+                        if birthd.get() != ""
+                        else int(self.birthday.split("|")[0]),
+                    ).strftime("%d|%m"),
+                    "age": int(age.get()) if age.get() != "" else self.age,
+                    "fin": self.fin,
                 }
 
             except Exception:
                 mb.showerror("Error", "Make sure the values are correct")
                 return
-            with open(self.config_file,"w") as f:
+            with open(self.config_file, "w") as f:
                 data_handle.dump(ab, f)
 
             a.destroy()
+
         a = Toplevel(self.root)
         lb1 = Label(a, text="Name: ")
         name = Entry(a)
@@ -1071,9 +1101,6 @@ class GUI:
 
         setb.grid(row=4, column=1)
 
-
-
-
     def check_if_open(self, item=""):
         for i in self.dir.get_children(item):
             value = self.dir.item(i, "values")
@@ -1085,16 +1112,14 @@ class GUI:
 
     def new(self):
         self.path = fd.askdirectory(title="New project")
-        if not self.path: return
+        if not self.path:
+            return
         self.check_if_open()
         for tab in self.editor.tabs[:]:
             self.editor.delete(tab)
         with open(os.path.join(self.path, "settings.json"), "w") as f:
-            default = {
-                "def_board":None,
-                "def_port":None
-            }
-            data_handle.dump(default,f)
+            default = {"def_board": None, "def_port": None}
+            data_handle.dump(default, f)
 
         with open(os.path.join(self.path, "README.md"), "w") as f:
             greeter = self.get_greet()
@@ -1103,14 +1128,15 @@ class GUI:
                 case 0:
                     greeter = f"""Good morning, {self.name}. You're early. """
                 case 1:
-                    greeter = f"""Good afternoon, {self.name}. Had your lunch? Hopefully. """
+                    greeter = (
+                        f"""Good afternoon, {self.name}. Had your lunch? Hopefully. """
+                    )
                 case 2:
                     greeter = f"""Good evening, {self.name}."""
                 case _:
                     greeter = f"""Good night, {self.name}. You're quite late today."""
 
-            GREETING = \
-f"""#This is an automatically generated file by the HobbySpark GUI
+            GREETING = f"""#This is an automatically generated file by the HobbySpark GUI
 {greeter}
 ---
 A few folders and files in your project:
@@ -1138,8 +1164,7 @@ A few folders and files in your project:
         os.makedirs(os.path.join(self.path, ".src"), exist_ok=True)
 
         with open(os.path.join(self.path, ".src", "main.py"), "w") as f:
-            code = \
-"""from stub import *
+            code = """from stub import *
 set_board(BoardName(), debug_mode=True)
 ###############
 #Your code here
@@ -1149,7 +1174,6 @@ set_board(BoardName(), debug_mode=True)
 
         self.dir.delete(*self.dir.get_children())
         self.build_tree("", self.path)
-
 
     def get_greet(self):
         hour = dt.datetime.now().hour
@@ -1162,16 +1186,11 @@ set_board(BoardName(), debug_mode=True)
             return 2
         else:
             return 3
-    
-
 
     def build_tree(self, parent, root):
         if parent == "":
             parent = self.dir.insert(
-                "",
-                END,
-                text=os.path.basename(root),
-                values=(root,)
+                "", END, text=os.path.basename(root), values=(root,)
             )
 
             if root in self.opened:
@@ -1181,7 +1200,6 @@ set_board(BoardName(), debug_mode=True)
         log("PATH =", repr(self.path))
 
         for a in os.listdir(root):
-
             full = os.path.join(root, a)
 
             node = self.dir.insert(parent, END, text=a, values=(full,))
@@ -1193,9 +1211,12 @@ set_board(BoardName(), debug_mode=True)
                 self.build_tree(node, full)
 
     def lex(self):
-        if self.run__():return
-        text = self.editor.current.editor.text.get("1.0",END)
-        self.console.write("Lexing is the process of turning text into a list of tokens. Tokens can have a position, a type and a value. ")
+        if self.run__():
+            return
+        text = self.editor.current.editor.text.get("1.0", END)
+        self.console.write(
+            "Lexing is the process of turning text into a list of tokens. Tokens can have a position, a type and a value. "
+        )
         try:
             lexed = Lexer(text).evaluate()
         except Exception as e:
@@ -1203,11 +1224,14 @@ set_board(BoardName(), debug_mode=True)
             return
 
         self.console.write(f"An example of a token list is {lexed}.")
-        self.console.write_warning("Do not worry if you do not understand this. This command is merely for curious users to see what happens inside of HobbySpark. ")
+        self.console.write_warning(
+            "Do not worry if you do not understand this. This command is merely for curious users to see what happens inside of HobbySpark. "
+        )
 
-    def parse(self): 
-        if self.run__(): return
-        text = self.editor.current.editor.text.get("1.0",END)
+    def parse(self):
+        if self.run__():
+            return
+        text = self.editor.current.editor.text.get("1.0", END)
         try:
             lexed = Lexer(text).evaluate()
         except Exception as e:
@@ -1221,8 +1245,8 @@ set_board(BoardName(), debug_mode=True)
             return
 
         self.console.write(
-        "Parsing is the process of turning a list of tokens into an Abstract Syntax Tree (AST). "
-        "The AST describes the structure and meaning of your program."
+            "Parsing is the process of turning a list of tokens into an Abstract Syntax Tree (AST). "
+            "The AST describes the structure and meaning of your program."
         )
 
         self.console.write_warning(
@@ -1232,35 +1256,49 @@ set_board(BoardName(), debug_mode=True)
 
         AST_visualizer(self.root, self.console, parsed)
 
-    def transpile(self): 
-        if self.run__(): return
-        text = self.editor.current.editor.text.get("1.0",END)
+    def transpile(self):
+        if self.run__():
+            return
+        text = self.editor.current.editor.text.get("1.0", END)
         try:
             lexed = Lexer(text).evaluate()
         except Exception as e:
-            self.console.write(f"Whoops, you made an error while lexing. {e}");return
+            self.console.write(f"Whoops, you made an error while lexing. {e}")
+            return
 
         try:
             parsed = Parser(lexed).parse()
         except Exception as e:
-            self.console.write(f"Whoops, you made an error  while parsing {e}.");return
+            self.console.write(f"Whoops, you made an error  while parsing {e}.")
+            return
 
         try:
             transpiled = Transpiler(parsed).translate()
 
         except Exception as e:
-            self.console.write(f"Whoops, you made an error {e}.\n {traceback.format_exc()}");return
+            self.console.write(
+                f"Whoops, you made an error {e}.\n {traceback.format_exc()}"
+            )
+            return
 
-        self.console.write("HobbySpark at it's core, uses transpilation from python to C++.", "Transpiling is the process of turning source code (like python) to destination code (like C++). ", "A example of your code transpiled to C++ is: ", "\n".join(transpiled))
-        self.console.write_warning("The transpiled code is NOT supposed to be ''reader friendly''. ", "The code may have unreadable code.", "Do not worry if you cannot articulate or understand the C++. ")
-        
+        self.console.write(
+            "HobbySpark at it's core, uses transpilation from python to C++.",
+            "Transpiling is the process of turning source code (like python) to destination code (like C++). ",
+            "A example of your code transpiled to C++ is: ",
+            "\n".join(transpiled),
+        )
+        self.console.write_warning(
+            "The transpiled code is NOT supposed to be ''reader friendly''. ",
+            "The code may have unreadable code.",
+            "Do not worry if you cannot articulate or understand the C++. ",
+        )
 
     def upload(self):
         if self.run__():
             return
-        text = self.editor.current.editor.text.get("1.0",END)
+        text = self.editor.current.editor.text.get("1.0", END)
         self.console.write("Lexing")
-        try: 
+        try:
             lexed = Lexer(text).evaluate()
             self.console.write("Lexed")
         except Exception as e:
@@ -1268,7 +1306,7 @@ set_board(BoardName(), debug_mode=True)
             return
 
         self.console.write("Parsing")
-        try: 
+        try:
             parsed = Parser(lexed).parse()
             self.console.write("Parsed")
         except Exception as e:
@@ -1276,7 +1314,7 @@ set_board(BoardName(), debug_mode=True)
             return
 
         self.console.write("Transpiling")
-        try: 
+        try:
             transpiled = Transpiler(parsed).translate()
             self.console.write("Transpiled")
         except Exception as e:
@@ -1285,23 +1323,41 @@ set_board(BoardName(), debug_mode=True)
 
         self.check_if_open()
 
-        os.makedirs(os.path.join(self.path, "COMPILATION", self.editor.current.name), exist_ok=True)
-        with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, f"{self.editor.current.name}.ino"), "w") as f:
+        os.makedirs(
+            os.path.join(self.path, "COMPILATION", self.editor.current.name),
+            exist_ok=True,
+        )
+        with open(
+            os.path.join(
+                self.path,
+                "COMPILATION",
+                self.editor.current.name,
+                f"{self.editor.current.name}.ino",
+            ),
+            "w",
+        ) as f:
             f.write("\n".join(transpiled))
 
-        with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, "package.h"), "w") as f:
+        with open(
+            os.path.join(
+                self.path, "COMPILATION", self.editor.current.name, "package.h"
+            ),
+            "w",
+        ) as f:
             with open(resource_path("package.h"), "r") as f2:
                 f.write(f2.read())
 
-        
         self.dir.delete(*self.dir.get_children())
         self.build_tree("", self.path)
         if os.path.exists(os.path.join(self.path, "settings.json")):
             with open(os.path.join(self.path, "settings.json")) as f:
                 loaded = data_handle.load(f)["def_board"]
-                if loaded is not None: fqbn = ALL_BOARDS[loaded], loaded
-                else: fqbn = askprompt(self.root)
-        else: fqbn = askprompt(self.root)
+                if loaded is not None:
+                    fqbn = ALL_BOARDS[loaded], loaded
+                else:
+                    fqbn = askprompt(self.root)
+        else:
+            fqbn = askprompt(self.root)
 
         result = subprocess.run(
             [
@@ -1309,24 +1365,28 @@ set_board(BoardName(), debug_mode=True)
                 "compile",
                 "--fqbn",
                 fqbn[0],
-                os.path.join(self.path, "COMPILATION", self.editor.current.name)
+                os.path.join(self.path, "COMPILATION", self.editor.current.name),
             ],
             capture_output=True,
-            text=True,creationflags=WINDOWS_CREATION_FLAGS
+            text=True,
+            creationflags=WINDOWS_CREATION_FLAGS,
         )
         if result.stderr:
             self.console.write_error(f"Failed to compile, {result.stderr}")
             return
         self.console.write("Compiled sucessfully")
         self.console.write("Uploading...")
-        log("A",fqbn[1])
+        log("A", fqbn[1])
         if os.path.exists(os.path.join(self.path, "settings.json")):
             with open(os.path.join(self.path, "settings.json")) as f:
-                loaded=data_handle.load(f)["def_port"]
-                if loaded is not None: board = loaded
-                else: board=askcom(self.root, fqbn[1], self.console)
-        else: board=askcom(self.root, fqbn[1], self.console)
-        
+                loaded = data_handle.load(f)["def_port"]
+                if loaded is not None:
+                    board = loaded
+                else:
+                    board = askcom(self.root, fqbn[1], self.console)
+        else:
+            board = askcom(self.root, fqbn[1], self.console)
+
         self.console.write("Uploading...")
         result = subprocess.run(
             [
@@ -1336,92 +1396,23 @@ set_board(BoardName(), debug_mode=True)
                 board,
                 "--fqbn",
                 fqbn[0],
-                os.path.join(self.path, "COMPILATION", self.editor.current.name)
+                os.path.join(self.path, "COMPILATION", self.editor.current.name),
             ],
             capture_output=True,
-            text=True,creationflags=WINDOWS_CREATION_FLAGS
+            text=True,
+            creationflags=WINDOWS_CREATION_FLAGS,
         )
         if result.stderr:
             self.console.write_error(f"Could not upload, {result.stderr}")
             return
         self.console.write(f"Uploaded, {result.stdout}")
 
-
     def test(self):
-            if self.run__():
-                return
-            text = self.editor.current.editor.text.get("1.0",END)
-            self.console.write("Lexing")
-            try: 
-                lexed = Lexer(text).evaluate()
-                self.console.write("Lexed")
-            except Exception as e:
-                self.console.write_error(f"Failed to lex code, {e}")
-                return
-
-            self.console.write("Parsing")
-            try: 
-                parsed = Parser(lexed).parse()
-                self.console.write("Parsed")
-            except Exception as e:
-                self.console.write_error(f"Failed to parse code, {e}")
-                return
-
-            self.console.write("Transpiling")
-            try: 
-                transpiled = Transpiler(parsed).translate()
-                self.console.write("Transpiled")
-            except Exception as e:
-                self.console.write_error(f"Failed to transpile code, {e}")
-                return
-
-            os.makedirs(os.path.join(self.path, "COMPILATION", self.editor.current.name), exist_ok=True)
-            with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, self.editor.current.name+".ino"), "w") as f:
-                f.write("\n".join(transpiled))
-
-            with open(os.path.join(self.path, "COMPILATION", self.editor.current.name, "package.h"), "w") as f:
-                with open(resource_path("package.h"), "r") as f2:
-                    f.write(f2.read())
-            self.check_if_open()
-            self.dir.delete(*self.dir.get_children())
-            self.build_tree("", self.path)
-
-            if os.path.exists(os.path.join(self.path, "settings.json")):
-                with open(os.path.join(self.path, "settings.json")) as f:
-                    loaded = data_handle.load(f)["def_board"]
-                    if loaded is not None: fqbn = ALL_BOARDS[loaded]
-                    else: fqbn = askprompt(self.root)[0]
-            else: fqbn = askprompt(self.root)[0]
-            log("FQBN", fqbn)
-
-            result = subprocess.run(
-                [
-                    "arduino-cli",
-                    "compile",
-                    "--fqbn",
-                    fqbn,
-                    os.path.join(self.path, "COMPILATION", self.editor.current.name),
-                ],
-                capture_output=True,
-                text=True,
-                creationflags=WINDOWS_CREATION_FLAGS
-            )
-            if result.stderr:
-                self.console.write_error(f"Failed to compile, {result.stderr}")
-                return
-            self.console.write("Compiled sucessfully")
-
-        
-
-
-        
-
-
-    def transpile_check(self):
-        if self.run__():return
-        text = self.editor.current.editor.text.get("1.0",END)
+        if self.run__():
+            return
+        text = self.editor.current.editor.text.get("1.0", END)
         self.console.write("Lexing")
-        try: 
+        try:
             lexed = Lexer(text).evaluate()
             self.console.write("Lexed")
         except Exception as e:
@@ -1429,7 +1420,7 @@ set_board(BoardName(), debug_mode=True)
             return
 
         self.console.write("Parsing")
-        try: 
+        try:
             parsed = Parser(lexed).parse()
             self.console.write("Parsed")
         except Exception as e:
@@ -1437,7 +1428,90 @@ set_board(BoardName(), debug_mode=True)
             return
 
         self.console.write("Transpiling")
-        try: 
+        try:
+            transpiled = Transpiler(parsed).translate()
+            self.console.write("Transpiled")
+        except Exception as e:
+            self.console.write_error(f"Failed to transpile code, {e}")
+            return
+
+        os.makedirs(
+            os.path.join(self.path, "COMPILATION", self.editor.current.name),
+            exist_ok=True,
+        )
+        with open(
+            os.path.join(
+                self.path,
+                "COMPILATION",
+                self.editor.current.name,
+                self.editor.current.name + ".ino",
+            ),
+            "w",
+        ) as f:
+            f.write("\n".join(transpiled))
+
+        with open(
+            os.path.join(
+                self.path, "COMPILATION", self.editor.current.name, "package.h"
+            ),
+            "w",
+        ) as f:
+            with open(resource_path("package.h"), "r") as f2:
+                f.write(f2.read())
+        self.check_if_open()
+        self.dir.delete(*self.dir.get_children())
+        self.build_tree("", self.path)
+
+        if os.path.exists(os.path.join(self.path, "settings.json")):
+            with open(os.path.join(self.path, "settings.json")) as f:
+                loaded = data_handle.load(f)["def_board"]
+                if loaded is not None:
+                    fqbn = ALL_BOARDS[loaded]
+                else:
+                    fqbn = askprompt(self.root)[0]
+        else:
+            fqbn = askprompt(self.root)[0]
+        log("FQBN", fqbn)
+
+        result = subprocess.run(
+            [
+                "arduino-cli",
+                "compile",
+                "--fqbn",
+                fqbn,
+                os.path.join(self.path, "COMPILATION", self.editor.current.name),
+            ],
+            capture_output=True,
+            text=True,
+            creationflags=WINDOWS_CREATION_FLAGS,
+        )
+        if result.stderr:
+            self.console.write_error(f"Failed to compile, {result.stderr}")
+            return
+        self.console.write("Compiled sucessfully")
+
+    def transpile_check(self):
+        if self.run__():
+            return
+        text = self.editor.current.editor.text.get("1.0", END)
+        self.console.write("Lexing")
+        try:
+            lexed = Lexer(text).evaluate()
+            self.console.write("Lexed")
+        except Exception as e:
+            self.console.write_error(f"Failed to lex code, {e}")
+            return
+
+        self.console.write("Parsing")
+        try:
+            parsed = Parser(lexed).parse()
+            self.console.write("Parsed")
+        except Exception as e:
+            self.console.write_error(f"Failed to parse code, {e}")
+            return
+
+        self.console.write("Transpiling")
+        try:
             transpiled = Transpiler(parsed).translate()
             self.console.write("Transpiled")
         except Exception as e:
@@ -1450,10 +1524,16 @@ set_board(BoardName(), debug_mode=True)
             return True
         self.save()
         self.console.write("Running")
-        result = subprocess.Popen([self.python, self.editor.current.path], text=True,creationflags=WINDOWS_CREATION_FLAGS, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.Popen(
+            [self.python, self.editor.current.path],
+            text=True,
+            creationflags=WINDOWS_CREATION_FLAGS,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         log(result.stderr)
         result.wait()
-        if result.returncode!=0:
+        if result.returncode != 0:
             self.console.write_error(f"Could not run: {result.stderr.read()}")
             return True
         self.console.write("Ran sucessfully ")
@@ -1462,50 +1542,54 @@ set_board(BoardName(), debug_mode=True)
         a.str.pack(expand=True, fill=BOTH)
         a.frame.pack(expand=True, fill=BOTH)
         closed = False
+
         def read_output():
             for line in result.stdout:
-                if closed: break
+                if closed:
+                    break
                 newconsole.after(0, lambda line=line: a.write(line))
-        t=threading.Thread(target=read_output, daemon=True).start()
+
+        t = threading.Thread(target=read_output, daemon=True).start()
+
         def exit():
             nonlocal closed
             newconsole.destroy()
-            if result.poll() is None: result.kill()
-            closed=True
+            if result.poll() is None:
+                result.kill()
+            closed = True
+
         ok = Button(newconsole, text="OK", command=exit).pack(side="right")
 
-
-        
-
     def open_project(self):
-        self.path=""
+        self.path = ""
         self.dir.delete(*self.dir.get_children())
         for a in self.editor.tabs[:]:
             self.editor.delete(a)
         self.path = fd.askdirectory()
-        try: 
+        try:
             if self.path:
-                self.build_tree("",self.path)
+                self.build_tree("", self.path)
         except PermissionError:
-            mb.showerror("Error",f"Permission denied to {self.path}")
+            mb.showerror("Error", f"Permission denied to {self.path}")
             self.open_project()
+
     def open_file(self, e):
-        if self.editor.tabs.__len__()>0:
-            if self.editor.tabs[0].name=="Untitled":
+        if self.editor.tabs.__len__() > 0:
+            if self.editor.tabs[0].name == "Untitled":
                 self.editor.tabs[0].frame.pack_forget()
                 self.editor.tabs[0].header.pack_forget()
                 self.editor.tabs.pop()
 
-        if len((self.dir.item(self.dir.focus()))['values'])<=0: return
-        real = (self.dir.item(self.dir.focus()))['values'][0]
+        if len((self.dir.item(self.dir.focus()))["values"]) <= 0:
+            return
+        real = (self.dir.item(self.dir.focus()))["values"][0]
         ext = (os.path.splitext(real)[1].lower())[1:]
-
 
         if not os.path.isfile(real):
             return
 
-        try:    
-            with open(real, 'r') as f:
+        try:
+            with open(real, "r") as f:
                 data = f.read()
                 paths = [t.path for t in self.editor.tabs]
 
@@ -1520,17 +1604,22 @@ set_board(BoardName(), debug_mode=True)
                 self.editor.current.editor.text.edit_modified(False)
                 self.editor.current.modified = False
         except UnicodeError:
-            mb.showwarning("Unsupported file format warning", f"The file {os.path.basename(real)} with extension '{ext}' is not a supported file format. ", detail="Try file formats like .py, .hb, .ino, etc. ")
+            mb.showwarning(
+                "Unsupported file format warning",
+                f"The file {os.path.basename(real)} with extension '{ext}' is not a supported file format. ",
+                detail="Try file formats like .py, .hb, .ino, etc. ",
+            )
 
-        
     def save(self, e=0):
         self.console.write("Saving... ")
 
         read = self.editor.current.editor.text.get("1.0", END)
         try:
-            with open(self.editor.current.path, 'w') as f:
+            with open(self.editor.current.path, "w") as f:
                 f.write(read)
-                self.console.write(f"Saved {os.path.basename(self.editor.current.name)}")
+                self.console.write(
+                    f"Saved {os.path.basename(self.editor.current.name)}"
+                )
         except Exception as f:
             self.console.write_error(f"Failed to save: {f}")
 
@@ -1539,27 +1628,27 @@ set_board(BoardName(), debug_mode=True)
 
     def on_right_click(self, event):
         obj = self.dir.identify_row(event.y)
-        if not obj:return
-        path = self.dir.item(obj)['values'][0]
+        if not obj:
+            return
+        path = self.dir.item(obj)["values"][0]
 
         def new_file():
-            name = askstring("New file","New file: ")
+            name = askstring("New file", "New file: ")
             new = os.path.join(path, name)
-            if os.path.exists(new): 
-                mb.showerror("File exists", f"The file {name} already exists") 
+            if os.path.exists(new):
+                mb.showerror("File exists", f"The file {name} already exists")
                 return
-            open(new,"w").close()
+            open(new, "w").close()
             self.check_if_open()
             self.dir.delete(*self.dir.get_children())
             self.build_tree("", self.path)
             self.editor.add_tab(new)
 
-
         def new_folder():
-            name = askstring("New folder","New folder: ")
+            name = askstring("New folder", "New folder: ")
             new = os.path.join(path, name)
-            if os.path.exists(new): 
-                mb.showerror("Folder exists" , f"The folder {name} already exists. ") 
+            if os.path.exists(new):
+                mb.showerror("Folder exists", f"The folder {name} already exists. ")
                 return
             os.makedirs(new)
             self.check_if_open()
@@ -1570,7 +1659,6 @@ set_board(BoardName(), debug_mode=True)
             if os.path.isfile(path):
                 os.remove(path)
                 current = [a.path for a in self.editor.tabs]
-
 
                 if path in current:
                     self.editor.delete(self.editor.tabs[current.index(path)])
@@ -1591,14 +1679,11 @@ set_board(BoardName(), debug_mode=True)
                 self.check_if_open()
                 self.dir.delete(*self.dir.get_children())
                 self.build_tree("", self.path)
-                
-
-
 
         def rename():
-            name = os.path.join(os.path.dirname(path),askstring("Rename","Rename: "))
+            name = os.path.join(os.path.dirname(path), askstring("Rename", "Rename: "))
             if os.path.exists(name):
-                mb.showerror("Name already exists" , f"The name {name} already exists. ")
+                mb.showerror("Name already exists", f"The name {name} already exists. ")
                 return
             os.rename(path, name)
             self.check_if_open()
@@ -1620,11 +1705,12 @@ set_board(BoardName(), debug_mode=True)
         if os.path.isdir(path):
             fo_m.tk_popup(event.x_root, event.y_root)
         else:
-            f_m.tk_popup(event.x_root,event.y_root)
+            f_m.tk_popup(event.x_root, event.y_root)
 
 
-def handle(g, b ,c):
+def handle(g, b, c):
     import webbrowser
+
     error = traceback.format_exc()
 
     root = Toplevel(a)
@@ -1634,7 +1720,7 @@ def handle(g, b ,c):
     main = Frame(root)
     main.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-    root.error_image  = PhotoImage(file=resource_path("assets\\close.png"))
+    root.error_image = PhotoImage(file=resource_path("assets\\close.png"))
     # Windows error icon
     icon = Label(main, image=root.error_image)
     icon.grid(row=0, column=0, sticky="n", padx=(0, 10))
@@ -1646,7 +1732,7 @@ def handle(g, b ,c):
             "Please reach out to us at our website. Include the error below."
         ),
         justify=LEFT,
-        anchor="w"
+        anchor="w",
     )
     message.grid(row=0, column=1, sticky="w")
 
@@ -1657,11 +1743,7 @@ def handle(g, b ,c):
     scroll = Scrollbar(frame)
     scroll.pack(side=RIGHT, fill=Y)
 
-    text = Text(
-        frame,
-        wrap="none",
-        yscrollcommand=scroll.set
-    )
+    text = Text(frame, wrap="none", yscrollcommand=scroll.set)
 
     text.pack(side=LEFT, fill=BOTH, expand=True)
     scroll.config(command=text.yview)
@@ -1671,48 +1753,37 @@ def handle(g, b ,c):
 
     # clickable link
     link = Label(
-        main,
-        text="https://sites.google.com/view/hobbyspark",
-        fg="blue",
-        cursor="hand2"
+        main, text="https://sites.google.com/view/hobbyspark", fg="blue", cursor="hand2"
     )
 
     link.grid(row=2, column=1, sticky="w")
 
     link.bind(
         "<Button-1>",
-        lambda e: webbrowser.open(
-            "https://sites.google.com/view/hobbyspark"
-        )
+        lambda e: webbrowser.open("https://sites.google.com/view/hobbyspark"),
     )
 
     Button(
         main,
         text="Copy Error",
-        command=lambda: (
-            root.clipboard_clear(),
-            root.clipboard_append(error)
-        )
+        command=lambda: (root.clipboard_clear(), root.clipboard_append(error)),
     ).grid(row=3, column=1, sticky="w", pady=5)
 
-    Button(
-        main,
-        text="OK",
-        command=root.destroy
-    ).grid(row=3, column=1, sticky="e", pady=5)
+    Button(main, text="OK", command=root.destroy).grid(
+        row=3, column=1, sticky="e", pady=5
+    )
 
     main.columnconfigure(1, weight=1)
     main.rowconfigure(1, weight=1)
 
     root.wait_window()
-    v=mb.askyesno("Serious error", "Should I close?", icon="error", default="yes")
+    v = mb.askyesno("Serious error", "Should I close?", icon="error", default="yes")
     if v:
         a.destroy()
     root.mainloop()
+
 
 a = Tk()
 a.report_callback_exception = handle
 b = GUI(a)
 a.mainloop()
-
-
