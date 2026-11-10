@@ -48,7 +48,7 @@ if len(sys.argv) < 2:
     error("No command provided.")
     print(f"\n{BOLD}Usage:{RESET} hobbyspark <command> <arguments>")
     print(
-        f"{DIM}Available commands: build, upload, transpile-test, run, lex,  boards, ports{RESET}\n"
+        f"{DIM}Available commands: build, upload, transpile-test, run, lex, parse, boards, ports{RESET}\n"
     )
     sys.exit(1)
 
@@ -356,6 +356,94 @@ POWER — The token used to represent `**`, which is used for power in python.
 MODULUS — The token used to represent `%`, which is used to find the remainder after dividing in python.
 TODO: COMPLETE THIS LIST
 """)
+
+
+def parse(file_in_question, verbose=False):
+    banner()
+
+    with open(file_in_question) as f:
+        code = f.read()
+    stage("checking stage", "Running your file")
+    python = shutil.which("python") or shutil.which("python3")
+
+    if python is None:
+        error(
+            "Python was not found on your system. Please install python on your system to use HobbySpark."
+        )
+        raise RuntimeError("Python is not installed or could not be found.")
+
+    QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+
+    success_ = window.run(file_in_question, python)
+    if success_ is None:
+        warning(
+            "You closed the run window before it finished running. The program will not compile."
+        )
+        raise RuntimeError("Program execution was cancelled.")
+    if success_ is False:
+        info("The program will not compile due to an error.")
+        raise RuntimeError("Program execution failed.")
+
+    success("Ran succesfully")
+
+    stage("1/2", "Lexing")
+    if verbose:
+        lexer.verbose = True
+    try:
+        lexed = lexer.Lexer(code).evaluate()
+        success("Lexing completed")
+    except Exception as e:  # noqa: BLE001
+        error(f"Lexing failed: {e}")
+        raise Exception(f"Failed to lex code: {e}")  # noqa: TRY002
+
+    stage("2/2", "Parsing")
+    if verbose:
+        parser.verbose = True
+    try:
+        lexed = parser.Parser(lexed).parse()
+        success("Parsing completed")
+    except Exception as e:  # noqa: BLE001
+        error(f"Parsing failed: {e}")
+        raise Exception(f"Failed to parse code: {e}")  # noqa: TRY002
+
+    print(f"""{RED}WARNING: Parsing is a more advanced stage of compiler engineering.
+The output may contain technical terms and structures that you might
+not understand yet. That's completely normal! You don't need to
+understand everything to continue.""")
+
+    print(f"""{CYAN}So, you've seen how your code gets broken down into tokens.
+But here's a question: how does the computer understand how those
+tokens are related to each other?
+
+That's where parsing comes in!
+
+Parsing is the process of analysing a sequence of tokens and
+organising them into a structured representation of your program.
+This representation is commonly called an Abstract Syntax Tree,
+or AST for short.
+
+Think of it like building a sentence. You have individual words,
+but simply knowing the words isn't enough to understand the sentence.
+You need to understand how those words are arranged and how they
+relate to one another.
+
+Parsing does exactly that with your code!
+
+For example, consider this expression:
+
+    5 + 3 * 2
+
+The parser doesn't just see a collection of numbers and operators.
+It understands that multiplication must happen before addition.
+It represents that relationship in the AST.
+
+The AST is then passed to the next stages of the compiler or
+transpiler, where it can be analysed, transformed, or translated
+into another programming language.""")
+
+
 def transpile_test(file_in_question, verbose=False):
     banner()
 
@@ -650,6 +738,16 @@ try:
                 print(
                     f"{BOLD} Usage: {RESET} {CYAN} hobbyspark lex {MAGENTA}<file>{RESET}"
                 )
+    elif command == "parse":
+        try:
+            parse(args[0])
+        except Exception as e:
+            command_exit_code = 1
+            error(str(e))
+            if type(e).__name__ == "IndexError":
+                print(
+                    f"{BOLD} Usage: {RESET} {CYAN} hobbyspark parse {MAGENTA}<file>{RESET}"
+                )
 
     elif command == "boards":
         boards()
@@ -670,7 +768,7 @@ try:
     else:
         error(f"Unknown command: {command}")
         print(
-            f"{DIM}Available commands: build, upload, transpile-test, run, lex, boards, ports{RESET}"
+            f"{DIM}Available commands: build, upload, transpile-test, run, lex, parse, boards, ports{RESET}"
         )
         command_exit_code = 1
 
@@ -680,7 +778,7 @@ except KeyboardInterrupt:
 
 finally:
     # Only notify the IDE about operations whose completion it needs to track.
-    if command in ("build", "upload", "transpile-test", "run", "lex"):
+    if command in ("build", "upload", "transpile-test", "run", "lex", "parse"):
         notify_command_finished(command_exit_code)
 
 sys.exit(command_exit_code)
