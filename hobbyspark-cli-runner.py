@@ -106,6 +106,99 @@ ALL_BOARDS = {
     "SeeeduinoXIAO": "Seeeduino:samd:seeed_XIAO_m0",
 }
 
+TOKEN_DESCRIPTIONS = {
+    "IDENTIFIER": "The universal token used for names of things, like variables, class names, and function names. Takes one value, which is the name.",
+    "NUMBER": "The token used to represent integers and floating-point numbers. Takes one value, which is the number.",
+    "STRING": "The token used to represent strings. Takes one value, which is the text inside the string.",
+    "FSTRING": "The token used to represent formatted strings (f-strings), which allow expressions to be embedded inside strings.",
+    "ASSIGN": "The token used to represent =, which assigns a value to a variable.",
+    "ADD": "The token used to represent +, which performs addition.",
+    "ADD_COMPOUND": "The token used to represent +=, which adds a value to a variable and assigns the result back to it.",
+    "MINUS": "The token used to represent -, which performs subtraction or represents a negative number.",
+    "MIN_COMPOUND": "The token used to represent -=, which subtracts a value from a variable and assigns the result back to it.",
+    "MULTILPY": "The token used to represent *, which performs multiplication and can also be used for argument unpacking.",
+    "MULTIPLY_COMPOUND": "The token used to represent *=, which multiplies a variable by a value and assigns the result back to it.",
+    "DIVISION": "The token used to represent /, which performs division.",
+    "DIV_COMPOUND": "The token used to represent /=, which divides a variable by a value and assigns the result back to it.",
+    "FLOOR_DIVISION": "The token used to represent //, which performs floor division.",
+    "FLOOR_DIV_COMPOUND": "The token used to represent //=, which performs floor division and assigns the result back to the variable.",
+    "POWER": "The token used to represent **, which raises a number to a power.",
+    "POWER_COMPOUND": "The token used to represent **=, which raises a variable to a power and assigns the result back to it.",
+    "MODULUS": "The token used to represent %, which calculates the remainder after division.",
+    "MODULUS_COMPOUND": "The token used to represent %=, which calculates the remainder and assigns the result back to the variable.",
+    "LEFT_PARAN": "The token used to represent (, which marks the beginning of a parenthesized expression, function call, or parameter list.",
+    "RIGHT_PARAN": "The token used to represent ), which marks the end of a parenthesized expression, function call, or parameter list.",
+    "LEFT_BRACE": "The token used to represent {, which marks the beginning of a dictionary, set, or brace-delimited structure.",
+    "RIGHT_BRACE": "The token used to represent }, which marks the end of a dictionary, set, or brace-delimited structure.",
+    "LEFT_BRACKET": "The token used to represent [, which marks the beginning of a list or indexing operation.",
+    "RIGHT_BRACKET": "The token used to represent ], which marks the end of a list or indexing operation.",
+    "COMMA": "The token used to represent ,, which separates elements, arguments, and parameters.",
+    "COLON": "The token used to represent :, which introduces a code block or separates dictionary keys from values.",
+    "DOT": "The token used to represent ., which accesses attributes and methods of an object.",
+    "EQUALS": "The token used to represent ==, which checks whether two values are equal.",
+    "NOT_EQUALS": "The token used to represent !=, which checks whether two values are not equal.",
+    "LESS_THAN": "The token used to represent <, which checks whether one value is smaller than another.",
+    "GREATER_THAN": "The token used to represent >, which checks whether one value is greater than another.",
+    "LESS_THAN_OR_EQUALS": "The token used to represent <=, which checks whether one value is smaller than or equal to another.",
+    "GREATER_THAN_OR_EQUALS": "The token used to represent >=, which checks whether one value is greater than or equal to another.",
+    "NOT_IN": "The token used to represent not in, which checks whether a value is absent from a collection.",
+    "NOT_IS": "The token used to represent is not, which checks whether two objects are not identical.",
+    "INDENT": "The token generated when the indentation level increases. It marks the beginning of an indented code block.",
+    "EXIT": "The token generated when the indentation level decreases. It marks the end of an indented code block.",
+    "NEWLINE": "The token used to represent the end of a logical line of code.",
+    "COMMENT": "The token used to represent a comment in the source code.",
+    "FUNCTION TYPE": "The token used to represent a function-related type or function type annotation.",
+    "MATRIX_MUL": "The token used to represent @, which is used for decorators in HobbySpark.",
+    "SHIFT_LEFT": "The token used to represent <<.",
+    "SHIFT_RIGHT": "The token used to represent >>.",
+    "PIPE": "The token used to represent |.",
+    "XOR": "The token used to represent ^.",
+    "ADDRESSIVE(&)": "The token used to represent &.",
+    "IF": "The token used for the if keyword, which executes a block when a condition is true.",
+    "ELIF": "The token used for the elif keyword, which checks another condition if previous conditions were false.",
+    "ELSE": "The token used for the else keyword, which executes a block when previous conditions are not satisfied.",
+    "WHILE": "The token used for the while keyword, which repeatedly executes a block while a condition remains true.",
+    "FOR": "The token used for the for keyword, which iterates over a sequence or iterable.",
+    "BREAK": "The token used for the break keyword, which terminates the nearest enclosing loop.",
+    "CONTINUE": "The token used for the continue keyword, which skips the current loop iteration.",
+    "RETURN": "The token used for the return keyword, which exits a function and optionally returns a value.",
+    "DEF": "The token used for the def keyword, which defines a function.",
+    "CLASS": "The token used for the class keyword, which defines a class.",
+    "IMPORT": "The token used for the import keyword, which imports a module.",
+    "FROM": "The token used for the from keyword, which specifies the module from which something is imported.",
+    "TRUE": "The token used to represent the Boolean value True.",
+    "FALSE": "The token used to represent the Boolean value False.",
+    "NOTHING": "The token used to represent None, which indicates the absence of a value.",
+    "PASS": "The token used for the pass keyword, which represents an empty statement that performs no operation.",
+    "AND": "The token used for the and keyword, which performs logical conjunction.",
+    "OR": "The token used for the or keyword, which performs logical disjunction.",
+    "NOT": "The token used for the not keyword, which performs logical negation.",
+    "IN": "The token used for the in keyword, which checks membership or participates in iteration.",
+    "IS": "The token used for the is keyword, which checks whether two references point to the same object.",
+    "LAMBDA": "The token used for the lambda keyword, which defines an anonymous function.",
+    "ASSERT": "The token used for the assert keyword, which checks a condition and raises an assertion error if it is false.",
+    "TRY": "The token used for the try keyword, which introduces a block where exceptions may occur.",
+    "EXCEPT": "The token used for the except keyword, which handles exceptions raised inside a try block.",
+    "FINALLY": "The token used for the finally keyword, which introduces a block that executes after exception handling.",
+    "RAISE": "The token used for the raise keyword, which explicitly raises an exception.",
+    "UNLESS": "The token used for the unless keyword, which executes a block when a condition is false.",
+    "FOREVER": "The token used for the forever keyword, which introduces a loop intended to execute indefinitely.",
+    "RAISE_IF": "The token used for the raise_if keyword, which conditionally raises an exception when a condition is true.",
+    "UNTIL": "The token used for the until keyword, which introduces repetition until a specified condition is satisfied.",
+    "REPEAT": "The token used for the repeat keyword, which introduces a repetition construct.",
+    "STOP_IF": "The token used for the stop_if keyword, which conditionally stops an enclosing loop.",
+    "SKIP_IF": "The token used for the skip_if keyword, which conditionally skips the current loop iteration.",
+    "RAISE_IF_NOT": "The token used for the raise_ifnot keyword, which conditionally raises an exception when a condition is false.",
+    "AS": "The token used for the as keyword, which assigns an alias to an imported object or name.",
+    "WITH": "The token used for the with keyword, which introduces a context-management block.",
+    "GLOBAL": "The token used for the global keyword, which declares that a name refers to a global variable.",
+    "YIELD": "The token used for the yield keyword, which produces a value from a generator function.",
+    "ASYNC": "The token used for the async keyword, which declares an asynchronous function or construct.",
+    "AWAIT": "The token used for the await keyword, which waits for the result of an asynchronous operation.",
+    "MATCH": "The token used for the match keyword, which introduces structural pattern matching.",
+    "CASE": "The token used for the case keyword, which defines a pattern-matching case inside a match statement.",
+}
+
 
 def notify_command_finished(exit_code):
     print(f"\x1b]777;HOBBYSPARK;FINISHED;{exit_code}\x07", end="", flush=True)
@@ -345,19 +438,11 @@ Tokens may also take up bits of information like a value. Not all tokens have a 
     print(
         f"""To give you a better idea of a `token`, let's look at an example using your own code. The tokens that were generated by the lexer in your code is: {lexed}"""
     )
-    print("""Here is a guide to all the token types used in HobbySpark:
-IDENTIFIER — The universal token used for names of things, like variables, class names, and function names. Takes one value, which is the name.
-NUMBER — The token used to represent floats and integers. Takes one value, which is the number.
-STRING — The token used to represnt strings. Takes one value, which is the text inside the string.
-ASSIGN — The token used to represent `==`.
-ADD — The token used to represent `+`.
-MINUS — The token used to represent `-`.
-MULTIPLY — The token used to represent `*`, it is also used to represent the stars behind a *args and a **kawargs argument.
-DIVISION — The token used to represent `/`.
-FLOOR_DIVISION — The token used to represent `//`, which is used for floor division in python.
-POWER — The token used to represent `**`, which is used for power in python.
-MODULUS — The token used to represent `%`, which is used to find the remainder after dividing in python.
-TODO: COMPLETE THIS LIST
+    all = ""
+    for token, descr in TOKEN_DESCRIPTIONS.items():
+        all += f"{token} — {descr}\n"
+    print(f"""\nHere is a guide to all the token types used in HobbySpark:
+{all}
 """)
 
 
