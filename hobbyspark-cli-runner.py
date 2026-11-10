@@ -3,6 +3,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+from PySide6.QtWidgets import QApplication
+
+from ast_visualizer import visualize_ast
 from pager_helper import MainWindow, QApplication
 
 # ── Terminal styling ──────────────────────────────────────────
@@ -402,7 +405,7 @@ def parse(file_in_question, verbose=False):
     if verbose:
         parser.verbose = True
     try:
-        lexed = parser.Parser(lexed).parse()
+        parsed = parser.Parser(lexed).parse()
         success("Parsing completed")
     except Exception as e:  # noqa: BLE001
         error(f"Parsing failed: {e}")
@@ -442,6 +445,22 @@ It represents that relationship in the AST.
 The AST is then passed to the next stages of the compiler or
 transpiler, where it can be analysed, transformed, or translated
 into another programming language.""")
+    print(
+        f"\nNow, a window will open displaying your program's AST. "
+        f"Feel free to explore it! Click on different nodes to inspect "
+        f"their structure, attributes, and relationships. "
+        f"Have fun exploring HobbySpark's AST! {RESET}"
+    )
+
+    app = QApplication.instance()
+
+    if app is None:
+        app = QApplication(sys.argv)
+
+    window = visualize_ast(parsed)
+    window.show()
+
+    sys.exit(app.exec())
 
 
 def transpile_test(file_in_question, verbose=False):
