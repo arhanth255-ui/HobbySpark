@@ -6,6 +6,7 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 
 from ast_visualizer import visualize_ast
+from cpp_viewer import MainWindow as CppView
 from pager_helper import MainWindow
 
 # ── Terminal styling ──────────────────────────────────────────
@@ -658,6 +659,18 @@ And that's how a transpiler bridges two programming languages!""")
     print(
         "Now, a window will open up with the c++ made from your code. Please note that the indenting may not be readable."
     )
+    with open(Path.cwd() / "your_code.cpp", "w") as f:
+        f.write("\n".join(transpiled))
+
+    app = QApplication.instance()
+
+    if app is None:
+        app = QApplication(sys.argv)
+
+    window = CppView(Path.cwd() / "your_code.cpp")
+    window.show()
+
+    sys.exit(app.exec())
 
 
 def transpile_test(file_in_question, verbose=False):
@@ -957,6 +970,16 @@ try:
     elif command == "parse":
         try:
             parse(args[0])
+        except Exception as e:
+            command_exit_code = 1
+            error(str(e))
+            if type(e).__name__ == "IndexError":
+                print(
+                    f"{BOLD} Usage: {RESET} {CYAN} hobbyspark parse {MAGENTA}<file>{RESET}"
+                )
+    elif command == "transpile":
+        try:
+            transpile(args[0])
         except Exception as e:
             command_exit_code = 1
             error(str(e))
