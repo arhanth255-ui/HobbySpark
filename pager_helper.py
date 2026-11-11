@@ -20,7 +20,7 @@ CYAN = "\033[96m"
 MAGENTA = "\033[95m"
 WHITE = "\033[97m"
 
-DEBUG = True
+DEBUG = False
 
 
 def debug(*args):
