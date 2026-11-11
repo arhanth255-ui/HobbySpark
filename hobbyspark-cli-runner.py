@@ -6,7 +6,7 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 
 from ast_visualizer import visualize_ast
-from pager_helper import MainWindow, QApplication
+from pager_helper import MainWindow
 
 # ── Terminal styling ──────────────────────────────────────────
 
@@ -546,6 +546,118 @@ into another programming language.""")
     window.show()
 
     sys.exit(app.exec())
+
+
+def transpile(file_in_question, verbose=False):
+    banner()
+
+    with open(file_in_question) as f:
+        code = f.read()
+    stage("checking stage", "Running your file")
+    python = shutil.which("python") or shutil.which("python3")
+
+    if python is None:
+        error(
+            "Python was not found on your system. Please install python on your system to use HobbySpark."
+        )
+        raise RuntimeError("Python is not installed or could not be found.")
+
+    QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+
+    success_ = window.run(file_in_question, python)
+    if success_ is None:
+        warning(
+            "You closed the run window before it finished running. The program will not compile."
+        )
+        raise RuntimeError("Program execution was cancelled.")
+    if success_ is False:
+        info("The program will not compile due to an error.")
+        raise RuntimeError("Program execution failed.")
+
+    success("Ran succesfully")
+
+    stage("1/3", "Lexing")
+    if verbose:
+        lexer.verbose = True
+    try:
+        lexed = lexer.Lexer(code).evaluate()
+        success("Lexing completed")
+    except Exception as e:  # noqa: BLE001
+        error(f"Lexing failed: {e}")
+        raise Exception(f"Failed to lex code: {e}")  # noqa: TRY002
+
+    stage("2/3", "Parsing")
+    if verbose:
+        parser.verbose = True
+    try:
+        parsed = parser.Parser(lexed).parse()
+        success("Parsing completed")
+    except Exception as e:  # noqa: BLE001
+        error(f"Parsing failed: {e}")
+        raise Exception(f"Failed to parse code: {e}")  # noqa: TRY002
+
+    stage("2/3", "Parsing")
+    if verbose:
+        parser.verbose = True
+    try:
+        transpiled = transpiler.Transpiler(parsed).translate()
+        success("Parsing completed")
+    except Exception as e:  # noqa: BLE001
+        error(f"Parsing failed: {e}")
+        raise Exception(f"Failed to parse code: {e}")  # noqa: TRY002
+
+    print(f"""{RED}WARNING: Transpilation is where things start getting closer
+to actual code generation. You may encounter unfamiliar syntax,
+language constructs, and implementation details. That's completely
+normal! Take your time and follow along.""")
+
+    print(f"""{CYAN}So, you've learned how the parser organises tokens into an
+Abstract Syntax Tree (AST).
+
+But here's a question: how do we turn that tree into something
+another programming language can understand?
+
+That's where transpilation comes in!
+
+Transpilation is the process of translating source code written
+in one programming language into equivalent code written in
+another programming language.
+
+Unlike traditional compilation, which often produces machine
+code or another lower-level representation, transpilation
+typically produces source code in a different language.
+
+Think of it like translating a sentence from English to Kannada.
+The words may change, and the sentence structure might be
+different, but the original meaning should remain the same.
+
+Transpilation does something similar with programs!
+
+For example, consider this Python expression:
+
+    result = 5 + 3 * 2
+
+A transpiler might translate it into equivalent C++ code:
+
+    int result = 5 + 3 * 2;
+
+Notice that the syntax has changed, but the intended computation
+remains the same.
+
+In a compiler or transpiler, this process usually involves
+traversing the AST, identifying different node types, and
+generating equivalent constructs in the target language.
+
+The generated code can then be passed to the target language's
+compiler or interpreter for execution.
+
+And that's how a transpiler bridges two programming languages!""")
+
+    print(
+        "Now, a window will open up with the c++ made from your code. Please note that the indenting may not be readable."
+    )
 
 
 def transpile_test(file_in_question, verbose=False):
