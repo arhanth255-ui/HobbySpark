@@ -38,19 +38,32 @@ transpile.addEventListener("click", onTranspile)
 document.addEventListener("DOMContentLoaded", async function (ev) {
     const data = await readFile(recent);
     console.log("data is, ", data)
+    let alreadyAdded = [];
+    if (data.folders.length === 0) {
+        console.log("There's no data")
 
-    for (const item of data.folders) {
-        console.log("Got item!", item);
-        const a = document.createElement("button")
-        console.log("Added element, ", a)
-        a.className = "dropdown-item"
-        a.textContent = item
-        openRecentFolder.appendChild(a)
+    }
+    else {
+        for (const item of data.folders) {
+            if (alreadyAdded.includes(item)) {
+                continue;
+            }
+            else {
+                document.getElementById("none").remove()
+                console.log("Got item!", item);
+                alreadyAdded.push(item)
+                const a = document.createElement("button")
+                console.log("Added element, ", a)
+                a.className = "dropdown-item"
+                a.textContent = item
+                openRecentFolder.appendChild(a)
 
-        a.addEventListener("click", async function () {
-            console.log("Item is in the function: ", item)
-            projectTree.clear()
-            await startup(null, item);
-        })
+                a.addEventListener("click", async function () {
+                    console.log("Item is in the function: ", item)
+                    projectTree.clear()
+                    await startup(null, item);
+                })
+            }
+        }
     }
 })
