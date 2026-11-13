@@ -1,7 +1,7 @@
 import { projectTree, startup } from "./app"
 import { onClickOfNewFile, onClickOfOpenFolder } from "./menu-actions"
 import { readFile, recent } from "./run-before-all"
-import { onLex, onTranspileTest, onParse } from "./toolbar-buttons"
+import { onLex, onTranspileTest, onParse, onTranspile } from "./toolbar-buttons"
 
 const openFolder = document.getElementById("open-folder")
 const newFile = document.getElementById("new-file")
@@ -16,6 +16,7 @@ const paste = document.getElementById("paste")
 const transpileTest = document.getElementById("transpile-test")
 const lex = document.getElementById("lex")
 const parse = document.getElementById("parse")
+const transpile = document.getElementById("transpile")
 
 openFolder.addEventListener("click", onClickOfOpenFolder)
 newFile.addEventListener("click", onClickOfNewFile)
@@ -29,6 +30,8 @@ undo.addEventListener("click", function (ev) { window.hobbySpark.doFunc("undo") 
 transpileTest.addEventListener("click", onTranspileTest)
 lex.addEventListener("click", onLex)
 parse.addEventListener("click", onParse)
+transpile.addEventListener("click", onTranspile)
+
 
 
 

@@ -52,7 +52,7 @@ if len(sys.argv) < 2:
     error("No command provided.")
     print(f"\n{BOLD}Usage:{RESET} hobbyspark <command> <arguments>")
     print(
-        f"{DIM}Available commands: build, upload, transpile-test, run, lex, parse, boards, ports{RESET}\n"
+        f"{DIM}Available commands: build, upload, transpile-test, run, lex, parse, transpile, boards, ports{RESET}\n"
     )
     sys.exit(1)
 
@@ -687,7 +687,7 @@ def transpile_test(file_in_question, verbose=False):
         )
         raise RuntimeError("Python is not installed or could not be found.")
 
-    app = QApplication(sys.argv)
+    app = QApplication(sys.argv)  # noqa: F841
     window = MainWindow()
     window.show()
 
@@ -985,7 +985,7 @@ try:
             error(str(e))
             if type(e).__name__ == "IndexError":
                 print(
-                    f"{BOLD} Usage: {RESET} {CYAN} hobbyspark parse {MAGENTA}<file>{RESET}"
+                    f"{BOLD} Usage: {RESET} {CYAN} hobbyspark transpile {MAGENTA}<file>{RESET}"
                 )
 
     elif command == "boards":
@@ -1007,7 +1007,7 @@ try:
     else:
         error(f"Unknown command: {command}")
         print(
-            f"{DIM}Available commands: build, upload, transpile-test, run, lex, parse, boards, ports{RESET}"
+            f"{DIM}Available commands: build, upload, transpile-test, run, lex, parse, transpile, boards, ports{RESET}"
         )
         command_exit_code = 1
 
@@ -1017,7 +1017,15 @@ except KeyboardInterrupt:
 
 finally:
     # Only notify the IDE about operations whose completion it needs to track.
-    if command in ("build", "upload", "transpile-test", "run", "lex", "parse"):
+    if command in (
+        "build",
+        "upload",
+        "transpile-test",
+        "run",
+        "lex",
+        "parse",
+        "transpile",
+    ):
         notify_command_finished(command_exit_code)
 
 sys.exit(command_exit_code)

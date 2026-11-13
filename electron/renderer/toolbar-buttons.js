@@ -117,8 +117,21 @@ export function onParse() {
     window.hobbySpark.writeTerminal(
         `hobbyspark parse "${file}" \n`
     );
-    command = "Parsing"
+    command = "parsing"
     notify("Parsing started");
+}
+
+export function onTranspile() {
+    const file = editorTabs.active
+    if (!file) {
+        notifyError("Please open a tab before transpiling the file.");
+        return;
+    }
+    window.hobbySpark.writeTerminal(
+        `hobbyspark transpile "${file}" \n`
+    );
+    command = "transpiling"
+    notify("Transpiling started");
 }
 
 function onRun() {
