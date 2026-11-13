@@ -30,6 +30,8 @@ jobs:
             $v = "${{ github.ref_name }}"
             $v = $v.TrimStart("v")
             "version=$v" >> $env:GITHUB_OUTPUT
+            $v = $v.TrimStart("v")
+            $v = $v -replace '-pre-release$', ''
 
       - name: Compile excecutable
         run: pyinstaller tks.spec
@@ -142,6 +144,8 @@ jobs:
           fi
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT" 
+          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${VERSION%-pre-release}"
 
       - name: Compile excecutable
         run: pyinstaller tks.spec
@@ -204,6 +208,9 @@ jobs:
           fi
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT" 
+          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${VERSION%-pre-release}"
+          
       - name: Compile excecutable
         run: pyinstaller tks.spec
       - name: Debug output
@@ -262,11 +269,34 @@ jobs:
 
       - name: Show files
         run: find .
+
+      - name: Determine release type
+        id: release_meta
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_NAME" == *-pre-release ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+
+            {
+              echo "body<<EOF"
+              echo "⚠️ PRE-RELEASE WARNING"
+              echo ""
+              echo "If you don't know the difference between pre-release and stable, stable releases have fewer features, but things usually don't go wrong."
+              echo ""
+              echo "Pre-releases are for nerds who REALLY REALLY want the latest updates, though half the things might not work at all."
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "body=" >> "$GITHUB_OUTPUT"
+          fi
       
       - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{github.ref_name}}
+          tag_name: ${{ github.ref_name }}
+          prerelease: ${{ steps.release_meta.outputs.prerelease == 'true' }}
+          body: ${{ steps.release_meta.outputs.body }}
           files: |
             Windows/*
             Linux/*
