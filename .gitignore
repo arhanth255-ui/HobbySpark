@@ -24,5 +24,6 @@ about_me.txt
 zxyxparser.py
 
 electron/node_modules/
+electron/release/
 
 Important Info/

@@ -30,7 +30,13 @@ function createWindow() {
     });
     win.setMenu(null);
 
-    win.loadURL("http://127.0.0.1:5173");
+    const isDev = !app.isPackaged
+
+    if (isDev) {
+        win.loadURL("http://127.0.0.1:5173")
+    } else {
+        win.loadFile(path.join(__dirname, "dist", "index.html"))
+    }
 
     let isClosing = false;
 

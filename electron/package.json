@@ -1,31 +1,103 @@
 {
-  "name": "hobbyspark-electron",
-  "version": "1.0.0",
-  "description": "Electron GUI for the HobbySpark transpiler",
-  "main": "main.js",
-  "scripts": {
-    "start": "concurrently -k \"vite\" \"wait-on http://127.0.0.1:5173 && electron .\"",
-    "build": "vite build"
-  },
-  "private": true,
-  "devDependencies": {
-    "@monaco-editor/loader": "^1.7.0",
-    "concurrently": "^10.0.6",
-    "electron": "^39.0.0",
-    "vite": "^8.3.4",
-    "wait-on": "^9.5.1"
-  },
-  "dependencies": {
-    "@xterm/addon-fit": "^0.11.0",
-    "@xterm/xterm": "^6.0.0",
-    "lucide-static": "^1.60.0",
-    "monaco-editor": "^0.57.0",
-    "monaco-languageclient": "^11.0.3",
-    "node-pty": "^1.1.0",
-    "tree-sitter-wasm": "^2.0.4",
-    "vscode-jsonrpc": "^9.0.3",
-    "vscode-ws-jsonrpc": "^4.0.3",
-    "web-tree-sitter": "^0.27.1",
-    "ws": "^8.22.0"
-  }
+    "name": "hobbyspark-electron",
+    "version": "1.0.0",
+    "description": "Electron GUI for the HobbySpark transpiler",
+    "main": "main.js",
+    "author": {
+        "name": "HobbySpark",
+        "email": "arhanth255@gmail.com"
+    },
+    "homepage": "https://github.com/arhanth255-ui/HobbySpark",
+    "license": "MIT",
+    "scripts": {
+        "start": "concurrently -k \"vite\" \"wait-on http://127.0.0.1:5173 && electron .\"",
+        "build": "vite build",
+        "build:linux": "npm run build && electron-builder --linux",
+        "build:windows": "npm run build && electron-builder --win",
+        "build:mac": "npm run build && electron-builder --mac",
+        "build:dir": "npm run build && electron-builder --dir"
+    },
+    "private": true,
+    "devDependencies": {
+        "@monaco-editor/loader": "^1.7.0",
+        "concurrently": "^10.0.6",
+        "electron": "^39.0.0",
+        "electron-builder": "^26.18.0",
+        "vite": "^8.3.4",
+        "wait-on": "^9.5.1"
+    },
+    "dependencies": {
+        "@xterm/addon-fit": "^0.11.0",
+        "@xterm/xterm": "^6.0.0",
+        "lucide-static": "^1.60.0",
+        "monaco-editor": "^0.57.0",
+        "monaco-languageclient": "^11.0.3",
+        "node-pty": "^1.1.0",
+        "tree-sitter-wasm": "^2.0.4",
+        "vscode-jsonrpc": "^9.0.3",
+        "vscode-ws-jsonrpc": "^4.0.3",
+        "web-tree-sitter": "^0.27.1",
+        "ws": "^8.22.0"
+    },
+    "build": {
+        "appId": "com.hobbyspark.electron",
+        "productName": "HobbySpark",
+        "directories": {
+            "output": "release"
+        },
+        "files": [
+            "dist/**/*",
+            "main.js",
+            "preload.js",
+            "lsp-connect.js"
+        ],
+        "asar": true,
+        "asarUnpack": [
+            "**/*.node"
+        ],
+        "extraResources": [
+            {
+                "from": "../",
+                "to": "hobbyspark",
+                "filter": [
+                    "hobbyspark-cli-runner.py",
+                    "lexer.py",
+                    "parser.py",
+                    "transpiler.py",
+                    "ast_visualizer.py",
+                    "cpp_viewer.py",
+                    "pager_helper.py",
+                    "stub.py",
+                    "package.h"
+                ]
+            }
+        ],
+        "linux": {
+            "target": [
+                "AppImage",
+                "deb"
+            ],
+            "category": "Development",
+            "icon": "build/icon.png"
+        },
+        "win": {
+            "target": [
+                "nsis",
+                "portable"
+            ]
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true
+        },
+        "mac": {
+            "target": [
+                "dmg",
+                "zip"
+            ],
+            "category": "public.app-category.developer-tools"
+        }
+    }
 }
