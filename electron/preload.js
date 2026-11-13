@@ -5,6 +5,13 @@ contextBridge.exposeInMainWorld("systemInfo", {
     architecture: process.arch
 });
 
+contextBridge.exposeInMainWorld("electronAPI", {
+    toggleDevTools: () => ipcRenderer.send("toggle-devtools"),
+    toggleFullscreen: () => ipcRenderer.send("toggle-fullscreen"),
+    reload: () => ipcRenderer.send("reload-window")
+}
+)
+
 contextBridge.exposeInMainWorld("hobbySpark", {
     openProjectFolder: function () {
         return ipcRenderer.invoke("project:open-folder");

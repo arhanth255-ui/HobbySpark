@@ -493,6 +493,26 @@ ipcMain.handle("app:do-func", function (ev, string) {
     }
 })
 
+ipcMain.on("toggle-devtools", (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+
+    if (win.webContents.isDevToolsOpened()) {
+        win.webContents.closeDevTools()
+    } else {
+        win.webContents.openDevTools()
+    }
+})
+
+ipcMain.on("toggle-fullscreen", (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    win.setFullScreen(!win.isFullScreen())
+})
+
+ipcMain.on("reload-window", (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    win.webContents.reload()
+})
+
 app.whenReady().then(() => {
     startLanguageServer();
     startTerminal();

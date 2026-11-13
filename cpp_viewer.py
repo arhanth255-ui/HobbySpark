@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QRegularExpression, Qt
+from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QColor, QFont, QPalette, QSyntaxHighlighter, QTextCharFormat
 from PySide6.QtWidgets import (
     QApplication,
@@ -342,7 +342,7 @@ class MainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("C++ Viewer")
-    filename = sys.argv[1] if len(sys.argv) > 1 else None
+    sys.argv[1] if len(sys.argv) > 1 else None
     window = MainWindow(None)
     window.show()
     sys.exit(app.exec())

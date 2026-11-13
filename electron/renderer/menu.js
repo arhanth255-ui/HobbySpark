@@ -18,6 +18,10 @@ const lex = document.getElementById("lex")
 const parse = document.getElementById("parse")
 const transpile = document.getElementById("transpile")
 
+const devToolsButton = document.getElementById("dev-tools")
+const fullscreenButton = document.getElementById("full-screen")
+const reloadButton = document.getElementById("reload-window")
+
 openFolder.addEventListener("click", onClickOfOpenFolder)
 newFile.addEventListener("click", onClickOfNewFile)
 
@@ -31,6 +35,18 @@ transpileTest.addEventListener("click", onTranspileTest)
 lex.addEventListener("click", onLex)
 parse.addEventListener("click", onParse)
 transpile.addEventListener("click", onTranspile)
+
+devToolsButton.addEventListener("click", () => {
+    window.electronAPI.toggleDevTools()
+})
+
+fullscreenButton.addEventListener("click", () => {
+    window.electronAPI.toggleFullscreen()
+})
+
+reloadButton.addEventListener("click", () => {
+    window.electronAPI.reload()
+})
 
 
 
